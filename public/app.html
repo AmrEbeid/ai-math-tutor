@@ -847,9 +847,9 @@
   <div class="container">
     <div class="chat-container">
       <div id="limit-blocked">You have reached your usage limit. Please ask your parent to adjust your limits.</div>
-      <div class="chat-messages" id="chat-messages">
+      <div class="chat-messages" id="chat-messages" role="log" aria-live="polite" aria-atomic="false" aria-label="Conversation with your tutor">
         <div class="chat-bubble assistant">
-          Hi! I'm Zeluu, your learning companion. Pick a subject above and ask me anything — let's learn together!
+          Hi! I'm Zeluu, your learning companion. Pick a subject above and ask me anything. I'll give you hints first and we'll work it out together, step by step!
         </div>
       </div>
       <div id="image-preview" style="display:none; padding:8px 12px; background:var(--color-accent-light); border-radius:8px; margin:0 12px 8px; align-items:center; gap:8px; border: 1px solid var(--color-border);">
@@ -860,9 +860,9 @@
       <div class="chat-input-area">
         <input type="file" id="file-input" accept="image/*,.pdf" style="display:none;" onchange="handleFileSelect(event)" />
         <button class="btn btn-secondary" onclick="document.getElementById('file-input').click()" style="padding:8px 10px; font-size:16px;" title="Attach image or file">📎</button>
-        <textarea id="chat-input" placeholder="Type your question..." rows="1"
+        <textarea id="chat-input" placeholder="Type your question..." rows="1" aria-label="Type your question"
           onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
-        <button class="btn btn-primary" onclick="sendMessage()" id="send-btn">Send</button>
+        <button class="btn btn-primary" onclick="sendMessage()" id="send-btn" aria-label="Send message">Send</button>
       </div>
     </div>
   </div>
@@ -1094,8 +1094,12 @@
         }
       } else if (data && data.error === 'No credits remaining') {
         document.getElementById('credits-modal').classList.add('active');
+      } else if (data && /not authenticated|unauthorized|expired|invalid token/i.test(data.error || '')) {
+        // Session-expired state: child token is missing/expired — guide them back to login.
+        addBubble('Your session has timed out. Please log in again to keep learning.', 'assistant');
+        setTimeout(() => { location.href = '/child-login'; }, 2500);
       } else {
-        addBubble('Oops, something went wrong. Try again!', 'assistant');
+        addBubble('Oops, something went wrong on our side. Please try again in a moment!', 'assistant');
       }
 
       // Auto scroll
