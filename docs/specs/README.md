@@ -122,3 +122,11 @@ ID (e.g. `A0.5`, `A0.6`, `STAGE1`).
 * **Risk level:** High planning relevance, low execution (read-only + docs-only).
 * **Next action:** GPT/user review, then approve the selected source commit/review slice
   (preferred: STAGE1-1C4A — commit low-risk API CORS changes). No source commit authorized yet.
+
+### `SPEC-STAGE1-LOCAL-ACCEPTANCE.md`
+* **Purpose:** Records Stage 1 **local** completion — source committed in clean slices
+  (C4a/C4b/C4c/C5), env validation + `.env.example`, migration 002 (not applied), and a
+  22-test `npm test` baseline — plus the remaining external gates.
+* **Status:** Stage 1 complete locally; blocked externally on live gates.
+* **Risk level:** High execution (local only); no production actions.
+* **Next action:** External gate review (apply migration, manual LS verify, deploy).
