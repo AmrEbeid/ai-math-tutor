@@ -140,3 +140,25 @@ ID (e.g. `A0.5`, `A0.6`, `STAGE1`).
 * **Status:** Stage 2 partially complete locally; deeper items deferred/gated.
 * **Risk level:** Medium (frontend edits); no production actions.
 * **Next action:** External gate review; later Stage 2 slices (moderation, math, migration).
+
+### `SPEC-PROJECT-BRIEF-drift-reconciliation.md`
+* **Purpose:** Read-only reconciliation of the untracked `PROJECT_BRIEF.md` vs current specs;
+  records drift (`credit_transactions`/`knowledge_*`/Stripe naming) and recommends archiving it.
+* **Status:** Drafted / awaiting review. **Risk:** Low. **Next:** owner picks disposition (`DOCS-BRIEF-1`).
+
+### `SPEC-SECURITY-RLS-SECDEF-hardening-backlog.md`
+* **Purpose:** Actionable security backlog (RLS wrap/`TO authenticated`, SECDEF `search_path`,
+  child isolation tests, idempotency, token storage, service-role/CI) with approval + future prompts.
+* **Status:** Drafted / awaiting review. **Risk:** High relevance, plan-only. **Next:** STAGE1-9/10, STAGE1-H.
+
+### `SPEC-child-token-storage-httpOnly-migration-plan.md`
+* **Purpose:** Plan to move the child JWT from localStorage → httpOnly cookie (CSRF, dual-read rollout, tests).
+* **Status:** Drafted / awaiting review. **Risk:** High (hard gate), plan-only. **Next:** `STAGE2-TOKEN-1`.
+
+### `SPEC-STAGE2-deferred-work-closure-plan.md`
+* **Purpose:** Roadmap for deferred Stage 2 work (moderation, KaTeX, RTL/a11y QA, React/Vite decision, streaming…).
+* **Status:** Drafted / awaiting review. **Risk:** Medium planning. **Next:** post-PROD-GATE-1 Stage 2 slices.
+
+> **Runbooks & checklists:** see `docs/runbooks/` (production gate, migration 002, Lemon Squeezy)
+> and `docs/checklists/` (production env & deploy). Read-only preflight SQL:
+> `supabase/sql/preflight_002_webhook_idempotency.sql`.

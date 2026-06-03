@@ -17,9 +17,13 @@ UX is partially done locally.** Source is committed in clean slices (C4a `15d62f
 **LOCAL-CORRECTION-1 `948baa8` wired all 8 env vars through `lib/env.js`** (OpenAI/LS-key/
 webhook-secret/CHILD_JWT now fail secret-free; ALLOWED_ORIGIN documented `'*'` fallback);
 **36-test** `npm test` baseline; migration `002` (NOT applied); static child-chat UX
-(`4360957`). The next priority is **GPT/user review + PROD-GATE-1**: apply migration 002 to
-live Supabase, manual Lemon Squeezy replay verification, production env verification, deploy.
-**No deploy / no live SQL / no React/Vite** performed. `PROJECT_BRIEF.md` still held out (drift).
+(`4360957`). **PENDING-CLOSURE-1** then prepared the full production-gate pack (runbooks +
+checklists + security/token/Stage-2 backlogs + PROJECT_BRIEF drift decision) — all docs-only.
+The next priority is **GPT/user review + execution of `PROD-GATE-1`** (manual): apply
+migration 002 to live Supabase (after preflight de-dup), manual Lemon Squeezy replay
+verification, production env verification, deploy + smoke. **No deploy / no live SQL / no
+React/Vite** performed. `PROJECT_BRIEF.md` still held out (drift) — disposition recommended:
+archive as legacy.
 
 ## 3. Must-Read Files
 
@@ -97,6 +101,12 @@ live Supabase, manual Lemon Squeezy replay verification, production env verifica
   documented request-time `'*'` fallback for ALLOWED_ORIGIN). Added 5 tests (now 36, 0 installs):
   per-var secret-free failure + child-auth sign-throws/verify-fail-closed. Stage 1 now genuinely
   complete locally; Stage 2 remains partially complete. No deploy/live SQL.
+* **PENDING-CLOSURE-1 done** (docs-only) — production-gate pack: `docs/runbooks/` (PROD-GATE-1
+  master, migration-002 apply, Lemon Squeezy verification) + `docs/checklists/` (prod env &
+  deploy) + read-only `supabase/sql/preflight_002_*.sql`; backlogs `SPEC-SECURITY-RLS-SECDEF-...`,
+  `SPEC-child-token-storage-httpOnly-...`, `SPEC-STAGE2-deferred-work-...`; and
+  `SPEC-PROJECT-BRIEF-drift-reconciliation` (brief held out, recommend archive as legacy).
+  No live SQL/deploy/installs/React-Vite; `PROJECT_BRIEF.md` not committed.
 
 ## 6. Current Blockers / Gates
 
@@ -140,12 +150,15 @@ live Supabase, manual Lemon Squeezy replay verification, production env verifica
 ## 8. Next Action
 
 Stage 1 is complete locally and Stage 2 static UX is partially done locally; all source is
-committed and `npm test` is green (31 tests). The next safe action is **GPT/user review +
-`PROD-GATE-1 — Manual Supabase, Lemon Squeezy, and Deployment Readiness Review`**: apply
-migration `002` (after de-dup), manual Lemon Squeezy replay verification, production env
-verification, then deploy + prod smoke. `PROJECT_BRIEF.md` is held out (drift). Do not deploy,
-apply migration `002` or any live SQL, mutate production data, call real LS/OpenAI/Supabase
-from tests, change child token storage, install packages, or start React/Vite without approval.
+committed and `npm test` is green (36 tests). The production-gate pack is prepared
+(`docs/runbooks/` + `docs/checklists/` + preflight SQL). The next safe action is **GPT/user
+review + execution of `PROD-GATE-1 — Manual Supabase, Lemon Squeezy, and Deployment Readiness
+Review`** following `docs/runbooks/RUNBOOK-PROD-GATE-1-production-readiness.md`: run the
+read-only preflight, apply migration `002` (after de-dup), manual Lemon Squeezy replay
+verification, production env verification, then deploy + prod smoke. `PROJECT_BRIEF.md` is held
+out (drift). Do not deploy, apply migration `002` or any live SQL, mutate production data, call
+real LS/OpenAI/Supabase from tests, change child token storage, install packages, or start
+React/Vite without approval.
 
 > **Key STAGE1-C findings to action later (all gated):** only
 > `LEMONSQUEEZY_WEBHOOK_SECRET` is guarded today; others fail late/silently
@@ -178,6 +191,7 @@ from tests, change child token storage, install packages, or start React/Vite wi
 | 2026-06-03 | A0.6 continued — completed the final 2 research categories (SaaS billing/trial/checkout + Supabase auth/RLS/security; 16 sources). Folded findings into `SPEC-A0.6` (candidate tables for Cat 3 & 4, shortlist rows, Q4/Q7 picks, billing + Supabase/security lessons, roadmap rows, what-to-avoid), flipped its status to **Complete (8/8)**. Updated `PROJECT_TRACKER.md` (A0.6 + A0.6-R status, decision/finding). **No source files changed; no code copied; no installs/migrations.** | `git diff --name-only` lists only pre-existing `api/*`+`public/*`; scoped intent-to-add diff confirms only `docs/SPEC-A0.6 + PROJECT_TRACKER + SESSION_BRIEF` changed. | Next safe action: user approval to draft a Stage 1 test/schema/tooling **planning** spec (docs only). |
 | 2026-06-03 | A0.6 README sync correction — updated the A0.6 entry in `docs/specs/README.md` from "In progress (4/8)" to "Complete (8/8)". Docs-only. **No source files changed.** | Scoped diff shows only `docs/specs/README.md` + this brief. | Next safe action unchanged: approval to draft Stage 1 planning spec (docs only). |
 | 2026-06-03 | Tracker status sync — updated the A0.OS workstream row in `docs/PROJECT_TRACKER.md` from "In progress (this task)" to "Complete / accepted" (current task: "Operating docs installed"). Docs-only. **No source files changed.** | Scoped diff shows only `docs/PROJECT_TRACKER.md` + this brief. | Next safe action: GPT/user review of Stage 1 planning spec, then STAGE1-A. |
+| 2026-06-03 | PENDING-CLOSURE-1 — docs-only production-gate pack (no live actions). Created `docs/runbooks/` (PROD-GATE-1 master, migration-002 apply, Lemon Squeezy verification, README), `docs/checklists/` (prod env & deploy, README), read-only `supabase/sql/preflight_002_webhook_idempotency.sql` (SELECT-only), and specs: `SPEC-PROJECT-BRIEF-drift-reconciliation` (brief held out → archive recommended), `SPEC-SECURITY-RLS-SECDEF-hardening-backlog`, `SPEC-child-token-storage-httpOnly-migration-plan`, `SPEC-STAGE2-deferred-work-closure-plan`. Updated specs README + tracker (PENDING-CLOSURE-1 row) + this brief. No source changes; `npm test` still 36/36. **No deploy; no live SQL; no Supabase mutation; no real LS/OpenAI; no installs; no React/Vite; PROJECT_BRIEF not committed.** | 3 docs commits; `git status` clean except `?? PROJECT_BRIEF.md`; preflight SQL is SELECT-only. | Next safe action: PROD-GATE-1 (manual external gates). |
 | 2026-06-03 | LOCAL-CORRECTION-1 — closed the overstated-acceptance gap: wired all 8 required env vars through `lib/env.js` (`getEnv` in `api/chat.js`/`api/exams.js` for OPENAI_API_KEY, `api/credits/checkout.js` for LEMONSQUEEZY_API_KEY, webhook for LEMONSQUEEZY_WEBHOOK_SECRET, `lib/child-auth.js` for CHILD_JWT_SECRET; `getAllowedOrigin()` documented `'*'` fallback for ALLOWED_ORIGIN). Added 5 `node:test` tests (per-var secret-free failure + `getAllowedOrigin` + child-auth sign-throws/verify-fail-closed) → **36 pass / 0 fail**. Committed code+tests `948baa8`; updated SPEC-STAGE1-LOCAL-ACCEPTANCE (§5a + status), SPEC-STAGE2-LOCAL-ACCEPTANCE (count), README, tracker, this brief. **No deploy; no live SQL; no live Supabase/LS/OpenAI; no installs; no React/Vite; PROJECT_BRIEF held out.** | `npm test` 36/36; `node --check` OK on 8 edited JS; `git status` clean except `?? PROJECT_BRIEF.md`; only allowed files committed. | Next safe action: PROD-GATE-1 (apply migration 002, manual LS replay, prod env verify, deploy). |
 | 2026-06-03 | FINISH-STAGE1-STAGE2-LOCAL — local build + clean commits. Committed STAGE1-1R docs (`8b89292`); committed source in slices: C4a CORS `15d62f5`, C4b chat+children (+ child-auth lazy-import test seam) `8a60d2d`, C4c webhook (+ extracted `lib/webhook-verify.js`) `b3f043f`, C5 A0.5 frontend `f0b4c87`; env validation `lib/env.js` + `.env.example` + `!.env.example` gitignore `2a32f76`; `node:test` baseline (`npm test`, 31 tests, 0 installs) `84d2084`; Stage 2 static `public/app.html` UX `4360957`; Stage 1+2 local acceptance docs `e108e09`/this. Created migration `002` (webhook unique index + processed_webhooks + notifications.type CHECK for 4 missing types) — **NOT applied**. **No deploy; no live SQL; no live Supabase/LS/OpenAI; no React/Vite; no package installs; PROJECT_BRIEF held out.** | `npm test` 31/31 pass; `git log` shows the slice commits; `git diff` clean after each commit; `git status` source committed, only docs + this brief pending. | Next safe action: GPT/user review + PROD-GATE-1 (apply migration 002, manual LS replay, prod env verify, deploy). |
 | 2026-06-03 | STAGE1-1R — read-only review of all 14 uncommitted source diffs (`git diff` per file + schema/lib cross-checks; no mutation) → created `docs/specs/SPEC-STAGE1-1R-source-diff-review-before-commit.md` (per-file risk, cross-file interactions, C4a/C4b/C4c/C5 split recommendation, manual verification checklist, gates). Findings: 7 CORS one-liners (Low, C4a); `chat.js` credit-count reorder + notif dedup (High, C4b); `children.js` unsigned→HMAC token verify + service-role consolidation (High, security-positive, C4b); `lemonsqueezy.js` best-effort idempotency (no UNIQUE on `credit_ledger.stripe_payment_id` → race) + logging cut + `message`→`body`, and **`payment_failed` violates `notifications.type` CHECK (silently caught)** (High, C4c). Updated `SPEC-STAGE1-1` (§13a), specs `README.md`, `PROJECT_TRACKER.md` (STAGE1 row + STAGE1-1A/1R task rows). **No staging; no commits; no source/files reset/reverted/stashed; no source changed; no installs/tests/build/SQL/migrations/deploy; no React/Vite.** | `git status --short`: 14 `M` source + `?? PROJECT_BRIEF.md`; `git diff --cached` empty; HEAD `d5f7d0d`; only allowed docs edited (now uncommitted). | Next safe action: GPT/user review of STAGE1-1R, then approve STAGE1-1C4A (commit low-risk CORS) or STAGE1-1C4R/1C5R review slices. |

@@ -40,6 +40,7 @@
 | STAGE1-LOCAL | Finish Stage 1 locally (commit source, env validation, tests, migration) | Done | commits 8b89292…84d2084 | Source committed C4a/C4b/C4c/C5; env validation + `.env.example`; 22-test baseline; migration 002 NOT applied. Created SPEC-STAGE1-LOCAL-ACCEPTANCE. Local only; no deploy/live SQL. |
 | STAGE2-LOCAL | Stage 2 static child chat UX (local) | Done | commit 4360957 | Additive `public/app.html` a11y/hint-first/session-expired/error UX + 9 smoke tests. No React/Vite/providers/token-storage change/deploy. Created SPEC-STAGE2-LOCAL-ACCEPTANCE. **Partially complete locally** — deeper items (streaming, KaTeX, moderation, httpOnly token, full a11y/Arabic QA, React/Vite) deferred. |
 | LOCAL-CORRECTION-1 | Close remaining local Stage 1/2 gaps (full env wiring) | Done | commit 948baa8 | Wired all 8 env vars through `lib/env.js`; added 5 tests (36 total); documented ALLOWED_ORIGIN request-time fallback. Corrected overstated Stage 1 acceptance. No deploy/live SQL. |
+| PENDING-CLOSURE-1 | Close non-live pending tasks + prepare production gate pack | Done | local docs only | Created runbooks (PROD-GATE-1 master, migration-002, Lemon Squeezy), prod env/deploy checklist, read-only preflight SQL, security/RLS backlog, token-storage plan, Stage 2 deferred plan, PROJECT_BRIEF drift reconciliation. Docs-only; no live SQL/deploy/installs. PROD-GATE-1 is now ready as a manual/external gate. |
 
 ## Decision Log
 
