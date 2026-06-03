@@ -130,3 +130,12 @@ ID (e.g. `A0.5`, `A0.6`, `STAGE1`).
 * **Status:** Stage 1 complete locally; blocked externally on live gates.
 * **Risk level:** High execution (local only); no production actions.
 * **Next action:** External gate review (apply migration, manual LS verify, deploy).
+
+### `SPEC-STAGE2-LOCAL-ACCEPTANCE.md`
+* **Purpose:** Records the Stage 2 **static** child-tutor UX work on `public/app.html` —
+  a11y live region + labels, hint-first copy, session-expired state, no-payment-in-child
+  invariant, 9 smoke tests — plus deferred items (streaming, KaTeX, moderation, token
+  storage, React/Vite).
+* **Status:** Stage 2 partially complete locally; deeper items deferred/gated.
+* **Risk level:** Medium (frontend edits); no production actions.
+* **Next action:** External gate review; later Stage 2 slices (moderation, math, migration).

@@ -11,13 +11,14 @@ backend, and a static frontend currently under stabilization.
 
 ## 2. Current Priority
 
-Docs are committed (3 waves: `590e67b`/`09b8142`/`d5f7d0d`), and the **STAGE1-1R source diff
-review is now drafted** (`SPEC-STAGE1-1R-source-diff-review-before-commit.md`): all 14
-uncommitted source diffs were reviewed read-only with a **C4a/C4b/C4c/C5 commit-split
-recommendation**. The next priority is **GPT/user review of STAGE1-1R**, then approve a
-source commit/review slice — preferred **`STAGE1-1C4A`** (commit the 7 low-risk CORS
-one-liners). Source remains **uncommitted and unchanged**; `PROJECT_BRIEF.md` still held out.
-No implementation, installs, migrations, React/Vite, or Stage 2 code without approval.
+**Stage 1 is complete locally and Stage 2 static UX is partially done locally.** The
+previously-uncommitted Stage 0/A0.5 source is now committed in clean slices (C4a `15d62f5`
+/ C4b `8a60d2d` / C4c `b3f043f` / C5 `f0b4c87`), plus env validation + `.env.example`
+(`2a32f76`), a 31-test `npm test` baseline (`84d2084`), migration `002` (NOT applied), and
+static child-chat UX improvements (`4360957`). The next priority is **GPT/user review +
+external gate approval (PROD-GATE-1)**: apply migration 002 to live Supabase, manual Lemon
+Squeezy replay verification, production env verification, and deploy. **No deploy / no live
+SQL / no React/Vite** were performed. `PROJECT_BRIEF.md` still held out (drift).
 
 ## 3. Must-Read Files
 
@@ -79,6 +80,16 @@ No implementation, installs, migrations, React/Vite, or Stage 2 code without app
   `credit_ledger.stripe_payment_id` → concurrent-replay race; STAGE1-7/8 still needed);
   `payment_failed` notification violates the `notifications.type` CHECK (silently caught);
   `children.js` token change confirmed a security upgrade (HMAC verify). **No source committed/changed.**
+* **FINISH-STAGE1-STAGE2-LOCAL done** — committed source in clean slices (C4a CORS,
+  C4b chat+children, C4c webhook, C5 A0.5 frontend); added `lib/env.js` validation +
+  `.env.example` + `!.env.example` gitignore; created migration `002` (webhook unique
+  index + `processed_webhooks` + extends `notifications.type` CHECK for **4** missing types
+  found in code: payment_failed/child_distress/exam_completed/personal_info_shared) — **NOT
+  applied**; added a **31-test** Node `node:test` baseline (`npm test`, 0 deps installed);
+  improved `public/app.html` child UX (a11y live region + labels, hint-first copy,
+  session-expired state). Created `SPEC-STAGE1-LOCAL-ACCEPTANCE` + `SPEC-STAGE2-LOCAL-ACCEPTANCE`.
+  Test seams added: `lib/child-auth.js` lazy-imports supabase; `lib/webhook-verify.js` extracted.
+  **No deploy, no live SQL, no live Supabase/LS/OpenAI, no React/Vite, no installs.**
 
 ## 6. Current Blockers / Gates
 
@@ -98,15 +109,16 @@ No implementation, installs, migrations, React/Vite, or Stage 2 code without app
 * **Stage 2 is blocked** pending Stage 1 implementation readiness; its plan is drafted but
   no Stage 2 code is authorized (token-storage change, moderation, and React/Vite remain
   hard gates).
-* Docs are committed (C1–C3). Pre-existing Stage 0/A0.5 `api/*`+`public/*` diffs remain
-  **uncommitted**; STAGE1-1R recommends splitting **C4a** (CORS, Low — safe to commit) /
-  **C4b** (chat+children, High — verify) / **C4c** (webhook, High — manual LS replay verify)
-  / **C5** (A0.5 frontend); `PROJECT_BRIEF.md` still held out (drift).
-* **Two source findings to action later (gated, no source edits yet):** (1) webhook
-  idempotency is best-effort only — no UNIQUE on `credit_ledger.stripe_payment_id`, so
-  concurrent replay can still double-grant → DB `processed_webhooks` migration (STAGE1-7/8)
-  required; (2) the webhook `payment_failed` notification violates the `notifications.type`
-  CHECK constraint and fails silently (`.catch`) → fix `type`/CHECK in a future approved slice.
+* Source is now committed (C4a/C4b/C4c/C5). `PROJECT_BRIEF.md` still held out (drift).
+* **External gates remain (NOT done — need approval/live access):** apply migration `002`
+  to live Supabase (after de-duping existing `credit_ledger.stripe_payment_id`); manual
+  Lemon Squeezy webhook replay verification (grant-once) + card/14-day/10-credit config;
+  production env verification in Vercel (8 vars; `ALLOWED_ORIGIN`); deployment + prod smoke;
+  RLS/SECDEF `search_path` hardening; child token-storage migration (hard gate).
+* **Migration `002` is authored but NOT applied** — closes the webhook double-grant race
+  (unique index) and fixes the `notifications.type` CHECK (4 missing types). Review before apply.
+* Deeper Stage 2 deferred: streaming, KaTeX math, per-turn moderation, httpOnly token,
+  full a11y/Arabic QA, React/Vite decision.
 
 ## 7. Do Not Do
 
@@ -120,17 +132,13 @@ No implementation, installs, migrations, React/Vite, or Stage 2 code without app
 
 ## 8. Next Action
 
-Docs are committed (C1–C3) and the **STAGE1-1R source diff review** is drafted. The next
-safe action is **GPT/user review of
-`docs/specs/SPEC-STAGE1-1R-source-diff-review-before-commit.md`**; then approve a source
-commit/review slice — preferred **STAGE1-1C4A — Commit Low-Risk API CORS Changes** (the 7
-backward-compatible CORS one-liners), with **STAGE1-1C4R** (backend chat/children/webhook
-review + manual LS verification) and **STAGE1-1C5R** (A0.5 frontend flow review) before C4b/
-C4c/C5. The Stage 0 `api/*` + A0.5 `public/*` diffs remain **uncommitted and unmodified**;
-`PROJECT_BRIEF.md` is held out (drift). Stage 2's first slice (when reached) is the read-only
-**STAGE2-A** audit. Do not commit, stage source, reset/revert/stash, start
-any Stage 1/Stage 2 implementation, write env-validation code, create `.env.example`, edit
-`.gitignore`, install packages, apply migrations, or start React/Vite without approval.
+Stage 1 is complete locally and Stage 2 static UX is partially done locally; all source is
+committed and `npm test` is green (31 tests). The next safe action is **GPT/user review +
+`PROD-GATE-1 — Manual Supabase, Lemon Squeezy, and Deployment Readiness Review`**: apply
+migration `002` (after de-dup), manual Lemon Squeezy replay verification, production env
+verification, then deploy + prod smoke. `PROJECT_BRIEF.md` is held out (drift). Do not deploy,
+apply migration `002` or any live SQL, mutate production data, call real LS/OpenAI/Supabase
+from tests, change child token storage, install packages, or start React/Vite without approval.
 
 > **Key STAGE1-C findings to action later (all gated):** only
 > `LEMONSQUEEZY_WEBHOOK_SECRET` is guarded today; others fail late/silently
@@ -163,6 +171,7 @@ any Stage 1/Stage 2 implementation, write env-validation code, create `.env.exam
 | 2026-06-03 | A0.6 continued — completed the final 2 research categories (SaaS billing/trial/checkout + Supabase auth/RLS/security; 16 sources). Folded findings into `SPEC-A0.6` (candidate tables for Cat 3 & 4, shortlist rows, Q4/Q7 picks, billing + Supabase/security lessons, roadmap rows, what-to-avoid), flipped its status to **Complete (8/8)**. Updated `PROJECT_TRACKER.md` (A0.6 + A0.6-R status, decision/finding). **No source files changed; no code copied; no installs/migrations.** | `git diff --name-only` lists only pre-existing `api/*`+`public/*`; scoped intent-to-add diff confirms only `docs/SPEC-A0.6 + PROJECT_TRACKER + SESSION_BRIEF` changed. | Next safe action: user approval to draft a Stage 1 test/schema/tooling **planning** spec (docs only). |
 | 2026-06-03 | A0.6 README sync correction — updated the A0.6 entry in `docs/specs/README.md` from "In progress (4/8)" to "Complete (8/8)". Docs-only. **No source files changed.** | Scoped diff shows only `docs/specs/README.md` + this brief. | Next safe action unchanged: approval to draft Stage 1 planning spec (docs only). |
 | 2026-06-03 | Tracker status sync — updated the A0.OS workstream row in `docs/PROJECT_TRACKER.md` from "In progress (this task)" to "Complete / accepted" (current task: "Operating docs installed"). Docs-only. **No source files changed.** | Scoped diff shows only `docs/PROJECT_TRACKER.md` + this brief. | Next safe action: GPT/user review of Stage 1 planning spec, then STAGE1-A. |
+| 2026-06-03 | FINISH-STAGE1-STAGE2-LOCAL — local build + clean commits. Committed STAGE1-1R docs (`8b89292`); committed source in slices: C4a CORS `15d62f5`, C4b chat+children (+ child-auth lazy-import test seam) `8a60d2d`, C4c webhook (+ extracted `lib/webhook-verify.js`) `b3f043f`, C5 A0.5 frontend `f0b4c87`; env validation `lib/env.js` + `.env.example` + `!.env.example` gitignore `2a32f76`; `node:test` baseline (`npm test`, 31 tests, 0 installs) `84d2084`; Stage 2 static `public/app.html` UX `4360957`; Stage 1+2 local acceptance docs `e108e09`/this. Created migration `002` (webhook unique index + processed_webhooks + notifications.type CHECK for 4 missing types) — **NOT applied**. **No deploy; no live SQL; no live Supabase/LS/OpenAI; no React/Vite; no package installs; PROJECT_BRIEF held out.** | `npm test` 31/31 pass; `git log` shows the slice commits; `git diff` clean after each commit; `git status` source committed, only docs + this brief pending. | Next safe action: GPT/user review + PROD-GATE-1 (apply migration 002, manual LS replay, prod env verify, deploy). |
 | 2026-06-03 | STAGE1-1R — read-only review of all 14 uncommitted source diffs (`git diff` per file + schema/lib cross-checks; no mutation) → created `docs/specs/SPEC-STAGE1-1R-source-diff-review-before-commit.md` (per-file risk, cross-file interactions, C4a/C4b/C4c/C5 split recommendation, manual verification checklist, gates). Findings: 7 CORS one-liners (Low, C4a); `chat.js` credit-count reorder + notif dedup (High, C4b); `children.js` unsigned→HMAC token verify + service-role consolidation (High, security-positive, C4b); `lemonsqueezy.js` best-effort idempotency (no UNIQUE on `credit_ledger.stripe_payment_id` → race) + logging cut + `message`→`body`, and **`payment_failed` violates `notifications.type` CHECK (silently caught)** (High, C4c). Updated `SPEC-STAGE1-1` (§13a), specs `README.md`, `PROJECT_TRACKER.md` (STAGE1 row + STAGE1-1A/1R task rows). **No staging; no commits; no source/files reset/reverted/stashed; no source changed; no installs/tests/build/SQL/migrations/deploy; no React/Vite.** | `git status --short`: 14 `M` source + `?? PROJECT_BRIEF.md`; `git diff --cached` empty; HEAD `d5f7d0d`; only allowed docs edited (now uncommitted). | Next safe action: GPT/user review of STAGE1-1R, then approve STAGE1-1C4A (commit low-risk CORS) or STAGE1-1C4R/1C5R review slices. |
 | 2026-06-03 | STAGE1-1A — committed the 15 approved docs in **3 waves** with a programmatic staged-set guard: `590e67b` operating docs (CLAUDE.md + tracker/brief/README + SPEC-000/001), `09b8142` A0.6+Stage 1 readiness (SPEC-A0.5/A0.6/STAGE1/A/B/C/FINAL/1), `d5f7d0d` Stage 2 plan (SPEC-STAGE2). Safety-scanned docs (no real secrets; no false impl claims). **No source staged/committed; `PROJECT_BRIEF.md` excluded; no source changed; no installs/tests/build/SQL/migrations/deploy.** | `git log --oneline -3` = the 3 docs commits atop `f5e6028`; `git diff --cached` empty post-commit; 14 source files still `M`/uncommitted; guard confirmed no source/forbidden file in any commit. | Next safe action: STAGE1-1R source diff review. |
 | 2026-06-03 | STAGE1-1 — read-only `git` diff audit of all 14 uncommitted source files (`git status/diff/log`, no mutation) + untracked `docs/` inventory → created `docs/specs/SPEC-STAGE1-1-working-tree-cleanup-commit-plan.md` (source inventory, docs inventory, workstream classification, commit-strategy Options A/B/C, file-listed commit plan C1–C5, review gates, safe example git commands, risks, next prompt). Classified: 7×CORS one-liner + `chat.js` credit-count/notif-dedup + `children.js` HMAC token verify/service-role consolidation + `lemonsqueezy.js` idempotency/logging/field-fix = Stage 0; 4×`public/*` trial copy + pendingPlan persistence + activation UX = A0.5. Updated `SPEC-STAGE1-FINAL` (§9a), specs `README.md`, `PROJECT_TRACKER.md` (STAGE1 task + STAGE1-1 row). **No commits; no files staged; no source/docs files reset/reverted/stashed; no source changed; no installs/tests/build/SQL/migrations/deploy; no React/Vite.** | `git status --short`: 14 `M` source + `?? CLAUDE.md PROJECT_BRIEF.md docs/`; `git diff --name-only` = same 14 source (unchanged by this task); only the allowed docs were edited (under untracked `docs/`). | Next safe action: GPT/user review of STAGE1-1, then approve STAGE1-1A (docs-only commit) or STAGE1-1R (source-diff review). |
