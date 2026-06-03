@@ -1,5 +1,5 @@
-import crypto from 'crypto';
 import { createServerClient } from '../../lib/supabase.js';
+import { verifyLemonSqueezySignature } from '../../lib/webhook-verify.js';
 
 // Disable body parsing to verify HMAC signature on raw body
 export const config = { api: { bodyParser: false } };
@@ -13,10 +13,7 @@ async function buffer(readable) {
 }
 
 function verifySignature(rawBody, signature) {
-  const secret = process.env.LEMONSQUEEZY_WEBHOOK_SECRET;
-  if (!secret) throw new Error('LEMONSQUEEZY_WEBHOOK_SECRET not set');
-  const hmac = crypto.createHmac('sha256', secret).update(rawBody).digest('hex');
-  return crypto.timingSafeEqual(Buffer.from(hmac), Buffer.from(signature));
+  return verifyLemonSqueezySignature(rawBody, signature, process.env.LEMONSQUEEZY_WEBHOOK_SECRET);
 }
 
 export default async function handler(req, res) {
@@ -43,7 +40,7 @@ export default async function handler(req, res) {
 
   const supabase = createServerClient();
 
-  console.log(`LemonSqueezy webhook: ${eventName}`, { customData });
+  console.log(`[webhook] ${eventName}`);
 
   try {
     switch (eventName) {
@@ -59,7 +56,7 @@ export default async function handler(req, res) {
         const maxChildren = parseInt(customData.max_children || '1');
         const orderTotal = parseInt(attrs.total || '0'); // in cents — 0 means trial
 
-        console.log('order_created:', JSON.stringify({ userId, credits, productType, planName, billingCycle, orderTotal, customData }));
+        console.log('[webhook] order_created:', JSON.stringify({ productType, planName, billingCycle, credits, orderTotal }));
 
         if (!userId || !credits) {
           console.error('Missing user_id or credits in order_created');
@@ -70,6 +67,18 @@ export default async function handler(req, res) {
         const isTrial = productType === 'subscription' && orderTotal === 0;
         const TRIAL_CREDITS = 10;
         const creditsToGrant = isTrial ? TRIAL_CREDITS : credits;
+
+        // Idempotency: skip if this order has already been credited
+        const orderRef = `ls_order_${event.data.id}`;
+        const { data: existingOrderCredit } = await supabase
+          .from('credit_ledger')
+          .select('id')
+          .eq('stripe_payment_id', orderRef)
+          .limit(1);
+        if (existingOrderCredit && existingOrderCredit.length > 0) {
+          console.log(`[webhook] order_created duplicate detected for ${orderRef}, skipping credit grant`);
+          break;
+        }
 
         // Add credits
         const { data: currentBalance } = await supabase.rpc('get_credit_balance', {
@@ -89,7 +98,7 @@ export default async function handler(req, res) {
           stripe_payment_id: `ls_order_${event.data.id}`,
         });
         if (creditErr) console.error('Error inserting credits:', JSON.stringify(creditErr));
-        else console.log(`Granted ${creditsToGrant} credits (trial=${isTrial}) to user ${userId}`);
+        else console.log(`[webhook] order_created: granted ${creditsToGrant} credits (trial=${isTrial})`);
 
         // If this is a subscription purchase, also create the subscription record
         if (productType === 'subscription' && planName) {
@@ -119,7 +128,7 @@ export default async function handler(req, res) {
           if (subErr) {
             console.error('ERROR creating subscription in order_created:', JSON.stringify(subErr));
           } else {
-            console.log(`Subscription created (status=${isTrial ? 'trialing' : 'active'}, period=${periodDays}d) for user ${userId}`);
+            console.log(`[webhook] order_created: subscription created status=${isTrial ? 'trialing' : 'active'} period=${periodDays}d`);
           }
         }
 
@@ -134,19 +143,20 @@ export default async function handler(req, res) {
         const billingCycle = customData.billing_cycle || 'monthly';
         const maxChildren = parseInt(customData.max_children || '1');
 
-        console.log('subscription_created payload:', JSON.stringify({ userId, credits, planName, billingCycle, maxChildren, customData, attrsStatus: attrs.status }));
+        console.log('[webhook] subscription_created:', JSON.stringify({ planName, billingCycle, credits, maxChildren, attrsStatus: attrs.status }));
 
         if (!userId || !planName) {
-          console.error('Missing user_id or plan_name in subscription_created. customData:', JSON.stringify(customData));
+          console.error('Missing user_id or plan_name in subscription_created');
           break;
         }
 
         // Check if order_created already handled this (avoid duplicate subscription)
+        // 24h window is safer than 60s against webhook retries
         const { data: existingSub } = await supabase.from('subscriptions')
           .select('id')
           .eq('parent_id', userId)
-          .eq('status', 'active')
-          .gte('created_at', new Date(Date.now() - 60000).toISOString()) // created in last 60s
+          .in('status', ['active', 'trialing'])
+          .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
           .limit(1);
 
         if (existingSub && existingSub.length > 0) {
@@ -186,22 +196,22 @@ export default async function handler(req, res) {
           billing_cycle: billingCycle,
           max_children: maxChildren,
         };
-        console.log('Inserting subscription (fallback):', JSON.stringify(subRecord));
+        console.log('[webhook] subscription_created: inserting fallback subscription record');
         const { error: insertErr } = await supabase.from('subscriptions').insert(subRecord);
         if (insertErr) {
           console.error('ERROR inserting subscription:', JSON.stringify(insertErr));
         } else {
-          console.log('Subscription created successfully for user', userId);
+          console.log('[webhook] subscription_created: subscription inserted');
         }
 
         // Credit the user (skip if trial — credits come on first payment)
         // Also skip if order_created already credited
         if (attrs.status !== 'on_trial') {
-          // Check if credits were already added by order_created
+          // Check if credits were already added by order_created (exact match on payment ref)
+          const subCreditRef = `ls_sub_${event.data.id}`;
           const { data: recentCredit } = await supabase.from('credit_ledger')
             .select('id')
-            .eq('parent_id', userId)
-            .gte('created_at', new Date(Date.now() - 60000).toISOString())
+            .eq('stripe_payment_id', subCreditRef)
             .limit(1);
           if (!recentCredit || recentCredit.length === 0) {
             const { data: bal } = await supabase.rpc('get_credit_balance', { p_parent_id: userId });
@@ -211,11 +221,11 @@ export default async function handler(req, res) {
               balance_after: (bal || 0) + credits,
               type: 'subscription',
               description: `${planName} subscription activated (${credits} credits)`,
-              stripe_payment_id: `ls_sub_${event.data.id}`,
+              stripe_payment_id: subCreditRef,
             });
             if (creditErr2) console.error('ERROR inserting credits:', JSON.stringify(creditErr2));
           } else {
-            console.log('Credits already added by order_created, skipping');
+            console.log('[webhook] subscription_created: credits already added, skipping');
           }
         }
 
@@ -303,17 +313,27 @@ export default async function handler(req, res) {
             })
             .eq('stripe_subscription_id', subId);
 
-          // Grant renewal credits
-          const { data: bal } = await supabase.rpc('get_credit_balance', { p_parent_id: sub.parent_id });
-          await supabase.from('credit_ledger').insert({
-            parent_id: sub.parent_id,
-            amount: sub.credits_per_month,
-            balance_after: (bal || 0) + sub.credits_per_month,
-            type: 'subscription',
-            description: `${sub.plan_name} renewal (${sub.credits_per_month} credits)`,
-            stripe_payment_id: `ls_payment_${event.data.id}`,
-          });
-          console.log(`Renewal: granted ${sub.credits_per_month} credits, period extended to ${newPeriodEnd}`);
+          // Grant renewal credits — idempotency check prevents double-crediting on retries
+          const renewalRef = `ls_payment_${event.data.id}`;
+          const { data: existingRenewal } = await supabase
+            .from('credit_ledger')
+            .select('id')
+            .eq('stripe_payment_id', renewalRef)
+            .limit(1);
+          if (existingRenewal && existingRenewal.length > 0) {
+            console.log(`[webhook] subscription_payment_success duplicate for ${renewalRef}, skipping credit grant`);
+          } else {
+            const { data: bal } = await supabase.rpc('get_credit_balance', { p_parent_id: sub.parent_id });
+            await supabase.from('credit_ledger').insert({
+              parent_id: sub.parent_id,
+              amount: sub.credits_per_month,
+              balance_after: (bal || 0) + sub.credits_per_month,
+              type: 'subscription',
+              description: `${sub.plan_name} renewal (${sub.credits_per_month} credits)`,
+              stripe_payment_id: renewalRef,
+            });
+            console.log(`[webhook] subscription_payment_success: granted ${sub.credits_per_month} credits, period extended to ${newPeriodEnd}`);
+          }
         }
         break;
       }
@@ -337,7 +357,7 @@ export default async function handler(req, res) {
             parent_id: sub.parent_id,
             type: 'payment_failed',
             title: 'Payment failed',
-            message: `Your ${sub.plan_name} subscription payment failed. Please update your payment method to avoid losing access.`,
+            body: `Your ${sub.plan_name} subscription payment failed. Please update your payment method to avoid losing access.`,
           }).catch(() => {});
 
           console.log(`Payment failed for subscription ${subId}, status set to past_due`);
@@ -359,7 +379,7 @@ export default async function handler(req, res) {
             .update({ status: 'expired', updated_at: new Date().toISOString() })
             .eq('stripe_subscription_id', subId);
 
-          console.log(`Subscription ${subId} expired for user ${sub.parent_id}`);
+          console.log(`[webhook] subscription expired: ${subId}`);
         }
         break;
       }
