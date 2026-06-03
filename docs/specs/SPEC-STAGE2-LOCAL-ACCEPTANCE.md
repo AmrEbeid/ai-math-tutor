@@ -47,7 +47,7 @@ additively rather than restructuring it.
 
 ## 4. Tests / Checks (commit `4360957`)
 
-`tests/child-chat-ux.test.mjs` (9 static smoke tests, part of `npm test` → 31 total):
+`tests/child-chat-ux.test.mjs` (9 static smoke tests, part of `npm test` → 36 total after LOCAL-CORRECTION-1):
 aria-live log; labelled input/send; hint-first copy; "ask your parent" (no child payment);
 **no payment/checkout surface**; session-expired guidance; RTL dir toggle; typing+error
 states; no leaked secret.

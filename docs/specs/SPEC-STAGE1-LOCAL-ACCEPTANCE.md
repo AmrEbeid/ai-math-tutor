@@ -3,9 +3,15 @@
 > Records what was implemented **locally** for Stage 1 (no deploy, no live SQL, no live
 > Supabase/Lemon Squeezy/OpenAI calls). Produced by FINISH-STAGE1-STAGE2-LOCAL Phases 1–8.
 
-**Status:** Stage 1 **complete locally**; **blocked externally** on live gates (below).
-**Date:** 2026-06-03
+**Status:** Stage 1 **complete locally** (env validation now fully wired + tested —
+LOCAL-CORRECTION-1); **blocked externally** on live gates (below).
+**Date:** 2026-06-03 (updated by LOCAL-CORRECTION-1)
 **Risk class:** High execution (source edits, migration files, commits); no production actions.
+
+> **LOCAL-CORRECTION-1 (2026-06-03):** the earlier "complete locally" claim was overstated —
+> env validation had been wired only at the Supabase seam. It is now wired for **all 8**
+> required vars through `lib/env.js` (`getEnv`), with the `ALLOWED_ORIGIN` request-time
+> fallback explicitly documented. Tests raised to **36**. See §5a.
 
 ## 1. What Was Implemented Locally
 
@@ -37,11 +43,12 @@
 
 ## 3. Tests Run
 
-`npm test` → **22 passed / 0 failed** (Node built-in `node:test`, no network, no real secrets):
-* `tests/child-auth.test.mjs` (5) — signed-token round-trip; forged/tampered/expired/malformed rejected.
+`npm test` → **36 passed / 0 failed** (Node built-in `node:test`, no network, no real secrets):
+* `tests/child-auth.test.mjs` (7) — signed-token round-trip; forged/tampered/expired/malformed rejected; **missing-secret: sign throws / verify fails closed**.
 * `tests/webhook-verify.test.mjs` (6) — valid accepted; wrong-secret/tampered/length-mismatch/blank rejected; missing-secret throws.
 * `tests/frontend-copy.test.mjs` (6) — no no-card contradiction; card-required/14-day/10-credit/activation copy present; no leaked secret.
-* `tests/env.test.mjs` (5) — present/missing/blank handling; missing-names-only errors (no values); `.env.example` placeholders-only.
+* `tests/env.test.mjs` (8) — present/missing/blank handling; **all 8 required vars fail secret-free via `getEnv`**; missing-names-only errors; `getAllowedOrigin` fallback; `.env.example` placeholders-only.
+* `tests/child-chat-ux.test.mjs` (9) — Stage 2 child-chat UX invariants.
 
 ## 4. Migrations Created But NOT Applied
 
@@ -51,11 +58,26 @@
   * extends `notifications.type` CHECK to add the 4 types the code already emits but the original CHECK omitted: `payment_failed`, `child_distress`, `exam_completed`, `personal_info_shared` (all currently fail the CHECK and are silently swallowed).
 * **NOT applied.** Review against the live schema first (esp. de-dup existing `stripe_payment_id` before the unique index can be created).
 
+## 5a. Env Validation — Full Wiring (LOCAL-CORRECTION-1, commit `948baa8`)
+
+All 8 required env vars now flow through `lib/env.js` and fail secret-free:
+
+| Var | Validated at | Behavior when missing/blank |
+|-----|--------------|------------------------------|
+| `SUPABASE_URL` / `SUPABASE_ANON_KEY` / `SUPABASE_SERVICE_ROLE_KEY` | `lib/supabase.js` via `getEnv` | throw `Missing required env var: <NAME>` at client creation |
+| `OPENAI_API_KEY` | `api/chat.js` + `api/exams.js` via `getEnv` | throw at module load (cold start) → 500 |
+| `LEMONSQUEEZY_API_KEY` | `api/credits/checkout.js` via `getEnv` (request-time) | throw → 500 before the LS fetch |
+| `LEMONSQUEEZY_WEBHOOK_SECRET` | webhook via `getEnv` (request-time) | throw → caught → 500 (secret-free) |
+| `CHILD_JWT_SECRET` | `lib/child-auth.js` via `getEnv` (call-time) | sign **throws** (login); verify **fails closed → null** |
+| `ALLOWED_ORIGIN` | `getAllowedOrigin()` helper (request-time) | **documented `'*'` fallback** (CORS config, not a secret); flagged by `validateServerEnv()` for boot/CI; prod must set it |
+
+Error messages name the variable only — never the value (covered by tests).
+
 ## 5. Findings Carried Forward
 
 * Webhook idempotency remains **best-effort in code** until migration 002 is applied (race window).
 * The `notifications.type` CHECK bug is broader than STAGE1-1R found — **4** types affected, fixed in migration 002 (pending apply).
-* Env validation is wired at the Supabase seam; other call sites (`chat`/`exams` OpenAI construction, `checkout` LS key, `ALLOWED_ORIGIN` per-endpoint) still fail later/generically — full `validateServerEnv()` wiring is a documented follow-up.
+* `ALLOWED_ORIGIN` is intentionally request-time with a documented `'*'` fallback (not fail-fast) — prod must set a concrete origin (external gate).
 * `console.error('set_child_password error:', error)` (children.js) logs an error object — pre-existing; flagged in STAGE1-C for a future log-scrub review (no password value logged).
 
 ## 6. External Gates Remaining (NOT done — require approval/live access)
@@ -69,6 +91,6 @@
 
 ## 7. Stage 1 Local Status
 
-**Complete locally** (all local checks pass; source committed; env validation + `.env.example`
-+ test baseline in place; migration authored). **Blocked externally** on the §6 live gates —
-no production completion is claimed.
+**Complete locally** (all local checks pass; source committed; **env validation fully wired
+for all 8 vars + tested**; `.env.example` + 36-test baseline in place; migration authored).
+**Blocked externally** on the §6 live gates — no production completion is claimed.

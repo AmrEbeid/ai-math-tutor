@@ -125,9 +125,10 @@ ID (e.g. `A0.5`, `A0.6`, `STAGE1`).
 
 ### `SPEC-STAGE1-LOCAL-ACCEPTANCE.md`
 * **Purpose:** Records Stage 1 **local** completion — source committed in clean slices
-  (C4a/C4b/C4c/C5), env validation + `.env.example`, migration 002 (not applied), and a
-  22-test `npm test` baseline — plus the remaining external gates.
-* **Status:** Stage 1 complete locally; blocked externally on live gates.
+  (C4a/C4b/C4c/C5), **env validation fully wired for all 8 vars** (LOCAL-CORRECTION-1) +
+  `.env.example`, migration 002 (not applied), and a 36-test `npm test` baseline — plus
+  the remaining external gates.
+* **Status:** Stage 1 complete locally (env validation wired + tested); blocked externally on live gates.
 * **Risk level:** High execution (local only); no production actions.
 * **Next action:** External gate review (apply migration, manual LS verify, deploy).
 
