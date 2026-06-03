@@ -1,16 +1,19 @@
--- Migration 002: Webhook idempotency + notification-type fix
+-- Migration 002: Webhook idempotency (credit-grant unique index + processed_webhooks)
 -- Created: 2026-06-03 (FINISH-STAGE1-STAGE2-LOCAL, Phase 4 / C4c)
+-- Revised: 2026-06-03 (PROD-APPLY-1A) — removed the notifications.type CHECK rewrite
+--   after the live preflight (project gstjvjynkdvqncjyybwm) showed the live constraint
+--   ALREADY allows all needed types AND two more (subscription_expired,
+--   subscription_expiring). Rewriting it here would have REGRESSED the live schema by
+--   dropping those two. The repo's migration 001 CHECK is stale vs live; reconciling the
+--   full live schema into version control is a separate task — see the migration runbook.
 -- STATUS: NOT APPLIED. Local file only — review against the live schema before applying.
--- Idempotent style (IF NOT EXISTS / DROP CONSTRAINT IF EXISTS) consistent with 001.
+-- Idempotent style (IF NOT EXISTS) consistent with 001.
 --
--- Addresses two STAGE1 findings:
---   (1) Webhook credit grants are deduped only in app code (SELECT-then-INSERT on
---       credit_ledger.stripe_payment_id) with NO DB constraint, so concurrent
---       re-delivery can race and double-grant credits.
---   (2) Several notifications.type values used by the code (payment_failed,
---       child_distress, exam_completed, personal_info_shared) are NOT in the current
---       CHECK constraint, so those notification INSERTs fail the CHECK and are
---       silently swallowed by the callers' .catch handlers.
+-- Addresses one confirmed live gap:
+--   Webhook credit grants are deduped only in app code (SELECT-then-INSERT on
+--   credit_ledger.stripe_payment_id) with NO DB constraint, so concurrent re-delivery
+--   can race and double-grant credits. Live preflight confirmed: no unique index on that
+--   column, 0 duplicate non-null values (3 payment-ref rows), processed_webhooks absent.
 
 -- ============================================================================
 -- 1. Close the webhook double-grant race at the DB level
@@ -43,22 +46,12 @@ CREATE TABLE IF NOT EXISTS processed_webhooks (
 COMMENT ON TABLE processed_webhooks IS 'Idempotency ledger: one row per processed LemonSqueezy webhook event id.';
 
 -- ============================================================================
--- 3. Fix the notifications.type CHECK constraint
+-- (REMOVED) notifications.type CHECK rewrite
 -- ============================================================================
--- Add the four notification types the application already emits but the original
--- CHECK omitted. Evidence (code): payment_failed (api/webhooks/lemonsqueezy.js),
--- child_distress + personal_info_shared (api/chat.js), exam_completed (api/exams.js).
-ALTER TABLE notifications DROP CONSTRAINT IF EXISTS notifications_type_check;
-ALTER TABLE notifications ADD CONSTRAINT notifications_type_check
-  CHECK (type IN (
-    'stuck_loop',
-    'credits_low',
-    'credits_empty',
-    'session_flagged',
-    'weekly_report',
-    'credit_limit_reached',
-    'payment_failed',
-    'child_distress',
-    'exam_completed',
-    'personal_info_shared'
-  ));
+-- A prior draft rewrote notifications_type_check to add payment_failed / child_distress
+-- / exam_completed / personal_info_shared. The PROD-APPLY-1A live preflight showed the
+-- production constraint ALREADY allows those four PLUS subscription_expired and
+-- subscription_expiring. Re-adding a 10-type CHECK here would DROP the two extra live
+-- types (a regression), so the rewrite was removed. No change to notifications.type is
+-- needed in production. (Bringing the live CHECK + other live-only objects into
+-- version-controlled migrations is a separate schema-reconciliation task.)

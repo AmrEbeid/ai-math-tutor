@@ -55,7 +55,7 @@ LOCAL-CORRECTION-1); **blocked externally** on live gates (below).
 * `supabase/migrations/002_webhook_idempotency_and_notification_types.sql`:
   * partial **UNIQUE index** on `credit_ledger(stripe_payment_id) WHERE NOT NULL` → closes the webhook double-grant race at the DB level;
   * `processed_webhooks` table (event-id UNIQUE) — the STAGE1-7/8 idempotency ledger (not yet wired into the handler);
-  * extends `notifications.type` CHECK to add the 4 types the code already emits but the original CHECK omitted: `payment_failed`, `child_distress`, `exam_completed`, `personal_info_shared` (all currently fail the CHECK and are silently swallowed).
+  * ~~extends `notifications.type` CHECK~~ — **REMOVED after the PROD-APPLY-1A live preflight** (the prod CHECK already allows those 4 types + `subscription_expired`/`subscription_expiring`; the rewrite would have regressed prod). Migration 002 now does only the unique index + `processed_webhooks`.
 * **NOT applied.** Review against the live schema first (esp. de-dup existing `stripe_payment_id` before the unique index can be created).
 
 ## 5a. Env Validation — Full Wiring (LOCAL-CORRECTION-1, commit `948baa8`)
@@ -76,7 +76,7 @@ Error messages name the variable only — never the value (covered by tests).
 ## 5. Findings Carried Forward
 
 * Webhook idempotency remains **best-effort in code** until migration 002 is applied (race window).
-* The `notifications.type` CHECK bug is broader than STAGE1-1R found — **4** types affected, fixed in migration 002 (pending apply).
+* **CORRECTION (PROD-APPLY-1A):** the earlier "notifications.type CHECK silently fails for 4 types" finding was true only against the **repo** migration 001 — the **live** DB already allows all of them (+2 more). There is **no production notification bug**; it was repo-vs-live drift. The CHECK rewrite was removed from migration 002.
 * `ALLOWED_ORIGIN` is intentionally request-time with a documented `'*'` fallback (not fail-fast) — prod must set a concrete origin (external gate).
 * `console.error('set_child_password error:', error)` (children.js) logs an error object — pre-existing; flagged in STAGE1-C for a future log-scrub review (no password value logged).
 
