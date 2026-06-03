@@ -489,8 +489,11 @@
 
     if (selectedPlanId) {
       sessionStorage.setItem('pendingPlan', selectedPlanId);
+      localStorage.setItem('pendingPlan', selectedPlanId);
     } else {
-      const savedPlan = sessionStorage.getItem('pendingPlan');
+      const savedPlan =
+        sessionStorage.getItem('pendingPlan') ||
+        localStorage.getItem('pendingPlan');
       if (savedPlan && PLAN_INFO[savedPlan]) {
         selectedPlanId = savedPlan;
       }
@@ -510,7 +513,10 @@
 
     async function redirectAuthenticatedUser(retryCount) {
       retryCount = retryCount || 0;
-      var planId = selectedPlanId || sessionStorage.getItem('pendingPlan');
+      var planId =
+        selectedPlanId ||
+        sessionStorage.getItem('pendingPlan') ||
+        localStorage.getItem('pendingPlan');
       if (!planId) {
         try {
           var sess = await getSession();
@@ -534,7 +540,9 @@
           });
           var data = await checkoutRes.json();
           if (data && data.url) {
+            // Clear pending plan from both stores before redirecting to checkout
             sessionStorage.removeItem('pendingPlan');
+            localStorage.removeItem('pendingPlan');
             try { window.supabaseClient.auth.updateUser({ data: { pending_plan: null } }); } catch(e) {}
             window.location.href = data.url;
             return;
@@ -543,15 +551,28 @@
             await new Promise(function(r) { setTimeout(r, 1500); });
             return redirectAuthenticatedUser(retryCount + 1);
           }
+          // Checkout failed after retries — show error to user
+          var errEl = document.getElementById('signup-error') || document.getElementById('otp-error');
+          if (errEl) {
+            errEl.textContent = 'Your account was created, but we could not open checkout. Please try again from the pricing page.';
+            errEl.style.display = 'block';
+          }
         } catch (e) {
           console.error('Checkout redirect error:', e);
           if (retryCount < 3) {
             await new Promise(function(r) { setTimeout(r, 1500); });
             return redirectAuthenticatedUser(retryCount + 1);
           }
+          // Network or unexpected error — show error to user
+          var errEl = document.getElementById('signup-error') || document.getElementById('otp-error');
+          if (errEl) {
+            errEl.textContent = 'Your account was created, but we could not open checkout. Please try again from the pricing page.';
+            errEl.style.display = 'block';
+          }
         }
       }
       sessionStorage.removeItem('pendingPlan');
+      localStorage.removeItem('pendingPlan');
       window.location.href = '/dashboard.html';
     }
 
@@ -580,7 +601,7 @@
         document.getElementById('login-form').style.display = 'none';
         document.getElementById('signup-form').style.display = 'block';
         document.getElementById('auth-title').textContent = 'Start your free trial';
-        document.getElementById('auth-subtitle').textContent = 'Create your account, verify your email, then subscribe.';
+        document.getElementById('auth-subtitle').textContent = 'Create your account, verify your email, then enter your card details. You won\u2019t be charged for 14 days.';
       }
     }
 

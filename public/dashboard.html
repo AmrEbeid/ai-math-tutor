@@ -683,10 +683,25 @@
       if (!session) return window.location.href = '/login.html';
 
       // Subscription gate: block dashboard access until user has an active subscription
-      // If returning from payment, retry a few times to allow webhook to process
+      // If returning from payment, retry more times to allow webhook to process
       const urlParams = new URLSearchParams(window.location.search);
       const isPaymentReturn = urlParams.get('payment') === 'success';
-      const maxRetries = isPaymentReturn ? 5 : 1;
+      const maxRetries = isPaymentReturn ? 8 : 1;
+
+      // Show activation state while polling after checkout return
+      let activationBanner = null;
+      if (isPaymentReturn) {
+        activationBanner = document.createElement('div');
+        activationBanner.id = 'trial-activation-banner';
+        activationBanner.style.cssText = 'position:fixed;inset:0;z-index:9999;background:var(--color-warm-bg,#fdfbf7);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;';
+        activationBanner.innerHTML = '<div style="max-width:440px;">'
+          + '<div style="font-size:48px;margin-bottom:20px;">&#9203;</div>'
+          + '<h2 style="font-family:var(--font-display,serif);font-size:26px;font-weight:700;color:var(--color-text-dark,#1a1a1a);margin-bottom:12px;">Activating your trial\u2026</h2>'
+          + '<p style="font-size:16px;color:var(--color-text-muted,#666);line-height:1.6;margin-bottom:8px;">We\u2019re confirming your secure checkout and adding your 10 free credits. This usually takes a few seconds.</p>'
+          + '<p style="font-size:13px;color:var(--color-text-light,#999);">Please keep this page open.</p>'
+          + '</div>';
+        document.body.appendChild(activationBanner);
+      }
 
       let subscriptionFound = false;
       for (let attempt = 0; attempt < maxRetries; attempt++) {
@@ -704,7 +719,24 @@
         }
       }
 
+      // Remove activation overlay now that polling is done
+      if (activationBanner) activationBanner.remove();
+
       if (!subscriptionFound) {
+        if (isPaymentReturn) {
+          // User just paid — do not redirect them away. Show a friendly pending message.
+          const pendingDiv = document.createElement('div');
+          pendingDiv.style.cssText = 'position:fixed;inset:0;z-index:9999;background:var(--color-warm-bg,#fdfbf7);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;';
+          pendingDiv.innerHTML = '<div style="max-width:480px;">'
+            + '<div style="font-size:48px;margin-bottom:20px;">&#128336;</div>'
+            + '<h2 style="font-family:var(--font-display,serif);font-size:24px;font-weight:700;color:var(--color-text-dark,#1a1a1a);margin-bottom:12px;">Your trial is almost ready</h2>'
+            + '<p style="font-size:16px;color:var(--color-text-muted,#666);line-height:1.6;margin-bottom:24px;">We\u2019re still waiting for checkout confirmation from Lemon Squeezy. This can take a little longer sometimes. Please refresh in a moment.</p>'
+            + '<button onclick="window.location.reload()" style="padding:13px 32px;background:var(--color-text-dark,#1a1a1a);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:12px;">Refresh status</button>'
+            + '<br><a href="/pricing.html" style="font-size:13px;color:var(--color-text-muted,#666);">Back to pricing</a>'
+            + '</div>';
+          document.body.appendChild(pendingDiv);
+          return;
+        }
         window.location.href = '/pricing.html?reason=no_subscription';
         return;
       }
