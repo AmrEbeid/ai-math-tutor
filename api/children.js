@@ -1,5 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
 import { createAuthClient, createServerClient, getUser } from '../lib/supabase.js';
+import { verifyChildToken } from '../lib/child-auth.js';
 
 /**
  * POST /api/children — Unified children endpoint
@@ -9,23 +9,9 @@ import { createAuthClient, createServerClient, getUser } from '../lib/supabase.j
  * 'check_limits' uses child JWT auth.
  */
 
-// Child JWT token verification (for check_limits)
-function verifyChildToken(req) {
-  const auth = req.headers.authorization;
-  if (!auth || !auth.startsWith('Bearer ')) return null;
-  const token = auth.replace('Bearer ', '');
-  try {
-    const parts = token.split('.');
-    if (parts.length !== 3) return null;
-    const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString());
-    if (!payload.child_id || !payload.parent_id) return null;
-    if (payload.exp && payload.exp * 1000 < Date.now()) return null;
-    return payload;
-  } catch (e) { return null; }
-}
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', process.env.ALLOWED_ORIGIN || '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -256,13 +242,12 @@ async function handleSetLimits(req, res, user, params) {
 // ACTION: check_limits — Child checks own limits
 // ============================================
 async function handleCheckLimits(req, res) {
-  const child = verifyChildToken(req);
+  const token = req.headers.authorization?.replace('Bearer ', '');
+  if (!token) return res.status(401).json({ error: 'Not authenticated' });
+  const child = verifyChildToken(token);
   if (!child) return res.status(401).json({ error: 'Not authenticated' });
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-  );
+  const supabase = createServerClient();
 
   try {
     const { data: cd, error: ce } = await supabase

@@ -137,7 +137,7 @@ Remember: Use these as STYLE and APPROACH references only. Always teach step-by-
 
 export default async function handler(req, res) {
   // CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', process.env.ALLOWED_ORIGIN || '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(200).end();
@@ -359,7 +359,14 @@ export default async function handler(req, res) {
       .replace('[OFF_TOPIC_REPEAT]', '')
       .trim();
 
-    // 11. Deduct credit — 1 credit per 5 text msgs, 1 per 2 image msgs
+    // 11. Save messages first — must happen before credit count so the modulo is correct
+    await supabase.from('messages').insert([
+      { session_id, role: 'user', content: message },
+      { session_id, role: 'assistant', content: cleanResponse, tokens_used: tokensUsed }
+    ]);
+
+    // 12. Deduct credit — 1 credit per 5 text msgs, 1 per 2 image msgs
+    // Count is queried AFTER the save so the first message yields count=1, not count=0
     const msgsPerCredit = image ? 2 : 5;
     const { count: msgCount } = await supabase
       .from('messages')
@@ -368,7 +375,7 @@ export default async function handler(req, res) {
       .eq('role', 'user');
 
     let newBalance = await getBalance(supabase, parentId);
-    if ((msgCount || 0) % msgsPerCredit === 0) {
+    if (msgCount !== null && msgCount % msgsPerCredit === 0) {
       const { data: bal } = await supabase.rpc('deduct_credit', {
         p_parent_id: parentId,
         p_session_id: session_id
@@ -376,20 +383,24 @@ export default async function handler(req, res) {
       newBalance = bal;
     }
 
-    // 12. Save messages
-    await supabase.from('messages').insert([
-      { session_id, role: 'user', content: message },
-      { session_id, role: 'assistant', content: cleanResponse, tokens_used: tokensUsed }
-    ]);
-
-    // 13. Low credit notification
+    // 13. Low credit notification — at most once per 24 hours to prevent flooding
     if (newBalance !== null && newBalance <= 5 && newBalance > 0) {
-      await supabase.from('notifications').insert({
-        parent_id: parentId,
-        type: 'credits_low',
-        title: 'Credits running low',
-        body: `You have ${newBalance} credits remaining. Top up to keep the learning going!`
-      });
+      const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const { data: recentNotif } = await supabase
+        .from('notifications')
+        .select('id')
+        .eq('parent_id', parentId)
+        .eq('type', 'credits_low')
+        .gte('created_at', since)
+        .limit(1);
+      if (!recentNotif || recentNotif.length === 0) {
+        await supabase.from('notifications').insert({
+          parent_id: parentId,
+          type: 'credits_low',
+          title: 'Credits running low',
+          body: `You have ${newBalance} credits remaining. Top up to keep the learning going!`
+        });
+      }
     }
 
     return res.status(200).json({
