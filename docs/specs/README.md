@@ -111,3 +111,14 @@ ID (e.g. `A0.5`, `A0.6`, `STAGE1`).
 * **Risk level:** Medium planning relevance, low execution (read-only + docs-only).
 * **Next action:** GPT/user review; then approve docs-only commit (STAGE1-1A) or
   source-diff review (STAGE1-1R). No cleanup or commit authorized yet.
+
+### `SPEC-STAGE1-1R-source-diff-review-before-commit.md`
+* **Purpose:** Detailed read-only review of the 14 uncommitted source diffs (Stage 0 `api/*`
+  + A0.5 `public/*`): per-file change/risk analysis, cross-file interactions, a risk matrix
+  with a C4a/C4b/C4c/C5 commit-split recommendation, and a manual verification checklist.
+  Surfaces the webhook best-effort-vs-DB idempotency gap (no UNIQUE on
+  `credit_ledger.stripe_payment_id`) and the `payment_failed` `notifications.type` CHECK bug.
+* **Status:** Drafted / awaiting GPT and user review.
+* **Risk level:** High planning relevance, low execution (read-only + docs-only).
+* **Next action:** GPT/user review, then approve the selected source commit/review slice
+  (preferred: STAGE1-1C4A — commit low-risk API CORS changes). No source commit authorized yet.

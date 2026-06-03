@@ -310,6 +310,20 @@ source untouched. Lowest risk, unblocks a clean tracked docs baseline.
 (`api/*`) and A0.5 (`public/*`) diffs (esp. webhook idempotency, child-token verify, credit
 count) **without committing**, feeding the §10 gates and the pending manual LS verification.
 
+## 13a. STAGE1-1R Source Diff Review Completed (2026-06-03)
+
+The deeper source review (alternative next prompt in §13) is done — see
+`SPEC-STAGE1-1R-source-diff-review-before-commit.md`. All 14 diffs were reviewed read-only.
+**Commit-split recommendation:** split the original **C4** into **C4a** (7 backward-compatible
+CORS one-liners — Low) / **C4b** (`chat.js` credit-count reorder + `children.js` signed-token
+verify & service-role consolidation — High, verify) / **C4c** (`webhooks/lemonsqueezy.js`
+idempotency/logging/`message`→`body` — High, manual LS replay verify); keep **C5** (A0.5
+frontend) separate. New findings: webhook idempotency is **best-effort only** (no UNIQUE on
+`credit_ledger.stripe_payment_id` → race remains; STAGE1-7/8 still needed), and the
+`payment_failed` notification violates the `notifications.type` CHECK (silently caught — fix
+in a future slice). **No source committed.** Recommended next prompt:
+`STAGE1-1C4A — Commit Low-Risk API CORS Changes`.
+
 ## 14. Acceptance Criteria
 
 Accepted when: all current changes are classified (source + docs); docs-vs-source separation
