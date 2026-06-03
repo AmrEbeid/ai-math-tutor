@@ -1,9 +1,10 @@
 import OpenAI from 'openai';
+import { getEnv } from '../lib/env.js';
 import { createServerClient } from '../lib/supabase.js';
 import { getChildOrUser, getParentId } from '../lib/child-auth.js';
 import { CURRICULUM_MAP, COUNTRY_CODE_MAP } from '../lib/prompts.js';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({ apiKey: getEnv('OPENAI_API_KEY') });
 
 /**
  * POST /api/exams — Unified exam endpoint

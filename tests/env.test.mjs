@@ -3,7 +3,44 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { getEnv, validateServerEnv, SERVER_ENV } from '../lib/env.js';
+import { getEnv, validateServerEnv, getAllowedOrigin, SERVER_ENV } from '../lib/env.js';
+
+const REQUIRED = [
+  'ALLOWED_ORIGIN', 'CHILD_JWT_SECRET', 'LEMONSQUEEZY_API_KEY', 'LEMONSQUEEZY_WEBHOOK_SECRET',
+  'OPENAI_API_KEY', 'SUPABASE_ANON_KEY', 'SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_URL',
+];
+
+test('all 8 required server env vars are declared in the contract', () => {
+  const declared = Object.keys(SERVER_ENV).filter((n) => SERVER_ENV[n].required).sort();
+  assert.deepEqual(declared, [...REQUIRED].sort());
+});
+
+test('each of the 8 required vars fails secret-free via getEnv when blank', () => {
+  for (const name of REQUIRED) {
+    const saved = process.env[name];
+    process.env[name] = '   '; // blank → must be treated as missing
+    try {
+      assert.throws(() => getEnv(name), (err) => {
+        assert.match(err.message, new RegExp(name));      // names the var
+        assert.doesNotMatch(err.message, /\bsk-|eyJ/);    // never an API-key/JWT-shaped value
+        return true;
+      }, `${name} should fail via getEnv when blank`);
+    } finally {
+      if (saved === undefined) delete process.env[name]; else process.env[name] = saved;
+    }
+  }
+});
+
+test('getAllowedOrigin returns the configured value, else the documented "*" fallback', () => {
+  const saved = process.env.ALLOWED_ORIGIN;
+  process.env.ALLOWED_ORIGIN = 'https://zeluu.com';
+  assert.equal(getAllowedOrigin(), 'https://zeluu.com');
+  delete process.env.ALLOWED_ORIGIN;
+  assert.equal(getAllowedOrigin(), '*');           // explicit, documented fallback (never throws)
+  process.env.ALLOWED_ORIGIN = '   ';
+  assert.equal(getAllowedOrigin(), '*');           // blank also falls back
+  if (saved === undefined) delete process.env.ALLOWED_ORIGIN; else process.env.ALLOWED_ORIGIN = saved;
+});
 
 test('getEnv returns a present value', () => {
   process.env.__ZEALTEST_PRESENT = 'value-here';

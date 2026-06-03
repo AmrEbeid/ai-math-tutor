@@ -51,3 +51,28 @@ test('malformed token (wrong segment count) is rejected', () => {
   assert.equal(verifyChildToken('not-a-jwt'), null);
   assert.equal(verifyChildToken('only.two'), null);
 });
+
+test('signChildToken throws a secret-free error when CHILD_JWT_SECRET is missing', () => {
+  const saved = process.env.CHILD_JWT_SECRET;
+  delete process.env.CHILD_JWT_SECRET;
+  try {
+    assert.throws(() => signChildToken(basePayload()), (err) => {
+      assert.match(err.message, /CHILD_JWT_SECRET/);                 // names the var
+      assert.doesNotMatch(err.message, /test-secret-local-only-not-real/); // never the value
+      return true;
+    });
+  } finally {
+    process.env.CHILD_JWT_SECRET = saved;
+  }
+});
+
+test('verifyChildToken fails closed (null) when CHILD_JWT_SECRET is missing', () => {
+  const token = signChildToken(basePayload()); // signed while the secret is present
+  const saved = process.env.CHILD_JWT_SECRET;
+  delete process.env.CHILD_JWT_SECRET;
+  try {
+    assert.equal(verifyChildToken(token), null); // misconfigured server rejects all tokens
+  } finally {
+    process.env.CHILD_JWT_SECRET = saved;
+  }
+});

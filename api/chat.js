@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { getEnv } from '../lib/env.js';
 import { createServerClient, getUser } from '../lib/supabase.js';
 import { getChildOrUser, getParentId } from '../lib/child-auth.js';
 import { getSystemPrompt, checkForBlockedContent, detectStuckLoop, detectChildDistress, detectPersonalInfo, COUNTRY_CODE_MAP } from '../lib/prompts.js';
@@ -66,7 +67,7 @@ function detectMathScaffoldLevel(history = [], subject = 'math') {
   return 'L1'; // Just starting
 }
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({ apiKey: getEnv('OPENAI_API_KEY') });
 
 // Reverse map: "UAE" -> "AE", "Egypt" -> "EG", etc.
 const COUNTRY_TO_ISO = Object.fromEntries(

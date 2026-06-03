@@ -1,5 +1,6 @@
 import { createServerClient } from '../../lib/supabase.js';
 import { verifyLemonSqueezySignature } from '../../lib/webhook-verify.js';
+import { getEnv } from '../../lib/env.js';
 
 // Disable body parsing to verify HMAC signature on raw body
 export const config = { api: { bodyParser: false } };
@@ -13,7 +14,9 @@ async function buffer(readable) {
 }
 
 function verifySignature(rawBody, signature) {
-  return verifyLemonSqueezySignature(rawBody, signature, process.env.LEMONSQUEEZY_WEBHOOK_SECRET);
+  // getEnv throws a secret-free "Missing required env var: LEMONSQUEEZY_WEBHOOK_SECRET"
+  // if unset; the handler catches it and returns 500 (never leaks the value).
+  return verifyLemonSqueezySignature(rawBody, signature, getEnv('LEMONSQUEEZY_WEBHOOK_SECRET'));
 }
 
 export default async function handler(req, res) {

@@ -1,4 +1,5 @@
 import { getUser } from '../../lib/supabase.js';
+import { getEnv } from '../../lib/env.js';
 
 const STORE_ID = '315398';
 
@@ -67,7 +68,7 @@ export default async function handler(req, res) {
     const lsRes = await fetch('https://api.lemonsqueezy.com/v1/checkouts', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.LEMONSQUEEZY_API_KEY}`,
+        'Authorization': `Bearer ${getEnv('LEMONSQUEEZY_API_KEY')}`,
         'Accept': 'application/vnd.api+json',
         'Content-Type': 'application/vnd.api+json',
       },
