@@ -4,7 +4,7 @@
 > gates, and remaining risks. Update this file as part of every meaningful task,
 > and update `SESSION_BRIEF.md` last.
 
-**Last Updated:** 2026-06-03
+**Last Updated:** 2026-06-10
 
 ## Global Status Table
 
@@ -41,6 +41,8 @@
 | STAGE2-LOCAL | Stage 2 static child chat UX (local) | Done | commit 4360957 | Additive `public/app.html` a11y/hint-first/session-expired/error UX + 9 smoke tests. No React/Vite/providers/token-storage change/deploy. Created SPEC-STAGE2-LOCAL-ACCEPTANCE. **Partially complete locally** — deeper items (streaming, KaTeX, moderation, httpOnly token, full a11y/Arabic QA, React/Vite) deferred. |
 | LOCAL-CORRECTION-1 | Close remaining local Stage 1/2 gaps (full env wiring) | Done | commit 948baa8 | Wired all 8 env vars through `lib/env.js`; added 5 tests (36 total); documented ALLOWED_ORIGIN request-time fallback. Corrected overstated Stage 1 acceptance. No deploy/live SQL. |
 | PENDING-CLOSURE-1 | Close non-live pending tasks + prepare production gate pack | Done | local docs only | Created runbooks (PROD-GATE-1 master, migration-002, Lemon Squeezy), prod env/deploy checklist, read-only preflight SQL, security/RLS backlog, token-storage plan, Stage 2 deferred plan, PROJECT_BRIEF drift reconciliation. Docs-only; no live SQL/deploy/installs. PROD-GATE-1 is now ready as a manual/external gate. |
+| UIUX-AUDIT-1 | Read-only frontend UI/UX audit + design improvement plan | Done | local docs only | Created `SPEC-003-frontend-uiux-audit-and-design-plan.md`. Read-only; no `public/*`/CSS/JS edits; no installs; no React/Vite. Findings: two coexisting design systems (warm OKLCH/Fraunces vs. legacy purple `styles.css` on 5 legal pages), inline-token duplication (~7 pages), `dashboard.html` 171 inline styles, a11y gaps (no reduced-motion, sparse ARIA, weak focus), no RTL. Plan = 7 gate-aware static slices (UI-1…UI-7); React/Vite still gated. |
+| EVAL-SPECKIT-1 | Evaluate GitHub Spec Kit vs. existing specs workflow (docs-only) | Done | local docs only | Created `SPEC-002-spec-kit-evaluation.md`. Recommendation: inspiration-only; do NOT install/`specify init`/adopt in Zeluu now. No tooling installed; no scaffolding; no source changes. |
 | PROD-APPLY-1A | Live preflight + revise migration 002 | Done (preflight run; migration revised; NOT applied) | read-only SQL + migration/docs edit | Resumed prod project `gstjvjynkdvqncjyybwm` (was INACTIVE→ACTIVE_HEALTHY); ran read-only preflight via MCP. Found live↔repo drift: live `notifications_type_check` already has all needed types +2 more → **removed 002's CHECK rewrite** (would regress). Parts 1–2 PASS (0 dup payment refs, no unique index, processed_webhooks absent). No migration applied; no data mutated. |
 
 ## Decision Log
@@ -77,6 +79,32 @@
   preferred; Zod = install gate), with an import- vs request-time split and secret-free
   fail-fast messages, before tests/webhook-idempotency work depends on configured envs.
   Env-validation code, `.env.example`, `.gitignore` edits, and installs remain hard gates.
+
+* 2026-06-10 — **Finding (EVAL-SPECKIT-1):** Zeluu has already independently reinvented
+  ~80% of GitHub Spec Kit (constitution≈`CLAUDE.md`, specs, plans, task lists, clarify,
+  analyze, checklists, acceptance) but as **human/GPT-driven docs and prompts** rather than
+  agent slash-commands. Spec Kit's `/speckit.implement` runs task lists autonomously, which
+  **conflicts with Zeluu's hard-stop / human-gate model** (SPEC-001 + CLAUDE.md), and
+  `specify init` (CLI install + scaffolding + slash-command install) trips multiple hard
+  gates. **Decision recommendation:** inspiration-only — keep the current workflow; later,
+  as docs-only slices, optionally borrow a standardized spec/plan/tasks template and an
+  `analyze`-style cross-artifact reconciliation step. Reconsider `specify init` only for the
+  *next greenfield* project, with Zeluu's risk/gate model pre-loaded into its constitution.
+  Full adoption/install in Zeluu remains a hard gate. See `SPEC-002-spec-kit-evaluation.md`.
+
+* 2026-06-10 — **Finding (UIUX-AUDIT-1):** the frontend runs **two design systems at once** —
+  the intended warm OKLCH + Fraunces/Plus-Jakarta system on the primary surfaces
+  (`index`/`pricing`/`login`/`child-login`/`app`/`dashboard`/`exam-prep`) and a **legacy
+  indigo/purple-gradient `styles.css`** still powering 5 legal/utility pages
+  (`gdpr`/`refund`/`terms`/`privacy`/`verify-email`). Design tokens are **duplicated inline
+  across ~7 pages** (drift already present), `dashboard.html` uses **171 inline styles**, and
+  accessibility is thin outside `app.html` (no `prefers-reduced-motion`, ~0 ARIA on
+  index/dashboard/login/pricing, weak focus-visible, missing alt text); no RTL/Arabic.
+  **Recommendation:** keep the warm-editorial aesthetic (it is genuinely differentiated, not
+  AI-slop) and *finish migrating to it as one shared system* — extract a single token/base
+  stylesheet (UI-1), retire/migrate the purple `styles.css` (UI-2), then a11y baseline (UI-3),
+  de-inline dashboard (UI-4), font/nav/RTL (UI-5–7). All slices fit the static stack; React/Vite
+  stays a hard gate. See `SPEC-003-frontend-uiux-audit-and-design-plan.md`.
 
 ## External Gates
 

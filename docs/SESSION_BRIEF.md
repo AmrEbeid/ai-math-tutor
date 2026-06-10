@@ -39,17 +39,17 @@ deploy.** `PROJECT_BRIEF.md` still held out (drift).
 ## 4. Current Branch / PRs
 
 * **Branch:** `main`.
-* **Worktree has UNCOMMITTED changes that predate this task** — do not assume prior
-  work is committed:
-  * Modified (uncommitted): `api/auth/child-login.js`, `api/auth/profile.js`,
-    `api/chat.js`, `api/children.js`, `api/credits/balance.js`,
-    `api/credits/checkout.js`, `api/exams.js`, `api/sessions/create.js`,
-    `api/sessions/history.js`, `api/webhooks/lemonsqueezy.js` (Stage 0 work),
-    and `public/dashboard.html`, `public/index.html`, `public/login.html`,
-    `public/pricing.html` (A0.5 work).
-  * Untracked: `PROJECT_BRIEF.md`.
-* A0.OS adds only documentation files (`CLAUDE.md`, `docs/**`); it did not touch the
-  above.
+* **The 14 former source diffs (Stage 0 `api/*` + A0.5 `public/*`) are COMMITTED** —
+  landed in the earlier source slices C4a `15d62f5` / C4b `8a60d2d` / C4c `b3f043f` /
+  C5 `f0b4c87` (plus env validation `2a32f76` and LOCAL-CORRECTION-1 `948baa8`).
+  Do not re-review them as uncommitted work.
+* **Working tree is clean except untracked `PROJECT_BRIEF.md`**, which remains
+  intentionally held out due to drift (see `SPEC-PROJECT-BRIEF-drift-reconciliation`).
+  Verify with `git status` at session start rather than assuming.
+* The main production gate remains **`PROD-APPLY-1B`** (apply revised migration 002
+  after the exact confirmation phrase).
+* (Corrected 2026-06-10 in DOCS-SYNC-UIUX-SPECKIT-1 — this section previously listed
+  the 14 files as uncommitted, which was stale.)
 
 ## 5. Recently Completed
 
@@ -117,6 +117,24 @@ deploy.** `PROJECT_BRIEF.md` still held out (drift).
   `processed_webhooks`) PASS preflight and remain valid/needed; **migration NOT applied**.
   Corrected the earlier "notifications silently failing" claim (it was repo-only, not prod).
   Project is currently **ACTIVE** (was paused) — re-pause is the owner's call.
+
+* **UIUX-AUDIT-1 done (read-only)** — frontend UI/UX audit + design improvement plan →
+  `docs/specs/SPEC-003-frontend-uiux-audit-and-design-plan.md`. Finding: **two design
+  systems run at once** — warm OKLCH/Fraunces on main surfaces vs. a legacy purple-gradient
+  `styles.css` on 5 legal pages; tokens duplicated inline across ~7 pages; `dashboard.html`
+  has 171 inline styles; a11y thin outside `app.html` (no reduced-motion, sparse ARIA, weak
+  focus); no RTL. Recommendation: keep the warm-editorial aesthetic, finish migrating to it
+  as one shared system (UI-1 tokens → UI-2 retire purple CSS → UI-3 a11y → UI-4 de-inline
+  dashboard → UI-5–7 font/nav/RTL). All slices fit the static stack; React/Vite stays gated.
+  **Read-only; no `public/*`/CSS/JS edits; no installs; no React/Vite; no source/backend.**
+* **EVAL-SPECKIT-1 done (docs-only)** — evaluated GitHub Spec Kit vs. the existing
+  specs workflow → `docs/specs/SPEC-002-spec-kit-evaluation.md`. Finding: Zeluu already
+  reinvented ~80% of Spec Kit as human/GPT-driven docs; `/speckit.implement` conflicts
+  with the hard-gate model and `specify init` trips install/scaffolding gates.
+  **Recommendation: inspiration-only — do NOT install/adopt in Zeluu now**; optionally
+  borrow a spec/plan/tasks template + an `analyze`-style reconciliation step later as
+  docs slices. No tooling installed; no scaffolding; no source changes. (The stale §4
+  note spotted during this task was corrected in DOCS-SYNC-UIUX-SPECKIT-1.)
 
 ## 6. Current Blockers / Gates
 
@@ -195,6 +213,8 @@ React/Vite without the explicit confirmation phrase / approval.
 
 | Date       | Action                                                                 | Evidence                                              | Next                                                |
 | ---------- | ---------------------------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------- |
+| 2026-06-10 | UIUX-AUDIT-1 — read-only frontend UI/UX audit (read `css/styles.css` + `index`/`app` heads/structure; static scan of all 12 pages for fonts/gradients/tokens/ARIA/focus/reduced-motion/`lang`-`dir`/alt) → wrote `docs/specs/SPEC-003-frontend-uiux-audit-and-design-plan.md` (7 gate-aware static slices UI-1…UI-7). Updated specs `README.md` + `PROJECT_TRACKER.md` (UIUX-AUDIT-1 row + finding). **Read-only; no `public/*`/CSS/JS edits; no installs; no React/Vite; no source/backend/migration/deploy.** | `git status --short` = `M docs/{PROJECT_TRACKER,SESSION_BRIEF}.md`, `M docs/specs/README.md`, `?? docs/specs/SPEC-003-...` (+ pre-existing `?? SPEC-002-...`, `?? PROJECT_BRIEF.md`). No `public/*` changed. | Owner/GPT picks first slice (rec. UI-1 shared token stylesheet); any CSS/HTML edit is a separate Medium-risk PR. |
+| 2026-06-10 | EVAL-SPECKIT-1 — docs-only evaluation of GitHub Spec Kit vs. the existing specs workflow. Read CLAUDE.md/brief/tracker/specs README/SPEC-001 + fetched current github/spec-kit docs; wrote `docs/specs/SPEC-002-spec-kit-evaluation.md` (concept mapping, strengths, fit, recommendation = inspiration-only). Updated specs `README.md` index + `PROJECT_TRACKER.md` (EVAL-SPECKIT-1 row + decision-log finding + Last Updated). **No tooling installed; no `specify init`; no scaffolding; no slash-command/operating-doc changes; no source/`api`/`public`/migration/deploy.** | `git status --short` = `M docs/PROJECT_TRACKER.md`, `M docs/specs/README.md`, `?? docs/specs/SPEC-002-...`, `?? PROJECT_BRIEF.md` (pre-existing). No source/migration touched. | Owner/GPT picks an option in SPEC-002 §8; any install/adopt remains a hard gate. Main thread next action unchanged: PROD-APPLY-1B. |
 | 2026-06-03 | A0.OS — installed project operating docs (CLAUDE.md, tracker, brief, specs index, SPEC-000/A0.5/A0.6). Preserved 4/8 A0.6 research categories into SPEC-A0.6. | `git status` shows only new docs added; `api/*`+`public/*` pre-existing uncommitted changes untouched. | Await approval to continue A0.6 (pending category). |
 | 2026-06-03 | A0.OS correction — re-opened SESSION_BRIEF.md and updated it **last** (after specs were written), fixing the execution-order issue. Confirmed: (a) A0.OS docs created; (b) SPEC-A0.6 created with partial research preserved; (c) SaaS-billing + Supabase/auth-security research remains **pending**; (d) A0.OS touched **no source files** (`api/*`/`public/*` untouched); (e) pre-existing Stage 0/A0.5 uncommitted changes still in working tree; (f) a separate "Amr's GPT → Claude operating workflow" doc is still needed (note added in §8). | `git diff --name-only` lists only the pre-existing `api/*`+`public/*` mods (A0.OS docs are untracked, so not shown there); scoped intent-to-add diff confirms only `docs/SESSION_BRIEF.md` + `docs/PROJECT_TRACKER.md` changed. | Next safe action: user approval to continue A0.6 research (pending category). |
 | 2026-06-03 | A0.OS-GPT — created `docs/specs/SPEC-001-human-gpt-claude-operating-flow.md` documenting Amr's Human + GPT + Claude operating workflow. Updated `docs/specs/README.md` (index) and `docs/PROJECT_TRACKER.md` (decision log + A0.OS-GPT task). Replaced the prior "workflow doc still needed" open note in §8. **No source files changed.** | Scoped diff shows only `docs/` files (SPEC-001, README, tracker, this brief). | Next safe action remains: user approval to continue A0.6 research (pending category). |

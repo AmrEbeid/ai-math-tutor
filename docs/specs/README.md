@@ -26,6 +26,25 @@ ID (e.g. `A0.5`, `A0.6`, `STAGE1`).
 * **Next action:** Use as the operating reference for planning, prompts, review, and
   process.
 
+### `SPEC-002-spec-kit-evaluation.md`
+* **Purpose:** Docs-only evaluation of GitHub **Spec Kit** vs. the existing hand-rolled
+  specs workflow — concept mapping, where each is stronger, fit assessment, and a
+  recommendation. No tooling installed; no `specify init`; no scaffolding; no source.
+* **Status:** Drafted / awaiting GPT and user review. Recommendation: **inspiration-only**
+  (do not install/adopt in Zeluu now).
+* **Risk level:** Low (research / docs only).
+* **Next action:** Owner/GPT picks an option (§8). Full adoption / install remains a hard gate.
+
+### `SPEC-003-frontend-uiux-audit-and-design-plan.md`
+* **Purpose:** Read-only UI/UX audit of `public/*` + a prioritized, gate-aware design
+  improvement plan (frontend-design lens). Surfaces two coexisting design systems (warm
+  OKLCH/Fraunces vs. a legacy purple-gradient `styles.css` on 5 legal pages), inline-token
+  duplication, dashboard inline-style debt, and accessibility/RTL gaps.
+* **Status:** Drafted / awaiting GPT and user review. Audit complete; no implementation authorized.
+* **Risk level:** Low (read-only / docs only); Medium when implemented (frontend edits).
+* **Next action:** Owner/GPT picks the first slice (recommended UI-1: shared token stylesheet).
+  No `public/*`/CSS edit, install, or React/Vite authorized.
+
 ### `SPEC-A0.5-trial-signup-onboarding-flow.md`
 * **Purpose:** Documents the completed A0.5 Trial Signup, Card-Based Onboarding &
   Activation UX fix (frontend-only flow/copy).
