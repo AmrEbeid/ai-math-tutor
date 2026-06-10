@@ -103,7 +103,7 @@ Suggested order:
 
 | # | Slice | Addresses | Risk | Effort |
 | --- | --- | --- | --- | --- |
-| **UI-1** | **Extract a single shared token + base stylesheet** (one `:root` OKLCH palette + type scale + base elements) and have every page import it; delete duplicated inline token blocks. | F2 | Medium (touches every page's `<style>`) | M |
+| **UI-1** | **DONE locally (2026-06-10).** Created `public/css/zeluu-tokens.css` — shared OKLCH/warm tokens (union of all 7 pages' inline tokens, incl. child variants + legacy aliases), spacing/radius/shadow/motion/z-index scales, minimal reset, `:focus-visible` accent-ring baseline, `prefers-reduced-motion` guard. Linked on the 7 warm pages **before** their inline `<style>` so page styles still win → appearance preserved. Inline token blocks intentionally **not yet removed** (that's UI-2+); `styles.css` not retired; legal pages untouched. `npm test` 36/36. | F2 (foundation; F4 partially — focus + reduced-motion now global on the 7 pages) | Medium | M |
 | **UI-2** | **Migrate the 5 legacy pages off purple `styles.css`** onto System A (or retire `styles.css` once UI-1 lands). | F1 | Medium | M |
 | **UI-3** | **Accessibility baseline pass**: add `prefers-reduced-motion`, landmarks/skip-link, consistent `:focus-visible` ring, alt text, label/`aria` coverage on `index`/`dashboard`/`login`/`pricing` (match `app.html`). | F4 | Medium | M |
 | **UI-4** | **De-inline `dashboard.html`**: move the 171 inline styles into classed/utility rules built on the shared tokens. | F3 | Medium | L |
@@ -130,9 +130,11 @@ React/Vite decision — see `SPEC-STAGE2-deferred-work-closure-plan.md` and
 
 ## 8. Status & Next Action
 
-* **Status:** Drafted / awaiting GPT and user review. Audit complete; **no implementation
-  authorized.**
-* **Risk level:** Low (read-only audit / docs only).
-* **Next action:** Owner/GPT selects the first implementation slice (recommended: **UI-1**
-  shared token stylesheet, since it unblocks UI-2/UI-4). Any actual `public/*`/CSS edit is
-  a separate, approved Medium-risk slice.
+* **Status:** Audit accepted; **UI-1 implemented locally (2026-06-10)** — shared token
+  stylesheet `public/css/zeluu-tokens.css` created and linked on the 7 warm pages.
+  UI-2…UI-7 not started.
+* **Risk level:** Low for the audit; UI-1 was a Medium-risk frontend slice (link-only page
+  edits; `npm test` 36/36; no backend/legal-page/`styles.css` changes).
+* **Next action:** **UI-2** — migrate the 5 legal/utility pages off the legacy purple
+  `styles.css` onto the shared system (separate approved slice). React/Vite, installs,
+  and deploy remain hard gates.

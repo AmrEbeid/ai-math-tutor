@@ -1,0 +1,144 @@
+/* ============================================================
+   Zeluu — Shared Static Design Foundation (UI-1)
+   ============================================================
+   Single source of truth for the warm-editorial design system
+   (OKLCH cream/terracotta palette, Fraunces + Plus Jakarta Sans).
+
+   Extracted from the identical inline :root blocks of the seven
+   warm-system pages (index, pricing, login, child-login, app,
+   dashboard, exam-prep). Values match the existing pages exactly;
+   pages still keep their own inline tokens for now and override
+   this file by cascade order, so linking it must not change
+   appearance. Later slices (UI-2…UI-4) migrate pages onto this
+   file and remove the duplicates.
+
+   Load order contract: link this file AFTER the Google Fonts
+   <link> and BEFORE the page's inline <style>.
+   ============================================================ */
+
+:root {
+  /* ---- Color: surfaces & text ---- */
+  --color-cream: oklch(97.5% 0.004 60);
+  --color-warm-bg: oklch(98.8% 0.005 62);
+  --color-surface: oklch(99% 0.003 60);
+  --color-text-dark: oklch(15% 0.02 60);
+  --color-text-muted: oklch(50% 0.015 65);
+  --color-text-light: oklch(75% 0.01 65);
+  --color-border: oklch(92% 0.008 65);
+
+  /* ---- Color: brand accent (terracotta) ---- */
+  --color-accent: oklch(55% 0.15 50);
+  --color-accent-dark: oklch(45% 0.18 48);
+  --color-accent-light: oklch(82% 0.1 55);
+
+  /* ---- Color: status ---- */
+  --color-success: oklch(65% 0.16 142);
+  --color-error: oklch(55% 0.2 25);
+  --color-warning: oklch(70% 0.15 80);
+
+  /* ---- Color: child-facing variants (child-login) ---- */
+  --color-child-accent: oklch(70% 0.14 75);
+  --color-child-bg: oklch(96% 0.03 80);
+
+  /* ---- Legacy aliases (older JS/markup still reads these) ---- */
+  --primary: var(--color-accent);
+  --primary-light: var(--color-accent-light);
+  --danger: var(--color-error);
+  --success: var(--color-success);
+  --warning: var(--color-warning);
+  --gray-50: oklch(96% 0.005 60);
+  --gray-100: oklch(94% 0.005 60);
+  --gray-200: oklch(92% 0.008 65);
+  --gray-500: oklch(50% 0.015 65);
+  --gray-600: oklch(45% 0.012 65);
+  --gray-700: oklch(30% 0.015 60);
+  --gray-900: oklch(15% 0.02 60);
+
+  /* ---- Typography ---- */
+  --font-display: 'Fraunces', serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+
+  /* ---- Spacing scale ---- */
+  --spacing-xs: 8px;
+  --spacing-sm: 16px;
+  --spacing-md: 24px;
+  --spacing-lg: 40px;
+  --spacing-xl: 64px;
+  --spacing-2xl: 100px;
+
+  /* ---- Radius scale ---- */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 999px;
+
+  /* ---- Shadows (warm-tinted, soft) ---- */
+  --shadow-sm: 0 1px 3px oklch(20% 0.02 60 / 0.06), 0 1px 2px oklch(20% 0.02 60 / 0.04);
+  --shadow-md: 0 4px 12px oklch(20% 0.02 60 / 0.08), 0 2px 4px oklch(20% 0.02 60 / 0.04);
+  --shadow-lg: 0 12px 32px oklch(20% 0.02 60 / 0.10), 0 4px 8px oklch(20% 0.02 60 / 0.05);
+
+  /* ---- Motion ---- */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --transition-fast: 150ms;
+  --transition-base: 250ms;
+
+  /* ---- Z-index layers ---- */
+  --z-nav: 100;
+  --z-modal: 200;
+  --z-toast: 300;
+}
+
+/* ============================================================
+   Base / reset
+   Identical to the reset every warm-system page already ships
+   inline, so double-loading is a no-op. Kept minimal on purpose
+   — page-level styles continue to own layout and components.
+   ============================================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-text-dark);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================================
+   Accessible focus baseline
+   Pages currently define no :focus-visible styles; this gives
+   keyboard users a consistent, visible accent ring everywhere
+   without showing rings on mouse clicks.
+   ============================================================ */
+
+:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ============================================================
+   Reduced motion
+   Respect vestibular-sensitivity preferences: collapse all
+   animation/transition timing and disable smooth scrolling.
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
