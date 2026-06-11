@@ -54,13 +54,22 @@ no deploy.** `PROJECT_BRIEF.md` still held out (drift).
   intentionally held out due to drift (see `SPEC-PROJECT-BRIEF-drift-reconciliation`).
   Verify with `git status` at session start rather than assuming.
 * ~~The main production gate remains `PROD-APPLY-1B`~~ — **DONE 2026-06-11**: migration
-  002 applied to prod (`20260611085209`). Remaining gates: LS verification, prod env
-  verification, deploy + smoke, RLS-on-`processed_webhooks` (new, gated).
+  002 applied to prod (`20260611085209`). RLS-on-`processed_webhooks` also **DONE**
+  (PROD-RLS-1, 2026-06-11). Remaining gates: LS verification, prod env verification,
+  deploy + smoke.
 * (Corrected 2026-06-10 in DOCS-SYNC-UIUX-SPECKIT-1 — this section previously listed
   the 14 files as uncommitted, which was stale.)
 
 ## 5. Recently Completed
 
+* **PROD-RLS-1 done (2026-06-11)** — enabled RLS on production `processed_webhooks`
+  with the single approved statement (`ALTER TABLE processed_webhooks ENABLE ROW LEVEL
+  SECURITY;`) after the exact owner phrase `ENABLE RLS ON PROCESSED_WEBHOOKS CONFIRMED`.
+  Preflight: RLS disabled, 0 rows, 0 policies. Post-apply: RLS enabled (not forced),
+  **0 policies = deny-by-default for anon/authenticated** (no permissive policies added),
+  table empty, `credit_ledger` intact (53 rows), and **no public table has RLS disabled
+  anymore**. Service-role webhook handler unaffected (bypasses RLS); handler not edited.
+  No migration file applied; no deploy; no push.
 * **UI-MASTER-STATIC-1 done locally (2026-06-11)** — completed the full static frontend
   polish UI-2…UI-7 from SPEC-003, one commit per slice: UI-2 legal-page migration
   `1758578` (5 pages off purple `styles.css` onto the warm system, copy verbatim;
@@ -266,7 +275,7 @@ The next actions are the remaining **PROD-GATE-1 manual gates**: (1) Lemon Squee
 verification (card-required 14-day trial, 10 credits, webhook events, success URL);
 (2) production env verification in Vercel (8 vars incl. `ALLOWED_ORIGIN`); (3) deploy + prod
 smoke (which would also ship the reviewed SEC fixes and UI slices); plus the gated follow-ups:
-enable RLS on `processed_webhooks` (only RLS-disabled public table), wire the
+~~enable RLS on `processed_webhooks`~~ (**DONE — PROD-RLS-1, 2026-06-11**), wire the
 `processed_webhooks` insert-first pattern into the webhook handler (STAGE1-7/8),
 `verify_child_login` DB hardening + live↔repo schema reconciliation, and retiring
 `public/css/styles.css` via a `sw.js` precache edit. The prod project `gstjvjynkdvqncjyybwm`
@@ -299,6 +308,7 @@ storage, install packages, or start React/Vite without explicit approval.
 
 | Date       | Action                                                                 | Evidence                                              | Next                                                |
 | ---------- | ---------------------------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------- |
+| 2026-06-11 | PROD-RLS-1 — **enabled RLS on production `processed_webhooks`** (project `gstjvjynkdvqncjyybwm`) with exactly one statement, `ALTER TABLE processed_webhooks ENABLE ROW LEVEL SECURITY;`, after the exact owner phrase. Preflight (read-only): table exists, RLS disabled, 0 rows, 0 policies; handler confirmed on service-role client (not edited). Post-apply (read-only): RLS enabled, not forced, 0 policies (deny-by-default), table empty, `credit_ledger` 53 rows intact, no remaining RLS-disabled public tables. No other table/policy touched; no migration file; no deploy; no push. Docs-only commit. | Pre/post `pg_class.relrowsecurity` false→true; `pg_policies` count 0; advisor finding closed. | Next gates: PROD-LS-1 (manual Lemon Squeezy verification), prod env verification (8 vars), deploy + smoke. STAGE1-8 insert-first wiring still future. Decide prod re-pause. |
 | 2026-06-11 | PROD-APPLY-1B — **applied migration 002 (parts 1–2) to production** project `gstjvjynkdvqncjyybwm` after the exact owner phrase `APPLY MIGRATION 002 TO PRODUCTION CONFIRMED`. Remote migration `20260611085209_webhook_idempotency_unique_index_and_processed_webhooks` = partial unique index on `credit_ledger.stripe_payment_id` + `processed_webhooks` table. Post-apply verification PASS (index present; table present/empty; credit_ledger 53 rows intact). Security advisors flag the new table as the only RLS-disabled public table (anon-visible via GraphQL) → gated follow-up to enable RLS. No data mutated; no deploy; project left ACTIVE. Updated migration file header, runbook, tracker, this brief. | `apply_migration` success; `list_migrations` shows `20260611085209`; post-apply SELECTs PASS. | Remaining PROD-GATE-1: manual LS verification, prod env verify (8 vars), deploy + smoke; gated RLS-on-`processed_webhooks` slice; handler insert-first wiring (STAGE1-7/8); decide prod re-pause. |
 | 2026-06-11 | UI-MASTER-STATIC-1 — static frontend polish UI-2…UI-7 in 6 slice commits: `1758578` legal pages onto warm system (copy verbatim; `styles.css` 0 HTML refs, kept for `sw.js` precache), `b9b5b7e` a11y baseline (main/skip/aria/dialog/keyboard), `3299658` dashboard de-inline (static 65→25, file 167→127), `85256a4` font normalization (1 shared URL ×12 pages), `a3c09f2` responsive tap-targets + table overflow guards, `750ad19` RTL foundation. Docs updated per slice (SPEC-003 rows + §8) + tracker row + this brief. **Frontend/docs only; no backend/auth/payment/webhook/credit/Supabase changes; no installs; no deploy; no React/Vite; PROJECT_BRIEF held out.** | `git log --oneline` shows the 6 slice commits; `npm test` 50 pass / 1 skip after each slice; `grep styles.css public/*.html` = none; `grep zeluu-tokens.css public/*.html` = all 12 pages; tree clean except `?? PROJECT_BRIEF.md`. | Owner visual review of the slices; follow-ups: retire `styles.css` via `sw.js` precache edit (separate slice), JS-template ARIA/inline-style pass. Main gate unchanged: PROD-APPLY-1B. |
 | 2026-06-11 | PROD-APPLY-1B-PREP — user invoked PROD-APPLY-1B; read runbook + revised migration 002; resumed prod project `gstjvjynkdvqncjyybwm` (INACTIVE→ACTIVE_HEALTHY); re-ran SELECT-only preflight: PASS, unchanged from 1A (0 dup payment refs, 3 rows, no unique index, processed_webhooks absent). **Migration NOT applied — exact confirmation phrase not yet given.** No DDL/DML; no data mutated. Project left ACTIVE. | MCP `get_project` status transitions; SELECT-only preflight results. | Await `APPLY MIGRATION 002 TO PRODUCTION CONFIRMED` to apply parts 1–2 via `apply_migration`; then post-apply verification + LS verification + env verify + deploy/smoke. Decide re-pause. |

@@ -8,10 +8,12 @@
 gave the exact confirmation phrase. Pre-apply preflight re-run same day: PASS (0 dup
 payment refs, no index, `processed_webhooks` absent). Post-apply verification: PASS
 (`to_regclass('public.processed_webhooks')` not null; unique index present;
-`credit_ledger` intact, 53 rows; `processed_webhooks` empty). **New follow-up finding
-(gated):** `processed_webhooks` is the only public table with RLS disabled and is
-anon/authenticated-visible via GraphQL — enable RLS (service-role webhook handler is
-unaffected) in a future approved slice. **Date:** 2026-06-11
+`credit_ledger` intact, 53 rows; `processed_webhooks` empty). **Follow-up RESOLVED
+(PROD-RLS-1, 2026-06-11):** RLS enabled on `processed_webhooks` via a single
+`ALTER TABLE processed_webhooks ENABLE ROW LEVEL SECURITY;` after the exact owner phrase
+`ENABLE RLS ON PROCESSED_WEBHOOKS CONFIRMED`. Verified: RLS enabled (not forced), 0
+policies (deny-by-default for anon/authenticated), table empty, service-role handler
+unaffected, no other public table has RLS disabled. **Date:** 2026-06-11
 
 > **PROD-APPLY-1A live preflight finding (project `gstjvjynkdvqncjyybwm`, PRODUCTION):**
 > the notification-CHECK section was **removed** from migration 002. The live
