@@ -53,6 +53,20 @@ deploy.** `PROJECT_BRIEF.md` still held out (drift).
 
 ## 5. Recently Completed
 
+* **SEC-FIX-1 done locally** (`e6b1696`) — fixed two cross-tenant authorization bugs from a full
+  360 security review. `api/sessions/history.js`: child tokens are now pinned to their own
+  `child_id` (a child could previously read every sibling's session transcripts by omitting the
+  `child_id` query param). `api/chat.js`: the session is ownership-checked up front and `child_id`
+  is derived from the session row instead of the spoofable request body (which let a child bypass
+  parent-set usage limits), with a 403 when a child acts on another child's session and ownership
+  validated before the content-flag writes. Added 8 handler tests (`tests/sessions-history.test.mjs`
+  5 pass via the real signed-token pipeline + mocked `lib/supabase.js`; `tests/chat-handler.test.mjs`
+  3 self-skip until `node_modules` is installed because `api/chat.js` imports `openai`); test script
+  now uses `--experimental-test-module-mocks`. `npm test` = **41 pass / 1 skip**. **Medium/High-risk
+  source — needs manual review before deploy; not pushed.** Two lower-confidence findings remain
+  UNFIXED: `api/auth/child-login.js` ignores the `verify_child_login` `success` flag (possible
+  password bypass — verify against the live DB function during schema reconciliation), and a
+  Low-severity intra-family billing-metadata leak in `api/credits/balance.js`.
 * Stage 0 accepted earlier.
 * A0.5 frontend-only flow/copy implementation completed.
 * A0.5 changed only four public files (`index.html`, `pricing.html`, `login.html`,
@@ -186,8 +200,12 @@ deploy.** `PROJECT_BRIEF.md` still held out (drift).
 
 ## 8. Next Action
 
-Stage 1 complete locally; Stage 2 partial; `npm test` green (36). The live preflight is **done**
-(PROD-APPLY-1A) and migration 002 was **revised** (CHECK rewrite removed; parts 1–2 PASS).
+Stage 1 complete locally; Stage 2 partial; `npm test` green (**41 pass / 1 skip**; the skip is the
+chat handler test, which needs `node_modules` to import `openai`). **SEC-FIX-1 (`e6b1696`) landed
+two cross-tenant authorization fixes** from the 360 review — pending manual review before any deploy,
+with two lower-confidence findings still UNFIXED (`child-login.js` `success`-flag bypass to verify
+against the live DB function; `balance.js` intra-family billing-metadata leak). The live preflight is
+**done** (PROD-APPLY-1A) and migration 002 was **revised** (CHECK rewrite removed; parts 1–2 PASS).
 The next action is **`PROD-APPLY-1B`** — apply the revised migration 002 (unique index +
 `processed_webhooks`) to the prod project **only after the exact phrase**
 `APPLY MIGRATION 002 TO PRODUCTION CONFIRMED`; then Lemon Squeezy verification, production env
@@ -222,6 +240,7 @@ React/Vite without the explicit confirmation phrase / approval.
 
 | Date       | Action                                                                 | Evidence                                              | Next                                                |
 | ---------- | ---------------------------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------- |
+| 2026-06-11 | SEC-FIX-1 — full 360 read-only security review (1 finder + 5 adversarial verifiers) of the whole codebase, then fixed the two confirmed cross-tenant bugs in their own slice `e6b1696`: `api/sessions/history.js` child tokens pinned to own `child_id`; `api/chat.js` session ownership-checked up front + `child_id` derived from session (not body) + 403 on foreign session + ownership-before-writes. Added 8 handler tests (`sessions-history` 5 pass; `chat-handler` 3 skip until deps installed); `package.json` test script gains `--experimental-test-module-mocks`. Staged only the 5 fix/test files (PROJECT_BRIEF held out). **Medium/High-risk source; no deploy; no live SQL; no installs; not pushed.** Verified chat tests pass via an ephemeral local `openai` stub that was then removed (node_modules untouched/gitignored). | `git show e6b1696 --stat` = api/chat.js, api/sessions/history.js, package.json, tests/{sessions-history,chat-handler}.test.mjs; `npm test` 41 pass / 1 skip; `git status` clean except `?? PROJECT_BRIEF.md`. | Manual review of the fix slice before deploy; then the two UNFIXED findings — `child-login.js` `success`-flag bypass (verify vs live DB fn) + `balance.js` billing-metadata leak. Main gate unchanged: PROD-APPLY-1B. |
 | 2026-06-10 | UI-1 — shared static design token/base stylesheet. Read all 7 warm pages' `:root` blocks (values identical across pages; one trivial `--gray-600` hue drift 65-vs-63, shared file uses 65, page overrides win). Created `public/css/zeluu-tokens.css` (tokens + reset + `:focus-visible` + `prefers-reduced-motion`); linked it on the 7 warm pages before their inline `<style>` (19 insertions, link-only). Updated SPEC-003 (UI-1 row + §8 status), tracker (UI-1 row). **No inline-token removal; `styles.css` not retired; legal pages untouched; no backend/`lib`/`supabase`/package/env edits; no installs; no React/Vite; no deploy.** | `git diff --stat` = 7 pages, 19 insertions, 0 deletions + new `zeluu-tokens.css`; `grep zeluu-tokens.css public/*.html` = exactly the 7 warm pages; `npm test` 36/36 pass. | UI-2 — migrate the 5 legal/utility pages off legacy purple `styles.css`. DOCS-SYNC log row for the previous task folded in here as promised. |
 | 2026-06-10 | DOCS-SYNC-UIUX-SPECKIT-1 — reviewed + committed the Spec Kit evaluation and UI/UX audit docs (`48e214f`, 5 docs files); corrected stale §4 (the 14 source files are committed in C4a–C5; tree clean except held-out `PROJECT_BRIEF.md`); staged-set guard confirmed docs-only. | `git show 48e214f --name-only` = 5 allowed docs; post-commit `git status` = `?? PROJECT_BRIEF.md` only. | UI-1 (now done — see row above). |
 | 2026-06-10 | UIUX-AUDIT-1 — read-only frontend UI/UX audit (read `css/styles.css` + `index`/`app` heads/structure; static scan of all 12 pages for fonts/gradients/tokens/ARIA/focus/reduced-motion/`lang`-`dir`/alt) → wrote `docs/specs/SPEC-003-frontend-uiux-audit-and-design-plan.md` (7 gate-aware static slices UI-1…UI-7). Updated specs `README.md` + `PROJECT_TRACKER.md` (UIUX-AUDIT-1 row + finding). **Read-only; no `public/*`/CSS/JS edits; no installs; no React/Vite; no source/backend/migration/deploy.** | `git status --short` = `M docs/{PROJECT_TRACKER,SESSION_BRIEF}.md`, `M docs/specs/README.md`, `?? docs/specs/SPEC-003-...` (+ pre-existing `?? SPEC-002-...`, `?? PROJECT_BRIEF.md`). No `public/*` changed. | Owner/GPT picks first slice (rec. UI-1 shared token stylesheet); any CSS/HTML edit is a separate Medium-risk PR. |

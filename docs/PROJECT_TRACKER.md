@@ -4,7 +4,7 @@
 > gates, and remaining risks. Update this file as part of every meaningful task,
 > and update `SESSION_BRIEF.md` last.
 
-**Last Updated:** 2026-06-10
+**Last Updated:** 2026-06-11
 
 ## Global Status Table
 
@@ -45,6 +45,7 @@
 | UIUX-AUDIT-1 | Read-only frontend UI/UX audit + design improvement plan | Done | local docs only | Created `SPEC-003-frontend-uiux-audit-and-design-plan.md`. Read-only; no `public/*`/CSS/JS edits; no installs; no React/Vite. Findings: two coexisting design systems (warm OKLCH/Fraunces vs. legacy purple `styles.css` on 5 legal pages), inline-token duplication (~7 pages), `dashboard.html` 171 inline styles, a11y gaps (no reduced-motion, sparse ARIA, weak focus), no RTL. Plan = 7 gate-aware static slices (UI-1…UI-7); React/Vite still gated. |
 | EVAL-SPECKIT-1 | Evaluate GitHub Spec Kit vs. existing specs workflow (docs-only) | Done | local docs only | Created `SPEC-002-spec-kit-evaluation.md`. Recommendation: inspiration-only; do NOT install/`specify init`/adopt in Zeluu now. No tooling installed; no scaffolding; no source changes. |
 | PROD-APPLY-1A | Live preflight + revise migration 002 | Done (preflight run; migration revised; NOT applied) | read-only SQL + migration/docs edit | Resumed prod project `gstjvjynkdvqncjyybwm` (was INACTIVE→ACTIVE_HEALTHY); ran read-only preflight via MCP. Found live↔repo drift: live `notifications_type_check` already has all needed types +2 more → **removed 002's CHECK rewrite** (would regress). Parts 1–2 PASS (0 dup payment refs, no unique index, processed_webhooks absent). No migration applied; no data mutated. |
+| SEC-FIX-1 | Fix cross-tenant access bugs from 360 security review (sessions/history + chat) | Done (local) | commit `e6b1696` (main) | **Vuln 1** `api/sessions/history.js`: child tokens were widened to parent scope and could read every sibling's session transcripts by omitting `child_id`; now pinned to own `child_id` (client value ignored), parents may still filter. **Vuln 4** `api/chat.js`: `child_id` came from the request body (spoofable to skip parent-set usage limits); now the session is ownership-checked up front, `child_id` is derived from the session row, a child acting on another child's session gets 403, and ownership is validated before content-flag writes (also closes the write-before-ownership gap). 8 handler tests added (`tests/sessions-history.test.mjs` 5 pass via real signed-token pipeline + mocked `lib/supabase.js`; `tests/chat-handler.test.mjs` 3, self-skip until `node_modules` present because `api/chat.js` imports `openai`). `package.json` test script gains `--experimental-test-module-mocks`. `npm test` = 41 pass / 1 skip. **Medium/High-risk source — manual review required before deploy; not yet pushed.** |
 
 ## Decision Log
 
@@ -92,6 +93,22 @@
   `analyze`-style cross-artifact reconciliation step. Reconsider `specify init` only for the
   *next greenfield* project, with Zeluu's risk/gate model pre-loaded into its constitution.
   Full adoption/install in Zeluu remains a hard gate. See `SPEC-002-spec-kit-evaluation.md`.
+
+* 2026-06-11 — **Finding (SEC-FIX-1 / 360 security review):** a full read-only review of the
+  whole codebase (one finder + five adversarial verifiers) surfaced two confirmed cross-tenant
+  authorization bugs, both fixed in `e6b1696`. (1) `api/sessions/history.js` accepted a child
+  HMAC token, widened it to the parent's scope via the service-role client, and — with no
+  `child_id` query param — returned **all of the parent's children's** session transcripts; a
+  child could read siblings' private conversations. (2) `api/chat.js` trusted a body-supplied
+  `child_id` for parent-set daily/weekly/monthly usage limits, so a child could pass a bogus or
+  sibling `child_id` to bypass the cap and drain the shared family credit pool. Fixes pin child
+  tokens to their own `child_id` and derive `child_id` from the ownership-checked session row.
+  **Still open (lower confidence, not in this slice):** `api/auth/child-login.js:44` ignores the
+  `verify_child_login` `success` flag — a potential password-bypass that depends on the live
+  function's return shape; must be verified against the **live** DB function as part of the
+  schema-reconciliation task. Also a Low-severity intra-family billing-metadata disclosure in
+  `api/credits/balance.js` (child token receives parent `credit_ledger`/`subscriptions`). Neither
+  is fixed yet.
 
 * 2026-06-10 — **Finding (UIUX-AUDIT-1):** the frontend runs **two design systems at once** —
   the intended warm OKLCH + Fraunces/Plus-Jakarta system on the primary surfaces
