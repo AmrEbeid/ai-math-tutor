@@ -71,6 +71,15 @@
     .footer-links { display: flex; justify-content: center; gap: 22px; flex-wrap: wrap; }
     .footer-links a { font-size: 13px; color: var(--color-text-muted); text-decoration: none; }
     .footer-links a:hover { color: var(--color-accent); }
+
+    @media (max-width: 640px) {
+      .nav-links { gap: 16px; }
+      .nav-links a { padding: 10px 4px; }
+      .policy-header { padding: 48px 20px 36px; }
+      .policy-content { padding: 32px 20px 56px; }
+      .footer-links a { padding: 8px 4px; display: inline-block; }
+      .refund-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    }
   </style>
 </head>
 <body>
