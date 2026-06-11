@@ -130,11 +130,16 @@ React/Vite decision — see `SPEC-STAGE2-deferred-work-closure-plan.md` and
 
 ## 8. Status & Next Action
 
-* **Status:** Audit accepted; **UI-1 implemented locally (2026-06-10)** — shared token
-  stylesheet `public/css/zeluu-tokens.css` created and linked on the 7 warm pages.
-  UI-2…UI-7 not started.
-* **Risk level:** Low for the audit; UI-1 was a Medium-risk frontend slice (link-only page
-  edits; `npm test` 36/36; no backend/legal-page/`styles.css` changes).
-* **Next action:** **UI-2** — migrate the 5 legal/utility pages off the legacy purple
-  `styles.css` onto the shared system (separate approved slice). React/Vite, installs,
-  and deploy remain hard gates.
+* **Status:** **All seven slices UI-1…UI-7 implemented locally** (UI-1 on 2026-06-10;
+  UI-2…UI-7 on 2026-06-11 under UI-MASTER-STATIC-1, one commit per slice:
+  UI-2 `1758578`, UI-3 `b9b5b7e`, UI-4 `3299658`, UI-5 `85256a4`, UI-6 `a3c09f2`,
+  UI-7 `750ad19`). `npm test` 50 pass / 1 skip throughout; no backend/API/lib/supabase
+  changes; no installs; no deploy; no React/Vite.
+* **Known remaining UI gaps (small, gated follow-ups):**
+  * Retire `public/css/styles.css` — 0 HTML references remain, but `public/sw.js`
+    still precaches it (sw edit was out of UI-MASTER-STATIC-1 scope).
+  * ARIA inside dashboard's JS-generated modals; pricing billing-toggle `aria-pressed`.
+  * UI-4 deeper pass: ~102 inline styles inside dashboard JS template strings.
+  * Full Arabic localization (see UI-7 row).
+* **Next action:** Owner visual review of the 6 slices, then deploy is gated behind
+  PROD-GATE-1. React/Vite, installs, and deploy remain hard gates.
