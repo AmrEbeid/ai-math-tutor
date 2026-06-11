@@ -45,6 +45,7 @@
 | UIUX-AUDIT-1 | Read-only frontend UI/UX audit + design improvement plan | Done | local docs only | Created `SPEC-003-frontend-uiux-audit-and-design-plan.md`. Read-only; no `public/*`/CSS/JS edits; no installs; no React/Vite. Findings: two coexisting design systems (warm OKLCH/Fraunces vs. legacy purple `styles.css` on 5 legal pages), inline-token duplication (~7 pages), `dashboard.html` 171 inline styles, a11y gaps (no reduced-motion, sparse ARIA, weak focus), no RTL. Plan = 7 gate-aware static slices (UI-1…UI-7); React/Vite still gated. |
 | EVAL-SPECKIT-1 | Evaluate GitHub Spec Kit vs. existing specs workflow (docs-only) | Done | local docs only | Created `SPEC-002-spec-kit-evaluation.md`. Recommendation: inspiration-only; do NOT install/`specify init`/adopt in Zeluu now. No tooling installed; no scaffolding; no source changes. |
 | PROD-APPLY-1A | Live preflight + revise migration 002 | Done (preflight run; migration revised; NOT applied) | read-only SQL + migration/docs edit | Resumed prod project `gstjvjynkdvqncjyybwm` (was INACTIVE→ACTIVE_HEALTHY); ran read-only preflight via MCP. Found live↔repo drift: live `notifications_type_check` already has all needed types +2 more → **removed 002's CHECK rewrite** (would regress). Parts 1–2 PASS (0 dup payment refs, no unique index, processed_webhooks absent). No migration applied; no data mutated. |
+| SEC-FIX-2 | Fix child-login password-flag bypass from 360 review | Done (local) | commit `37d87d5` (main) | `api/auth/child-login.js` issued a token whenever the RPC returned a `child_id`, ignoring the `success` flag — and `verify_child_login` returns the child id even on a wrong password (`success:false`), so knowing `parent_email`+`username` let an attacker log in with any password. Handler now normalizes the result shape (object or one-row array) and rejects when `child_id` is missing **or `success === false`** (closes the bypass without assuming the live function shape; never requires a success field, so it can't false-reject a deployed function that only returns a row on a correct password). 7 handler tests (`tests/child-login.test.mjs`). `npm test` = 48 pass / 1 skip. **Defense-in-depth DB hardening (return no row on failed password) still recommended — gated.** **Medium/High-risk source; manual review before deploy; not pushed.** |
 | SEC-FIX-1 | Fix cross-tenant access bugs from 360 security review (sessions/history + chat) | Done (local) | commit `e6b1696` (main) | **Vuln 1** `api/sessions/history.js`: child tokens were widened to parent scope and could read every sibling's session transcripts by omitting `child_id`; now pinned to own `child_id` (client value ignored), parents may still filter. **Vuln 4** `api/chat.js`: `child_id` came from the request body (spoofable to skip parent-set usage limits); now the session is ownership-checked up front, `child_id` is derived from the session row, a child acting on another child's session gets 403, and ownership is validated before content-flag writes (also closes the write-before-ownership gap). 8 handler tests added (`tests/sessions-history.test.mjs` 5 pass via real signed-token pipeline + mocked `lib/supabase.js`; `tests/chat-handler.test.mjs` 3, self-skip until `node_modules` present because `api/chat.js` imports `openai`). `package.json` test script gains `--experimental-test-module-mocks`. `npm test` = 41 pass / 1 skip. **Medium/High-risk source — manual review required before deploy; not yet pushed.** |
 
 ## Decision Log
@@ -93,6 +94,19 @@
   `analyze`-style cross-artifact reconciliation step. Reconsider `specify init` only for the
   *next greenfield* project, with Zeluu's risk/gate model pre-loaded into its constitution.
   Full adoption/install in Zeluu remains a hard gate. See `SPEC-002-spec-kit-evaluation.md`.
+
+* 2026-06-11 — **Fix (SEC-FIX-2 / child-login bypass):** `api/auth/child-login.js` ignored the
+  `verify_child_login` `success` flag and minted a 24h token on any result carrying a `child_id`.
+  The repo function (`001_initial_schema.sql`) returns `(child_id, parent_id, false)` on a wrong
+  password, so the presence of a `child_id` was not proof of authentication — knowing a valid
+  `parent_email`+`username` allowed login with any password (exploitability depended on the live
+  function's return shape; the live function drifted from repo, returning extra `name`/`grade`/
+  `credits` fields). Fixed in `37d87d5`: normalize object/one-row-array results and reject when
+  `child_id` is absent **or `success === false`**. Chose reject-on-explicit-false rather than
+  require-`success===true` so the fix cannot false-reject a deployed function that returns a row
+  only on a correct password (and therefore omits the flag) — it closes the bypass under every
+  plausible shape. **Recommended follow-up (gated):** harden the DB function to return no row on a
+  failed password as defense in depth, and reconcile the live↔repo `verify_child_login` drift.
 
 * 2026-06-11 — **Finding (SEC-FIX-1 / 360 security review):** a full read-only review of the
   whole codebase (one finder + five adversarial verifiers) surfaced two confirmed cross-tenant

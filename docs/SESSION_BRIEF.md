@@ -53,6 +53,18 @@ deploy.** `PROJECT_BRIEF.md` still held out (drift).
 
 ## 5. Recently Completed
 
+* **SEC-FIX-2 done locally** (`37d87d5`) — fixed the child-login password bypass from the 360
+  review. `api/auth/child-login.js` minted a 24h token whenever the `verify_child_login` RPC
+  returned a `child_id`, ignoring the `success` flag; since the function returns the child id even
+  on a wrong password (`success:false`), knowing a valid `parent_email`+`username` allowed login
+  with any password. The handler now normalizes the RPC result shape (object or one-row array) and
+  rejects when `child_id` is missing **or `success === false`** — chosen over requiring
+  `success === true` so it can't false-reject a deployed function that returns a row only on a
+  correct password. 7 handler tests (`tests/child-login.test.mjs`). `npm test` = **48 pass / 1
+  skip**. **DB defense-in-depth (return no row on failed password) + live↔repo function
+  reconciliation still recommended (gated). Medium/High-risk source; manual review before deploy;
+  not pushed.** The remaining open finding is the Low-severity `api/credits/balance.js` intra-family
+  billing-metadata leak.
 * **SEC-FIX-1 done locally** (`e6b1696`) — fixed two cross-tenant authorization bugs from a full
   360 security review. `api/sessions/history.js`: child tokens are now pinned to their own
   `child_id` (a child could previously read every sibling's session transcripts by omitting the
@@ -200,11 +212,13 @@ deploy.** `PROJECT_BRIEF.md` still held out (drift).
 
 ## 8. Next Action
 
-Stage 1 complete locally; Stage 2 partial; `npm test` green (**41 pass / 1 skip**; the skip is the
-chat handler test, which needs `node_modules` to import `openai`). **SEC-FIX-1 (`e6b1696`) landed
-two cross-tenant authorization fixes** from the 360 review — pending manual review before any deploy,
-with two lower-confidence findings still UNFIXED (`child-login.js` `success`-flag bypass to verify
-against the live DB function; `balance.js` intra-family billing-metadata leak). The live preflight is
+Stage 1 complete locally; Stage 2 partial; `npm test` green (**48 pass / 1 skip**; the skip is the
+chat handler test, which needs `node_modules` to import `openai`). **SEC-FIX-1 (`e6b1696`) and
+SEC-FIX-2 (`37d87d5`) landed three security fixes** from the 360 review (two cross-tenant access
+bugs + the child-login password-flag bypass) — all pending manual review before any deploy. One
+lower-confidence finding remains UNFIXED: the Low-severity `balance.js` intra-family
+billing-metadata leak. Defense-in-depth DB hardening for `verify_child_login` (return no row on a
+failed password) and the live↔repo function reconciliation are still recommended (gated). The live preflight is
 **done** (PROD-APPLY-1A) and migration 002 was **revised** (CHECK rewrite removed; parts 1–2 PASS).
 The next action is **`PROD-APPLY-1B`** — apply the revised migration 002 (unique index +
 `processed_webhooks`) to the prod project **only after the exact phrase**
@@ -240,6 +254,7 @@ React/Vite without the explicit confirmation phrase / approval.
 
 | Date       | Action                                                                 | Evidence                                              | Next                                                |
 | ---------- | ---------------------------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------- |
+| 2026-06-11 | SEC-FIX-2 — fixed the child-login password-flag bypass (`37d87d5`). `api/auth/child-login.js` now normalizes the `verify_child_login` result (object or one-row array) and rejects when `child_id` is missing or `success === false`, instead of issuing a token on `child_id` presence alone. Added `tests/child-login.test.mjs` (7). Staged only the fix + test file (PROJECT_BRIEF held out). Prod project `gstjvjynkdvqncjyybwm` was INACTIVE — **did NOT resume it** to read the live function; chose a fix correct under any return shape instead. **Medium/High-risk source; no deploy; no live SQL; no installs; not pushed.** | `git show 37d87d5 --stat` = api/auth/child-login.js + tests/child-login.test.mjs; `npm test` 48 pass / 1 skip; `git status` clean except `?? PROJECT_BRIEF.md`. | Manual review before deploy; DB defense-in-depth (return no row on failed password) + live↔repo `verify_child_login` reconciliation (gated). Remaining finding: `balance.js` billing-metadata leak. Main gate unchanged: PROD-APPLY-1B. |
 | 2026-06-11 | SEC-FIX-1 — full 360 read-only security review (1 finder + 5 adversarial verifiers) of the whole codebase, then fixed the two confirmed cross-tenant bugs in their own slice `e6b1696`: `api/sessions/history.js` child tokens pinned to own `child_id`; `api/chat.js` session ownership-checked up front + `child_id` derived from session (not body) + 403 on foreign session + ownership-before-writes. Added 8 handler tests (`sessions-history` 5 pass; `chat-handler` 3 skip until deps installed); `package.json` test script gains `--experimental-test-module-mocks`. Staged only the 5 fix/test files (PROJECT_BRIEF held out). **Medium/High-risk source; no deploy; no live SQL; no installs; not pushed.** Verified chat tests pass via an ephemeral local `openai` stub that was then removed (node_modules untouched/gitignored). | `git show e6b1696 --stat` = api/chat.js, api/sessions/history.js, package.json, tests/{sessions-history,chat-handler}.test.mjs; `npm test` 41 pass / 1 skip; `git status` clean except `?? PROJECT_BRIEF.md`. | Manual review of the fix slice before deploy; then the two UNFIXED findings — `child-login.js` `success`-flag bypass (verify vs live DB fn) + `balance.js` billing-metadata leak. Main gate unchanged: PROD-APPLY-1B. |
 | 2026-06-10 | UI-1 — shared static design token/base stylesheet. Read all 7 warm pages' `:root` blocks (values identical across pages; one trivial `--gray-600` hue drift 65-vs-63, shared file uses 65, page overrides win). Created `public/css/zeluu-tokens.css` (tokens + reset + `:focus-visible` + `prefers-reduced-motion`); linked it on the 7 warm pages before their inline `<style>` (19 insertions, link-only). Updated SPEC-003 (UI-1 row + §8 status), tracker (UI-1 row). **No inline-token removal; `styles.css` not retired; legal pages untouched; no backend/`lib`/`supabase`/package/env edits; no installs; no React/Vite; no deploy.** | `git diff --stat` = 7 pages, 19 insertions, 0 deletions + new `zeluu-tokens.css`; `grep zeluu-tokens.css public/*.html` = exactly the 7 warm pages; `npm test` 36/36 pass. | UI-2 — migrate the 5 legal/utility pages off legacy purple `styles.css`. DOCS-SYNC log row for the previous task folded in here as promised. |
 | 2026-06-10 | DOCS-SYNC-UIUX-SPECKIT-1 — reviewed + committed the Spec Kit evaluation and UI/UX audit docs (`48e214f`, 5 docs files); corrected stale §4 (the 14 source files are committed in C4a–C5; tree clean except held-out `PROJECT_BRIEF.md`); staged-set guard confirmed docs-only. | `git show 48e214f --name-only` = 5 allowed docs; post-commit `git status` = `?? PROJECT_BRIEF.md` only. | UI-1 (now done — see row above). |
