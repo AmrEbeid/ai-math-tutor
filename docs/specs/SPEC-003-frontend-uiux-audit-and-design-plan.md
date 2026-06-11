@@ -136,8 +136,10 @@ React/Vite decision — see `SPEC-STAGE2-deferred-work-closure-plan.md` and
   UI-7 `750ad19`). `npm test` 50 pass / 1 skip throughout; no backend/API/lib/supabase
   changes; no installs; no deploy; no React/Vite.
 * **Known remaining UI gaps (small, gated follow-ups):**
-  * Retire `public/css/styles.css` — 0 HTML references remain, but `public/sw.js`
-    still precaches it (sw edit was out of UI-MASTER-STATIC-1 scope).
+  * ~~Retire `public/css/styles.css`~~ **DONE (UI-2B, 2026-06-11):** `sw.js` precache
+    now lists `/css/zeluu-tokens.css` instead, cache bumped `zeluu-v5`→`v6` (activate
+    handler purges old caches), and `styles.css` deleted after a zero-reference sweep
+    of `public/`+`api/`+`lib/`+`tests/`. The legacy purple system is fully retired.
   * ARIA inside dashboard's JS-generated modals; pricing billing-toggle `aria-pressed`.
   * UI-4 deeper pass: ~102 inline styles inside dashboard JS template strings.
   * Full Arabic localization (see UI-7 row).
