@@ -235,10 +235,11 @@ export default async function handler(req, res) {
       });
     }
 
-    // 3b. Check for child distress signals
+    // 3b. Check for child distress signals — notify at most once per session so a
+    // repeated trigger phrase can't flood the parent's notification feed (the alert
+    // links to the session; the parent reviews the whole transcript anyway)
     const distressCheck = detectChildDistress(message);
-    if (distressCheck.detected) {
-      // Flag the message and notify parent immediately
+    if (distressCheck.detected && !(await hasSessionNotification(supabase, session_id, 'child_distress'))) {
       await supabase.from('notifications').insert({
         parent_id: parentId,
         type: 'child_distress',
@@ -248,9 +249,9 @@ export default async function handler(req, res) {
       });
     }
 
-    // 3c. Check for personal information sharing
+    // 3c. Check for personal information sharing — same once-per-session dedup
     const piCheck = detectPersonalInfo(message);
-    if (piCheck.detected) {
+    if (piCheck.detected && !(await hasSessionNotification(supabase, session_id, 'personal_info_shared'))) {
       await supabase.from('notifications').insert({
         parent_id: parentId,
         type: 'personal_info_shared',
@@ -434,5 +435,15 @@ export default async function handler(req, res) {
 async function getBalance(supabase, parentId) {
   const { data } = await supabase.rpc('get_valid_credit_balance', { p_parent_id: parentId });
   return data || 0;
+}
+
+async function hasSessionNotification(supabase, sessionId, type) {
+  const { data } = await supabase
+    .from('notifications')
+    .select('id')
+    .eq('session_id', sessionId)
+    .eq('type', type)
+    .limit(1);
+  return !!(data && data.length > 0);
 }
 

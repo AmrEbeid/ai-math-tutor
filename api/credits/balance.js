@@ -15,7 +15,9 @@ export default async function handler(req, res) {
   const isParent = authContext.type === 'parent';
   const supabase = createServerClient();
 
-  const { data: balance } = await supabase.rpc('get_credit_balance', {
+  // Expiry-aware balance — must match what chat gates on (get_valid_credit_balance),
+  // otherwise the badge can show credits that chat then refuses to spend.
+  const { data: balance } = await supabase.rpc('get_valid_credit_balance', {
     p_parent_id: parentId
   });
 

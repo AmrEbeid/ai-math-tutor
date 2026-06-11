@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
 import { getEnv } from '../lib/env.js';
 import { createServerClient } from '../lib/supabase.js';
-import { getChildOrUser, getParentId } from '../lib/child-auth.js';
+import { getChildOrUser, getParentId, resolveChildId, getChildId } from '../lib/child-auth.js';
 import { CURRICULUM_MAP, COUNTRY_CODE_MAP } from '../lib/prompts.js';
 
 const openai = new OpenAI({ apiKey: getEnv('OPENAI_API_KEY') });
@@ -25,8 +25,12 @@ export default async function handler(req, res) {
     const supabase = createServerClient();
     const { action, ...params } = req.body;
 
+    // A child token may only ever act as itself — pin any client-supplied child_id
+    // to the id baked into the signed token (parents may target any of their children).
+    params.child_id = resolveChildId(authContext, params.child_id);
+
     if (action === 'generate') return handleGenerate(req, res, supabase, parentId, params);
-    if (action === 'submit') return handleSubmit(req, res, supabase, parentId, params);
+    if (action === 'submit') return handleSubmit(req, res, supabase, parentId, params, getChildId(authContext));
     if (action === 'history') return handleHistory(req, res, supabase, parentId, params);
 
     return res.status(400).json({ error: 'Invalid action. Use: generate, submit, or history' });
@@ -179,7 +183,7 @@ Return ONLY the JSON array, no other text.`;
 // ============================================
 // ACTION: submit — Score exam answers
 // ============================================
-async function handleSubmit(req, res, supabase, parentId, params) {
+async function handleSubmit(req, res, supabase, parentId, params, ownChildId) {
   const { attempt_id, answers } = params;
 
   if (!attempt_id || !answers || !Array.isArray(answers)) {
@@ -194,6 +198,10 @@ async function handleSubmit(req, res, supabase, parentId, params) {
 
   if (!attempt) return res.status(404).json({ error: 'Attempt not found' });
   if (attempt.exams.parent_id !== parentId) return res.status(403).json({ error: 'Not authorized' });
+  // A child token may only submit its own attempt, not a sibling's.
+  if (ownChildId && attempt.child_id !== ownChildId) {
+    return res.status(403).json({ error: 'This exam does not belong to you' });
+  }
   if (attempt.status === 'completed') return res.status(400).json({ error: 'Already submitted' });
 
   const { data: questions } = await supabase

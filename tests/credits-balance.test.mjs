@@ -70,7 +70,7 @@ function makeRes() {
 }
 
 const responder = (rec) => {
-  if (rec.name === 'get_credit_balance') return { data: 8, error: null };
+  if (rec.name === 'get_valid_credit_balance') return { data: 8, error: null };
   if (rec.name === 'credit_ledger') return { data: [{ id: 't1', stripe_payment_id: 'pi_secret', amount: 999 }], error: null };
   if (rec.name === 'subscriptions') return { data: { plan_name: 'pro', price_cents: 4999, stripe_customer_id: 'cus_secret' }, error: null };
   return { data: null, error: null };

@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 
 // Must be set BEFORE importing the module (it reads CHILD_JWT_SECRET at load time).
 process.env.CHILD_JWT_SECRET = 'test-secret-local-only-not-real';
-const { signChildToken, verifyChildToken } = await import('../lib/child-auth.js');
+const { signChildToken, verifyChildToken, resolveChildId } = await import('../lib/child-auth.js');
 
 const basePayload = () => ({
   child_id: 'child-123',
@@ -75,4 +75,16 @@ test('verifyChildToken fails closed (null) when CHILD_JWT_SECRET is missing', ()
   } finally {
     process.env.CHILD_JWT_SECRET = saved;
   }
+});
+
+test('resolveChildId pins a child token to its own id, ignoring a requested sibling id', () => {
+  const childCtx = { type: 'child', user: null, child: { id: 'child-A', parent_id: 'parent-1' } };
+  assert.equal(resolveChildId(childCtx, 'child-B'), 'child-A');
+  assert.equal(resolveChildId(childCtx, undefined), 'child-A');
+});
+
+test('resolveChildId lets a parent target any requested child (ownership checked downstream)', () => {
+  const parentCtx = { type: 'parent', user: { id: 'parent-1' }, child: null };
+  assert.equal(resolveChildId(parentCtx, 'child-B'), 'child-B');
+  assert.equal(resolveChildId(parentCtx, undefined), null);
 });
