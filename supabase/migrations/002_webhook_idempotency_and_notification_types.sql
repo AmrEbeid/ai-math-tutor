@@ -6,7 +6,10 @@
 --   subscription_expiring). Rewriting it here would have REGRESSED the live schema by
 --   dropping those two. The repo's migration 001 CHECK is stale vs live; reconciling the
 --   full live schema into version control is a separate task — see the migration runbook.
--- STATUS: NOT APPLIED. Local file only — review against the live schema before applying.
+-- STATUS: APPLIED to production 2026-06-11 (PROD-APPLY-1B) as remote migration
+--   20260611085209_webhook_idempotency_unique_index_and_processed_webhooks after the
+--   exact owner confirmation phrase. Post-apply verification PASS (index present,
+--   processed_webhooks present/empty, credit_ledger intact at 53 rows).
 -- Idempotent style (IF NOT EXISTS) consistent with 001.
 --
 -- Addresses one confirmed live gap:

@@ -22,11 +22,13 @@ the **live read-only preflight** (prod project `gstjvjynkdvqncjyybwm`, resumed f
 parts 1–2 of migration 002 PASS (0 duplicate payment refs, no unique index, `processed_webhooks`
 absent), but **live↔repo schema drift** was found — the live `notifications_type_check` already
 allows all needed types + `subscription_expired`/`subscription_expiring`, so **002's CHECK
-rewrite was removed** (it would have regressed prod). Migration 002 now = unique index +
-`processed_webhooks` only, **still NOT applied**. The next priority is **`PROD-APPLY-1B`** —
-apply the revised migration 002 (parts 1–2) after the exact confirmation phrase — then LS
-verification, env verification, deploy + smoke. **No migration applied; no data mutated; no
-deploy.** `PROJECT_BRIEF.md` still held out (drift).
+rewrite was removed** (it would have regressed prod). Migration 002 (unique index +
+`processed_webhooks`) was **APPLIED to production on 2026-06-11 (PROD-APPLY-1B)** after the
+exact confirmation phrase; post-apply verification PASS. UI-MASTER-STATIC-1 also completed
+the full static frontend polish (UI-2…UI-7, 6 slice commits). The next priorities are the
+remaining **PROD-GATE-1** manual gates — LS verification, prod env verification (8 vars),
+deploy + smoke — plus the new gated RLS-on-`processed_webhooks` slice. **No data mutated;
+no deploy.** `PROJECT_BRIEF.md` still held out (drift).
 
 ## 3. Must-Read Files
 
@@ -51,8 +53,9 @@ deploy.** `PROJECT_BRIEF.md` still held out (drift).
 * **Working tree is clean except untracked `PROJECT_BRIEF.md`**, which remains
   intentionally held out due to drift (see `SPEC-PROJECT-BRIEF-drift-reconciliation`).
   Verify with `git status` at session start rather than assuming.
-* The main production gate remains **`PROD-APPLY-1B`** (apply revised migration 002
-  after the exact confirmation phrase).
+* ~~The main production gate remains `PROD-APPLY-1B`~~ — **DONE 2026-06-11**: migration
+  002 applied to prod (`20260611085209`). Remaining gates: LS verification, prod env
+  verification, deploy + smoke, RLS-on-`processed_webhooks` (new, gated).
 * (Corrected 2026-06-10 in DOCS-SYNC-UIUX-SPECKIT-1 — this section previously listed
   the 14 files as uncommitted, which was stale.)
 
@@ -71,13 +74,17 @@ deploy.** `PROJECT_BRIEF.md` still held out (drift).
   (`[dir="rtl"]` rules in tokens css + app.html; full Arabic localization deferred).
   `npm test` 50 pass / 1 skip after every slice. **Frontend + docs only; no backend/auth/
   payment/Supabase changes; no installs; no deploy; no React/Vite.**
-* **PROD-APPLY-1B-PREP (2026-06-11)** — resumed the prod project `gstjvjynkdvqncjyybwm`
-  (INACTIVE→ACTIVE_HEALTHY) and re-ran the read-only preflight: **PASS, unchanged from
-  PROD-APPLY-1A** (0 duplicate payment refs, 3 payment-ref rows, no unique index,
-  `processed_webhooks` absent). Migration 002 (parts 1–2) is ready to apply but remains
-  **NOT applied** — still awaiting the exact phrase
-  `APPLY MIGRATION 002 TO PRODUCTION CONFIRMED`. Project left ACTIVE; re-pause is the
-  owner's call.
+* **PROD-APPLY-1B done (2026-06-11)** — owner gave the exact confirmation phrase;
+  **migration 002 (parts 1–2) is APPLIED to production** as remote migration
+  `20260611085209_webhook_idempotency_unique_index_and_processed_webhooks`. Pre-apply
+  preflight re-run: PASS (0 duplicate payment refs, 3 payment-ref rows, no index,
+  `processed_webhooks` absent). Post-apply verification: PASS (unique index present;
+  `processed_webhooks` present and empty; `credit_ledger` intact, 53 rows). **The
+  webhook double-grant race is now closed at the DB level.** New gated follow-up from
+  the security advisors: `processed_webhooks` is the only RLS-disabled public table
+  (anon/authenticated-visible via GraphQL) — enable RLS in an approved slice
+  (service-role webhook handler unaffected). Prod project left **ACTIVE**; re-pause is
+  the owner's call. Repo migration file + runbook updated with applied status.
 * **SEC-FIX-3 done locally** (`57626f9`) — closed the last 360-review finding: the
   `api/credits/balance.js` billing-data leak. The endpoint returned the parent's `credit_ledger`
   (incl. `stripe_payment_id`/amounts) and subscription/billing metadata to any caller, so a child
@@ -230,8 +237,11 @@ deploy.** `PROJECT_BRIEF.md` still held out (drift).
   Lemon Squeezy webhook replay verification (grant-once) + card/14-day/10-credit config;
   production env verification in Vercel (8 vars; `ALLOWED_ORIGIN`); deployment + prod smoke;
   RLS/SECDEF `search_path` hardening; child token-storage migration (hard gate).
-* **Migration `002` is authored but NOT applied** — closes the webhook double-grant race
-  (unique index) and fixes the `notifications.type` CHECK (4 missing types). Review before apply.
+* **Migration `002` APPLIED to production 2026-06-11** (`20260611085209`) — the webhook
+  double-grant race is closed at the DB level. (The notifications CHECK part had been
+  removed after the PROD-APPLY-1A preflight; live CHECK already correct.) Follow-ups:
+  wire `processed_webhooks` insert-first into the handler (STAGE1-7/8); enable RLS on
+  `processed_webhooks` (gated).
 * Deeper Stage 2 deferred: streaming, KaTeX math, per-turn moderation, httpOnly token,
   full a11y/Arabic QA, React/Vite decision.
 
@@ -247,22 +257,22 @@ deploy.** `PROJECT_BRIEF.md` still held out (drift).
 
 ## 8. Next Action
 
-Stage 1 complete locally; Stage 2 partial; `npm test` green (**50 pass / 1 skip**; the skip is the
-chat handler test, which needs `node_modules` to import `openai`). **SEC-FIX-1 (`e6b1696`),
-SEC-FIX-2 (`37d87d5`) and SEC-FIX-3 (`57626f9`) landed all four security fixes** from the 360 review
-(two cross-tenant access bugs + the child-login password-flag bypass + the balance billing-data
-leak) — all pending manual review before any deploy. **No review-flagged findings remain open.**
-Defense-in-depth DB hardening for `verify_child_login` (return no row on a failed password) and the
-live↔repo function reconciliation are still recommended (gated). The live preflight is
-**done** (PROD-APPLY-1A) and migration 002 was **revised** (CHECK rewrite removed; parts 1–2 PASS).
-The next action is **`PROD-APPLY-1B`** — apply the revised migration 002 (unique index +
-`processed_webhooks`) to the prod project **only after the exact phrase**
-`APPLY MIGRATION 002 TO PRODUCTION CONFIRMED`; then Lemon Squeezy verification, production env
-verification, deploy + smoke. The prod project `gstjvjynkdvqncjyybwm` is currently **ACTIVE**
-(resumed from paused) — decide whether to re-pause. `PROJECT_BRIEF.md` held out (drift); a
-live↔repo schema-reconciliation task is now also open. Do not apply migration 002 (or any live
-SQL), mutate production data, deploy, change child token storage, install packages, or start
-React/Vite without the explicit confirmation phrase / approval.
+Stage 1 complete locally; Stage 2 partial; static frontend polish UI-1…UI-7 complete locally;
+`npm test` green (**50 pass / 1 skip**; the skip is the chat handler test, which needs
+`node_modules` to import `openai`). All four 360-review security fixes are landed
+(SEC-FIX-1/2/3) and **migration 002 is APPLIED to production** (PROD-APPLY-1B, 2026-06-11,
+remote migration `20260611085209`) — the webhook double-grant race is closed at the DB level.
+The next actions are the remaining **PROD-GATE-1 manual gates**: (1) Lemon Squeezy
+verification (card-required 14-day trial, 10 credits, webhook events, success URL);
+(2) production env verification in Vercel (8 vars incl. `ALLOWED_ORIGIN`); (3) deploy + prod
+smoke (which would also ship the reviewed SEC fixes and UI slices); plus the gated follow-ups:
+enable RLS on `processed_webhooks` (only RLS-disabled public table), wire the
+`processed_webhooks` insert-first pattern into the webhook handler (STAGE1-7/8),
+`verify_child_login` DB hardening + live↔repo schema reconciliation, and retiring
+`public/css/styles.css` via a `sw.js` precache edit. The prod project `gstjvjynkdvqncjyybwm`
+is currently **ACTIVE** — decide whether to re-pause. `PROJECT_BRIEF.md` held out (drift).
+Do not run further live SQL, mutate production data, deploy, change RLS/auth/child token
+storage, install packages, or start React/Vite without explicit approval.
 
 > **Key STAGE1-C findings to action later (all gated):** only
 > `LEMONSQUEEZY_WEBHOOK_SECRET` is guarded today; others fail late/silently
@@ -289,6 +299,7 @@ React/Vite without the explicit confirmation phrase / approval.
 
 | Date       | Action                                                                 | Evidence                                              | Next                                                |
 | ---------- | ---------------------------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------- |
+| 2026-06-11 | PROD-APPLY-1B — **applied migration 002 (parts 1–2) to production** project `gstjvjynkdvqncjyybwm` after the exact owner phrase `APPLY MIGRATION 002 TO PRODUCTION CONFIRMED`. Remote migration `20260611085209_webhook_idempotency_unique_index_and_processed_webhooks` = partial unique index on `credit_ledger.stripe_payment_id` + `processed_webhooks` table. Post-apply verification PASS (index present; table present/empty; credit_ledger 53 rows intact). Security advisors flag the new table as the only RLS-disabled public table (anon-visible via GraphQL) → gated follow-up to enable RLS. No data mutated; no deploy; project left ACTIVE. Updated migration file header, runbook, tracker, this brief. | `apply_migration` success; `list_migrations` shows `20260611085209`; post-apply SELECTs PASS. | Remaining PROD-GATE-1: manual LS verification, prod env verify (8 vars), deploy + smoke; gated RLS-on-`processed_webhooks` slice; handler insert-first wiring (STAGE1-7/8); decide prod re-pause. |
 | 2026-06-11 | UI-MASTER-STATIC-1 — static frontend polish UI-2…UI-7 in 6 slice commits: `1758578` legal pages onto warm system (copy verbatim; `styles.css` 0 HTML refs, kept for `sw.js` precache), `b9b5b7e` a11y baseline (main/skip/aria/dialog/keyboard), `3299658` dashboard de-inline (static 65→25, file 167→127), `85256a4` font normalization (1 shared URL ×12 pages), `a3c09f2` responsive tap-targets + table overflow guards, `750ad19` RTL foundation. Docs updated per slice (SPEC-003 rows + §8) + tracker row + this brief. **Frontend/docs only; no backend/auth/payment/webhook/credit/Supabase changes; no installs; no deploy; no React/Vite; PROJECT_BRIEF held out.** | `git log --oneline` shows the 6 slice commits; `npm test` 50 pass / 1 skip after each slice; `grep styles.css public/*.html` = none; `grep zeluu-tokens.css public/*.html` = all 12 pages; tree clean except `?? PROJECT_BRIEF.md`. | Owner visual review of the slices; follow-ups: retire `styles.css` via `sw.js` precache edit (separate slice), JS-template ARIA/inline-style pass. Main gate unchanged: PROD-APPLY-1B. |
 | 2026-06-11 | PROD-APPLY-1B-PREP — user invoked PROD-APPLY-1B; read runbook + revised migration 002; resumed prod project `gstjvjynkdvqncjyybwm` (INACTIVE→ACTIVE_HEALTHY); re-ran SELECT-only preflight: PASS, unchanged from 1A (0 dup payment refs, 3 rows, no unique index, processed_webhooks absent). **Migration NOT applied — exact confirmation phrase not yet given.** No DDL/DML; no data mutated. Project left ACTIVE. | MCP `get_project` status transitions; SELECT-only preflight results. | Await `APPLY MIGRATION 002 TO PRODUCTION CONFIRMED` to apply parts 1–2 via `apply_migration`; then post-apply verification + LS verification + env verify + deploy/smoke. Decide re-pause. |
 | 2026-06-11 | PUSH-2 — pushed `main` to `origin` (`amrabdelglill-pixel/ai-math-tutor`), `f5e6028..4e9eed3` fast-forward (28 commits). The prior 403 / `push: false` limitation no longer applies (owner granted access / resolved). Origin, fork, and local `main` are now identical. No source changes; no deploy; no live SQL. | `git push origin main` output `f5e6028..4e9eed3`. | Main gate unchanged: PROD-APPLY-1B (apply revised migration 002 after exact confirmation phrase). |

@@ -3,7 +3,15 @@
 > Manual apply pack for `supabase/migrations/002_webhook_idempotency_and_notification_types.sql`.
 > **Claude does not run any of this.** Apply only via an approved layer after preflight.
 
-**Status:** Authored + revised, NOT applied. **Approval:** owner + DBA review required. **Date:** 2026-06-03
+**Status:** **APPLIED to production 2026-06-11 (PROD-APPLY-1B)** as remote migration
+`20260611085209_webhook_idempotency_unique_index_and_processed_webhooks`, after the owner
+gave the exact confirmation phrase. Pre-apply preflight re-run same day: PASS (0 dup
+payment refs, no index, `processed_webhooks` absent). Post-apply verification: PASS
+(`to_regclass('public.processed_webhooks')` not null; unique index present;
+`credit_ledger` intact, 53 rows; `processed_webhooks` empty). **New follow-up finding
+(gated):** `processed_webhooks` is the only public table with RLS disabled and is
+anon/authenticated-visible via GraphQL — enable RLS (service-role webhook handler is
+unaffected) in a future approved slice. **Date:** 2026-06-11
 
 > **PROD-APPLY-1A live preflight finding (project `gstjvjynkdvqncjyybwm`, PRODUCTION):**
 > the notification-CHECK section was **removed** from migration 002. The live
