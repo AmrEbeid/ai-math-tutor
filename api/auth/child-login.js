@@ -41,18 +41,26 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    if (!data || !data.child_id) {
+    // verify_child_login reports password validity via a `success` flag. A wrong password
+    // still returns the child's id with success:false, so the presence of a child_id is NOT
+    // proof of authentication — the flag must be honored. Normalize the result shape too
+    // (a TABLE-returning function yields a one-row array; an object-returning one yields an
+    // object), then reject any result that lacks a child_id or that explicitly failed the
+    // password check. Rejecting on an explicit success:false closes the bypass regardless of
+    // the deployed function's exact return shape.
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row || !row.child_id || row.success === false) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     // Generate JWT token with 24 hour expiration
     const expiresAt = Math.floor(Date.now() / 1000) + 24 * 60 * 60;
     const token = signChildToken({
-      child_id: data.child_id,
-      parent_id: data.parent_id,
-      child_name: data.name,
-      grade: data.grade,
-      language: data.language || 'en',
+      child_id: row.child_id,
+      parent_id: row.parent_id,
+      child_name: row.name,
+      grade: row.grade,
+      language: row.language || 'en',
       exp: expiresAt
     });
 
@@ -60,12 +68,12 @@ export default async function handler(req, res) {
       success: true,
       token,
       child: {
-        id: data.child_id,
-        name: data.name,
-        grade: data.grade,
-        language: data.language || 'en'
+        id: row.child_id,
+        name: row.name,
+        grade: row.grade,
+        language: row.language || 'en'
       },
-      credits: data.credits || 0
+      credits: row.credits || 0
     });
   } catch (error) {
     console.error('Child login error:', error);
