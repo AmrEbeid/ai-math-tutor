@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
 import { getEnv } from '../lib/env.js';
 import { createServerClient, getUser } from '../lib/supabase.js';
-import { getChildOrUser, getParentId } from '../lib/child-auth.js';
+import { getChildOrUser, getParentId, getChildId } from '../lib/child-auth.js';
 import { getSystemPrompt, checkForBlockedContent, detectStuckLoop, detectChildDistress, detectPersonalInfo, COUNTRY_CODE_MAP } from '../lib/prompts.js';
 import { checkRateLimit, getClientIP, RATE_LIMITS } from '../lib/rate-limit.js';
 
@@ -164,12 +164,35 @@ export default async function handler(req, res) {
       });
     }
 
-    const { message, session_id, child_id, language: langOverride, image } = req.body;
-    if (!message || !session_id || !child_id) {
-      return res.status(400).json({ error: 'Missing required fields: message, session_id, child_id' });
+    const { message, session_id, language: langOverride, image } = req.body;
+    if (!message || !session_id) {
+      return res.status(400).json({ error: 'Missing required fields: message, session_id' });
     }
 
     const supabase = createServerClient();
+
+    // 1b. Resolve and authorize the session up front. Ownership is enforced via parent_id,
+    //     and child_id is derived from the session row — never trusted from the request body,
+    //     which a child could otherwise spoof to dodge parent-set usage limits or write into
+    //     another session. Doing this before any insert also gates the content-flag writes below.
+    const { data: session } = await supabase
+      .from('sessions')
+      .select('*, children(grade, preferred_language, name, country)')
+      .eq('id', session_id)
+      .eq('parent_id', parentId)
+      .single();
+
+    if (!session) {
+      return res.status(404).json({ error: 'Session not found' });
+    }
+
+    // A child token may only ever act on its own session.
+    const ownChildId = getChildId(authContext);
+    if (ownChildId && session.child_id !== ownChildId) {
+      return res.status(403).json({ error: 'This session does not belong to you' });
+    }
+
+    const child_id = session.child_id;
 
     // 2. Check child credit limits (daily/weekly/monthly)
     const { data: childLimits } = await supabase
@@ -247,18 +270,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // 5. Get session info (grade, history, country)
-    const { data: session } = await supabase
-      .from('sessions')
-      .select('*, children(grade, preferred_language, name, country)')
-      .eq('id', session_id)
-      .eq('parent_id', parentId)
-      .single();
-
-    if (!session) {
-      return res.status(404).json({ error: 'Session not found' });
-    }
-
+    // 5. Derive session context (grade, language, country) from the session authorized above
     const grade = session.children?.grade || 5;
     const language = langOverride || session.children?.preferred_language || 'en';
     const country = session.children?.country || 'UAE';
