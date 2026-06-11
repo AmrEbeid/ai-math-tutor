@@ -58,6 +58,26 @@ deploy.** `PROJECT_BRIEF.md` still held out (drift).
 
 ## 5. Recently Completed
 
+* **UI-MASTER-STATIC-1 done locally (2026-06-11)** — completed the full static frontend
+  polish UI-2…UI-7 from SPEC-003, one commit per slice: UI-2 legal-page migration
+  `1758578` (5 pages off purple `styles.css` onto the warm system, copy verbatim;
+  `styles.css` kept on disk because `public/sw.js` still precaches it — follow-up slice
+  to retire it must edit the sw precache list); UI-3 a11y baseline `b9b5b7e` (`<main>` on
+  all 12 pages, skip links, aria-labels, alert/dialog roles, keyboard toggles); UI-4
+  dashboard de-inline `3299658` (static inline styles 65→25; JS-template styles
+  intentionally untouched); UI-5 typography `85256a4` (one identical font URL on all 12
+  pages); UI-6 responsive polish `a3c09f2` (tap targets, mobile padding, policy-table
+  overflow guards; hamburger judged unnecessary); UI-7 RTL foundation `750ad19`
+  (`[dir="rtl"]` rules in tokens css + app.html; full Arabic localization deferred).
+  `npm test` 50 pass / 1 skip after every slice. **Frontend + docs only; no backend/auth/
+  payment/Supabase changes; no installs; no deploy; no React/Vite.**
+* **PROD-APPLY-1B-PREP (2026-06-11)** — resumed the prod project `gstjvjynkdvqncjyybwm`
+  (INACTIVE→ACTIVE_HEALTHY) and re-ran the read-only preflight: **PASS, unchanged from
+  PROD-APPLY-1A** (0 duplicate payment refs, 3 payment-ref rows, no unique index,
+  `processed_webhooks` absent). Migration 002 (parts 1–2) is ready to apply but remains
+  **NOT applied** — still awaiting the exact phrase
+  `APPLY MIGRATION 002 TO PRODUCTION CONFIRMED`. Project left ACTIVE; re-pause is the
+  owner's call.
 * **SEC-FIX-3 done locally** (`57626f9`) — closed the last 360-review finding: the
   `api/credits/balance.js` billing-data leak. The endpoint returned the parent's `credit_ledger`
   (incl. `stripe_payment_id`/amounts) and subscription/billing metadata to any caller, so a child
@@ -269,6 +289,8 @@ React/Vite without the explicit confirmation phrase / approval.
 
 | Date       | Action                                                                 | Evidence                                              | Next                                                |
 | ---------- | ---------------------------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------- |
+| 2026-06-11 | UI-MASTER-STATIC-1 — static frontend polish UI-2…UI-7 in 6 slice commits: `1758578` legal pages onto warm system (copy verbatim; `styles.css` 0 HTML refs, kept for `sw.js` precache), `b9b5b7e` a11y baseline (main/skip/aria/dialog/keyboard), `3299658` dashboard de-inline (static 65→25, file 167→127), `85256a4` font normalization (1 shared URL ×12 pages), `a3c09f2` responsive tap-targets + table overflow guards, `750ad19` RTL foundation. Docs updated per slice (SPEC-003 rows + §8) + tracker row + this brief. **Frontend/docs only; no backend/auth/payment/webhook/credit/Supabase changes; no installs; no deploy; no React/Vite; PROJECT_BRIEF held out.** | `git log --oneline` shows the 6 slice commits; `npm test` 50 pass / 1 skip after each slice; `grep styles.css public/*.html` = none; `grep zeluu-tokens.css public/*.html` = all 12 pages; tree clean except `?? PROJECT_BRIEF.md`. | Owner visual review of the slices; follow-ups: retire `styles.css` via `sw.js` precache edit (separate slice), JS-template ARIA/inline-style pass. Main gate unchanged: PROD-APPLY-1B. |
+| 2026-06-11 | PROD-APPLY-1B-PREP — user invoked PROD-APPLY-1B; read runbook + revised migration 002; resumed prod project `gstjvjynkdvqncjyybwm` (INACTIVE→ACTIVE_HEALTHY); re-ran SELECT-only preflight: PASS, unchanged from 1A (0 dup payment refs, 3 rows, no unique index, processed_webhooks absent). **Migration NOT applied — exact confirmation phrase not yet given.** No DDL/DML; no data mutated. Project left ACTIVE. | MCP `get_project` status transitions; SELECT-only preflight results. | Await `APPLY MIGRATION 002 TO PRODUCTION CONFIRMED` to apply parts 1–2 via `apply_migration`; then post-apply verification + LS verification + env verify + deploy/smoke. Decide re-pause. |
 | 2026-06-11 | PUSH-2 — pushed `main` to `origin` (`amrabdelglill-pixel/ai-math-tutor`), `f5e6028..4e9eed3` fast-forward (28 commits). The prior 403 / `push: false` limitation no longer applies (owner granted access / resolved). Origin, fork, and local `main` are now identical. No source changes; no deploy; no live SQL. | `git push origin main` output `f5e6028..4e9eed3`. | Main gate unchanged: PROD-APPLY-1B (apply revised migration 002 after exact confirmation phrase). |
 | 2026-06-11 | PUSH-1 — pushed `main` to the `fork` remote (`AmrEbeid/ai-math-tutor`), `f5e6028..f5f2bad` fast-forward (27 commits incl. SEC-FIX-1/2/3 + docs). Push to `origin` failed 403: active account `AmrEbeid` has `push: false` on `amrabdelglill-pixel/ai-math-tutor`. No source changes; no deploy; no live SQL; branch tracking unchanged (still `origin/main`). | `git push fork main` output `f5e6028..f5f2bad`; `gh api` shows origin `push:false`, fork `admin:true`. | Decide origin strategy: get collaborator access on `amrabdelglill-pixel` (or auth as that account) and push, or open a PR from the fork. Main gate unchanged: PROD-APPLY-1B. |
 | 2026-06-11 | SEC-FIX-3 — fixed the `api/credits/balance.js` billing-data leak (`57626f9`): the two billing queries (`credit_ledger` + `subscriptions`) now run only for parent tokens; child tokens get only the credit count. Added `tests/credits-balance.test.mjs` (2). Staged only the fix + test file (PROJECT_BRIEF held out). Closes the last 360-review finding. **Medium-risk source; no deploy; no live SQL; no installs; not pushed.** | `git show 57626f9 --stat` = api/credits/balance.js + tests/credits-balance.test.mjs; `npm test` 50 pass / 1 skip; `git status` clean except `?? PROJECT_BRIEF.md`. | Manual review of SEC-FIX-1/2/3 before deploy; optional hardening (explicit column lists vs `select('*')`). Main gate unchanged: PROD-APPLY-1B. |
