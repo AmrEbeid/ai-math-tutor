@@ -772,6 +772,34 @@
       font-size: 16px;
     }
 
+    #limit-info {
+      margin-left: 8px;
+    }
+
+    /* RTL (UI-7): mirror physical-property styles when the
+       language toggle sets dir="rtl" for Arabic */
+    [dir="rtl"] .nav-links {
+      margin-left: 0;
+      margin-right: auto;
+    }
+
+    [dir="rtl"] .chat-bubble.user {
+      margin-left: 0;
+      margin-right: auto;
+      border-bottom-right-radius: 8px;
+      border-bottom-left-radius: 2px;
+    }
+
+    [dir="rtl"] .chat-bubble.assistant {
+      border-bottom-left-radius: 8px;
+      border-bottom-right-radius: 2px;
+    }
+
+    [dir="rtl"] #limit-info {
+      margin-left: 0;
+      margin-right: 8px;
+    }
+
     /* Print Styles */
     @media print {
       .nav,
@@ -806,7 +834,7 @@
       </a>
       <div class="nav-links">
         <span class="credit-badge" id="credit-badge">-- credits</span>
-        <span id="limit-info" style="font-size:11px; color:var(--color-text-muted); margin-left:8px; display:none;"></span>
+        <span id="limit-info" style="font-size:11px; color:var(--color-text-muted); display:none;"></span>
         <span id="child-name-display" style="color: var(--gray-600); font-size: 14px;">--</span>
         <a href="#" onclick="logout()">Sign Out</a>
       </div>

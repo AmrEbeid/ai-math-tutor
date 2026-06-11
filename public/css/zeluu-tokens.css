@@ -151,6 +151,27 @@ body {
 }
 
 /* ============================================================
+   RTL readiness (UI-7)
+   The child app toggles document.documentElement.dir to "rtl"
+   for Arabic. These rules mirror the shared primitives; pages
+   add their own [dir="rtl"] overrides for physical-property
+   styles. Full Arabic localization (copy translation, fonts,
+   logical-property migration, QA) is tracked separately in
+   SPEC-003 / the Stage 2 deferred plan.
+   ============================================================ */
+
+[dir="rtl"] .skip-link {
+  left: auto;
+  right: -9999px;
+  border-radius: 0 0 0 8px;
+}
+
+[dir="rtl"] .skip-link:focus {
+  left: auto;
+  right: 0;
+}
+
+/* ============================================================
    Reduced motion
    Respect vestibular-sensitivity preferences: collapse all
    animation/transition timing and disable smooth scrolling.
