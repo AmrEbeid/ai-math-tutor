@@ -39,11 +39,11 @@ deploy.** `PROJECT_BRIEF.md` still held out (drift).
 ## 4. Current Branch / PRs
 
 * **Branch:** `main`.
-* **Pushed to `fork` (`AmrEbeid/ai-math-tutor`) on 2026-06-11** — `f5e6028..f5f2bad`
-  fast-forward; all 27 local commits (SEC-FIX-1/2/3 included) are now published on the
-  fork. **`origin` (`amrabdelglill-pixel/ai-math-tutor`) is read-only for the active
-  GitHub account (`push: false`)** — pushing to origin needs collaborator access or a
-  different account. Older "not pushed" notes in §5/§9 predate this push.
+* **Pushed to `origin` (`amrabdelglill-pixel/ai-math-tutor`) on 2026-06-11** —
+  `f5e6028..4e9eed3` fast-forward; origin now matches local `main` and `fork`. The
+  earlier `push: false` access limitation was resolved by the owner (PUSH-2). All 28
+  commits (SEC-FIX-1/2/3 included) are published on both remotes. Older "not pushed"
+  notes in §5/§9 predate the pushes.
 * **The 14 former source diffs (Stage 0 `api/*` + A0.5 `public/*`) are COMMITTED** —
   landed in the earlier source slices C4a `15d62f5` / C4b `8a60d2d` / C4c `b3f043f` /
   C5 `f0b4c87` (plus env validation `2a32f76` and LOCAL-CORRECTION-1 `948baa8`).
@@ -269,6 +269,7 @@ React/Vite without the explicit confirmation phrase / approval.
 
 | Date       | Action                                                                 | Evidence                                              | Next                                                |
 | ---------- | ---------------------------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------- |
+| 2026-06-11 | PUSH-2 — pushed `main` to `origin` (`amrabdelglill-pixel/ai-math-tutor`), `f5e6028..4e9eed3` fast-forward (28 commits). The prior 403 / `push: false` limitation no longer applies (owner granted access / resolved). Origin, fork, and local `main` are now identical. No source changes; no deploy; no live SQL. | `git push origin main` output `f5e6028..4e9eed3`. | Main gate unchanged: PROD-APPLY-1B (apply revised migration 002 after exact confirmation phrase). |
 | 2026-06-11 | PUSH-1 — pushed `main` to the `fork` remote (`AmrEbeid/ai-math-tutor`), `f5e6028..f5f2bad` fast-forward (27 commits incl. SEC-FIX-1/2/3 + docs). Push to `origin` failed 403: active account `AmrEbeid` has `push: false` on `amrabdelglill-pixel/ai-math-tutor`. No source changes; no deploy; no live SQL; branch tracking unchanged (still `origin/main`). | `git push fork main` output `f5e6028..f5f2bad`; `gh api` shows origin `push:false`, fork `admin:true`. | Decide origin strategy: get collaborator access on `amrabdelglill-pixel` (or auth as that account) and push, or open a PR from the fork. Main gate unchanged: PROD-APPLY-1B. |
 | 2026-06-11 | SEC-FIX-3 — fixed the `api/credits/balance.js` billing-data leak (`57626f9`): the two billing queries (`credit_ledger` + `subscriptions`) now run only for parent tokens; child tokens get only the credit count. Added `tests/credits-balance.test.mjs` (2). Staged only the fix + test file (PROJECT_BRIEF held out). Closes the last 360-review finding. **Medium-risk source; no deploy; no live SQL; no installs; not pushed.** | `git show 57626f9 --stat` = api/credits/balance.js + tests/credits-balance.test.mjs; `npm test` 50 pass / 1 skip; `git status` clean except `?? PROJECT_BRIEF.md`. | Manual review of SEC-FIX-1/2/3 before deploy; optional hardening (explicit column lists vs `select('*')`). Main gate unchanged: PROD-APPLY-1B. |
 | 2026-06-11 | SEC-FIX-2 — fixed the child-login password-flag bypass (`37d87d5`). `api/auth/child-login.js` now normalizes the `verify_child_login` result (object or one-row array) and rejects when `child_id` is missing or `success === false`, instead of issuing a token on `child_id` presence alone. Added `tests/child-login.test.mjs` (7). Staged only the fix + test file (PROJECT_BRIEF held out). Prod project `gstjvjynkdvqncjyybwm` was INACTIVE — **did NOT resume it** to read the live function; chose a fix correct under any return shape instead. **Medium/High-risk source; no deploy; no live SQL; no installs; not pushed.** | `git show 37d87d5 --stat` = api/auth/child-login.js + tests/child-login.test.mjs; `npm test` 48 pass / 1 skip; `git status` clean except `?? PROJECT_BRIEF.md`. | Manual review before deploy; DB defense-in-depth (return no row on failed password) + live↔repo `verify_child_login` reconciliation (gated). Remaining finding: `balance.js` billing-metadata leak. Main gate unchanged: PROD-APPLY-1B. |
