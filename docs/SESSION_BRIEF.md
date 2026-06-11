@@ -41,11 +41,12 @@ no deploy.** `PROJECT_BRIEF.md` still held out (drift).
 ## 4. Current Branch / PRs
 
 * **Branch:** `main`.
-* **Pushed to `origin` (`amrabdelglill-pixel/ai-math-tutor`) on 2026-06-11** —
-  `f5e6028..4e9eed3` fast-forward; origin now matches local `main` and `fork`. The
-  earlier `push: false` access limitation was resolved by the owner (PUSH-2). All 28
-  commits (SEC-FIX-1/2/3 included) are published on both remotes. Older "not pushed"
-  notes in §5/§9 predate the pushes.
+* **Both remotes in sync (last push 2026-06-11, PUSH-3: `d0c7b2a..34d4562`)** —
+  `origin` (`amrabdelglill-pixel/ai-math-tutor`) and `fork` (`AmrEbeid/ai-math-tutor`)
+  both carry all commits incl. SEC-FIX-1/2/3, the six UI-MASTER-STATIC-1 slices, and
+  the PROD-APPLY-1B + PROD-RLS-1 evidence docs. The earlier origin `push: false`
+  limitation was resolved by the owner (PUSH-2). Older "not pushed" notes in §5/§9
+  predate the pushes.
 * **The 14 former source diffs (Stage 0 `api/*` + A0.5 `public/*`) are COMMITTED** —
   landed in the earlier source slices C4a `15d62f5` / C4b `8a60d2d` / C4c `b3f043f` /
   C5 `f0b4c87` (plus env validation `2a32f76` and LOCAL-CORRECTION-1 `948baa8`).
