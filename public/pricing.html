@@ -558,8 +558,10 @@
 </head>
 <body>
 
+<a href="#main" class="skip-link">Skip to content</a>
+
 <!-- Nav -->
-<nav class="nav">
+<nav class="nav" aria-label="Main navigation">
     <div class="container nav-inner">
         <a href="/" class="nav-brand">
             <span class="nav-brand-name">Zeluu</span>
@@ -574,9 +576,11 @@
 </nav>
 
 <!-- Subscription required banner -->
-<div id="subscription-banner" class="subscription-banner">
+<div id="subscription-banner" class="subscription-banner" role="alert">
     <p>You need an active subscription to access your dashboard. Choose a plan below to get started.</p>
 </div>
+
+<main id="main">
 
 <!-- Hero -->
 <section class="pricing-hero container reveal">
@@ -711,22 +715,24 @@
 <section class="faq-section container reveal">
     <h2>Common questions</h2>
     <div class="faq-item">
-        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">What is a credit?</div>
+        <div class="faq-q" role="button" tabindex="0" aria-expanded="false" onclick="this.parentElement.classList.toggle('open'); this.setAttribute('aria-expanded', this.parentElement.classList.contains('open'))" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">What is a credit?</div>
         <div class="faq-a">One credit equals one AI tutoring interaction. Each time your child sends a message and receives a response, that uses one credit. Photo-based questions also use one credit.</div>
     </div>
     <div class="faq-item">
-        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Can I change plans later?</div>
+        <div class="faq-q" role="button" tabindex="0" aria-expanded="false" onclick="this.parentElement.classList.toggle('open'); this.setAttribute('aria-expanded', this.parentElement.classList.contains('open'))" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">Can I change plans later?</div>
         <div class="faq-a">Yes, you can upgrade or downgrade at any time. Changes take effect at the start of your next billing cycle. Unused credits don't carry over between months.</div>
     </div>
     <div class="faq-item">
-        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">How does the free trial work?</div>
+        <div class="faq-q" role="button" tabindex="0" aria-expanded="false" onclick="this.parentElement.classList.toggle('open'); this.setAttribute('aria-expanded', this.parentElement.classList.contains('open'))" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">How does the free trial work?</div>
         <div class="faq-a">Every plan starts with a 14-day free trial and 10 free credits. A valid payment method is required to start — you will not be charged today. If you cancel before the trial ends, you will not be billed. If you do not cancel, your chosen plan begins automatically after 14 days.</div>
     </div>
     <div class="faq-item">
-        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Is my child's data safe?</div>
+        <div class="faq-q" role="button" tabindex="0" aria-expanded="false" onclick="this.parentElement.classList.toggle('open'); this.setAttribute('aria-expanded', this.parentElement.classList.contains('open'))" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">Is my child's data safe?</div>
         <div class="faq-a">Absolutely. We encrypt all data in transit and at rest. Chat transcripts are retained for 90 days, then permanently deleted. We never share data with third parties. Read our privacy policy for full details.</div>
     </div>
 </section>
+
+</main>
 
 <!-- Footer -->
 <footer class="footer">

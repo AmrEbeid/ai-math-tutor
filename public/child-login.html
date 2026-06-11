@@ -180,9 +180,9 @@
     </style>
 </head>
 <body>
-    <div class="child-wrap">
+    <main class="child-wrap">
         <div class="child-hero">
-            <span class="child-emoji">&#129504;</span>
+            <span class="child-emoji" aria-hidden="true">&#129504;</span>
             <h1>Zeluu</h1>
             <p>Ready to learn? Let's go!</p>
         </div>
@@ -201,7 +201,7 @@
                     <label for="password">Your Password</label>
                     <input type="password" id="password" placeholder="Type your password" required>
                 </div>
-                <div id="error-message" class="form-error"></div>
+                <div id="error-message" class="form-error" role="alert"></div>
                 <button type="submit" class="btn-go" id="login-btn">Start Learning!</button>
             </form>
         </div>
@@ -209,7 +209,7 @@
         <div class="child-footer">
             Are you a parent? <a href="/login.html">Sign in here</a>
         </div>
-    </div>
+    </main>
 
     <script>
         async function handleLogin(event) {

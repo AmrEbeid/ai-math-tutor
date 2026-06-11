@@ -487,8 +487,9 @@
   </style>
 </head>
 <body>
+  <a href="#main" class="skip-link">Skip to content</a>
   <!-- Nav -->
-  <nav class="nav">
+  <nav class="nav" aria-label="Main navigation">
     <div class="container nav-inner">
       <a href="/dashboard.html" class="nav-brand" style="text-decoration:none;">
         <div class="zeluu-mascot">
@@ -504,7 +505,7 @@
     </div>
   </nav>
 
-  <div class="container" style="padding-top:32px; padding-bottom:40px;">
+  <main id="main" class="container" style="padding-top:32px; padding-bottom:40px;">
     <h1 class="mb-6">Parent Dashboard</h1>
 
     <!-- Stats -->
@@ -611,11 +612,11 @@
       </div>
 
       <!-- Subscription Modal -->
-      <div class="modal-overlay" id="subscription-modal">
+      <div class="modal-overlay" id="subscription-modal" role="dialog" aria-modal="true" aria-label="Upgrade your package">
         <div class="modal" style="max-width:520px; max-height:85vh; overflow-y:auto;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
             <h2>Upgrade Your Package</h2>
-            <button onclick="closeSubscriptionModal()" style="background:none; border:none; font-size:24px; cursor:pointer;">&times;</button>
+            <button onclick="closeSubscriptionModal()" aria-label="Close" style="background:none; border:none; font-size:24px; cursor:pointer;">&times;</button>
           </div>
           <!-- Billing toggle -->
           <div style="display:flex; gap:8px; margin-bottom:16px; background:var(--color-warm-bg); border-radius:8px; padding:4px;">
@@ -629,11 +630,11 @@
       </div>
 
       <!-- Extra Credits Modal -->
-      <div class="modal-overlay" id="extra-credits-modal">
+      <div class="modal-overlay" id="extra-credits-modal" role="dialog" aria-modal="true" aria-label="Extra credits">
         <div class="modal" style="max-width:420px;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
             <h2>Extra Credits</h2>
-            <button onclick="closeExtraCreditsModal()" style="background:none; border:none; font-size:24px; cursor:pointer;">&times;</button>
+            <button onclick="closeExtraCreditsModal()" aria-label="Close" style="background:none; border:none; font-size:24px; cursor:pointer;">&times;</button>
           </div>
           <div class="flex flex-col gap-2">
             <button class="btn btn-secondary" onclick="buyCredits('quick_topup')" style="justify-content:space-between; padding:14px 16px;">
@@ -651,11 +652,11 @@
     </div>
 
     <!-- Session Transcript Modal -->
-    <div class="modal-overlay" id="transcript-modal">
+    <div class="modal-overlay" id="transcript-modal" role="dialog" aria-modal="true" aria-labelledby="transcript-title">
       <div class="modal" style="max-width:600px; max-height:80vh; overflow-y:auto;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
           <h2 id="transcript-title">Session Transcript</h2>
-          <button onclick="closeTranscript()" style="background:none; border:none; font-size:24px; cursor:pointer;">&times;</button>
+          <button onclick="closeTranscript()" aria-label="Close" style="background:none; border:none; font-size:24px; cursor:pointer;">&times;</button>
         </div>
         <div id="transcript-content" style="display:flex; flex-direction:column; gap:12px;">
           <p style="color:var(--color-text-muted);">Loading...</p>
@@ -665,9 +666,9 @@
 
     <!-- Credit History (collapsed by default) -->
     <div class="card mt-6 mb-6">
-      <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="toggleCreditHistory()">
+      <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" role="button" tabindex="0" aria-expanded="false" onclick="toggleCreditHistory(); this.setAttribute('aria-expanded', document.getElementById('credit-history-wrapper').style.display !== 'none')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
         <h3 style="margin:0;">Credit History</h3>
-        <span id="credit-history-toggle" style="font-size:20px; color:var(--color-text-muted); transition:transform .2s;">&#9660;</span>
+        <span id="credit-history-toggle" aria-hidden="true" style="font-size:20px; color:var(--color-text-muted); transition:transform .2s;">&#9660;</span>
       </div>
       <div id="credit-history-wrapper" style="display:none; margin-top:16px;">
         <div id="credit-history">
@@ -675,7 +676,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </main>
 
   <script src="/js/supabase-config.js"></script>
   <script>

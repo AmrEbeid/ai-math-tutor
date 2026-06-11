@@ -369,7 +369,7 @@
   </style>
 </head>
 <body>
-  <div class="auth-wrap">
+  <main class="auth-wrap">
     <a href="/" class="auth-brand">
       <span class="auth-brand-name">Zeluu</span>
       <span class="auth-beta">Beta</span>
@@ -390,8 +390,8 @@
       </div>
 
       <div class="auth-tabs">
-        <div class="auth-tab active" onclick="switchTab('login')">Sign In</div>
-        <div class="auth-tab" id="signup-tab" onclick="switchTab('signup')">Sign Up</div>
+        <div class="auth-tab active" role="button" tabindex="0" onclick="switchTab('login')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">Sign In</div>
+        <div class="auth-tab" id="signup-tab" role="button" tabindex="0" onclick="switchTab('signup')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">Sign Up</div>
       </div>
 
       <!-- Login Form -->
@@ -404,7 +404,7 @@
           <label for="login-password">Password</label>
           <input type="password" id="login-password" placeholder="Your password" required>
         </div>
-        <div id="login-error" class="form-error"></div>
+        <div id="login-error" class="form-error" role="alert"></div>
         <button type="submit" class="btn-primary" id="login-btn">Sign In</button>
       </form>
 
@@ -433,7 +433,7 @@
             <span>I agree to the <a href="/privacy" target="_blank">Privacy Policy</a>, <a href="/terms" target="_blank">Terms of Service</a>, and <a href="/refund" target="_blank">Refund Policy</a>.</span>
           </label>
         </div>
-        <div id="signup-error" class="form-error"></div>
+        <div id="signup-error" class="form-error" role="alert"></div>
         <button type="submit" class="btn-primary" id="signup-btn">Create Account</button>
         <p class="signup-note">You'll get 10 free credits to start</p>
       </form>
@@ -452,7 +452,7 @@
           <label for="otp-code" style="text-align:center; display:block;">Verification Code</label>
           <input type="text" id="otp-code" placeholder="000000" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code">
         </div>
-        <div id="otp-error" class="form-error"></div>
+        <div id="otp-error" class="form-error" role="alert"></div>
         <button type="button" class="btn-primary" id="otp-btn" onclick="handleVerifyOtp()">Verify Email</button>
         <div class="resend-row">
           <span>Didn't receive the code? </span>
@@ -471,7 +471,7 @@
         <a href="/child-login.html">Go to Student Login</a>
       </div>
     </div>
-  </div>
+  </main>
 
   <script src="/js/supabase-config.js"></script>
   <script>

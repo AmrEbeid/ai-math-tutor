@@ -110,6 +110,30 @@ body {
 }
 
 /* ============================================================
+   Skip link (UI-3)
+   Hidden off-screen until focused; lets keyboard users jump
+   past the nav. Pages opt in by adding
+   <a href="#main" class="skip-link">Skip to content</a>.
+   ============================================================ */
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--color-text-dark);
+  color: var(--color-cream);
+  padding: 10px 18px;
+  border-radius: 0 0 8px 0;
+  z-index: var(--z-toast);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  left: 0;
+}
+
+/* ============================================================
    Accessible focus baseline
    Pages currently define no :focus-visible styles; this gives
    keyboard users a consistent, visible accent ring everywhere

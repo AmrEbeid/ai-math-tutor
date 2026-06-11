@@ -137,14 +137,14 @@
   </style>
 </head>
 <body>
-  <nav class="nav">
+  <nav class="nav" aria-label="App navigation">
     <a href="app.html" class="nav-brand">Zeluu</a>
     <a href="app.html" class="nav-back">Back to Chat</a>
   </nav>
 
-  <div class="container">
+  <main class="container">
     <!-- Tabs -->
-    <div class="tabs">
+    <div class="tabs" role="navigation" aria-label="Exam sections">
       <button class="tab active" onclick="showTab('new')">New Exam</button>
       <button class="tab" onclick="showTab('history')">History</button>
     </div>
@@ -216,7 +216,7 @@
       <div id="screen-exam" style="display:none">
         <div class="exam-header">
           <span class="exam-progress" id="exam-progress">Question 1 of 10</span>
-          <span class="exam-timer" id="exam-timer" style="display:none">10:00</span>
+          <span class="exam-timer" id="exam-timer" role="timer" aria-label="Time remaining" style="display:none">10:00</span>
         </div>
         <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
         <div id="question-area"></div>
@@ -236,7 +236,7 @@
         <div class="loading"><div class="spinner"></div><p>Loading history...</p></div>
       </div>
     </div>
-  </div>
+  </main>
 
   <script>
     const API_BASE = window.location.origin;
