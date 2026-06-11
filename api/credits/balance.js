@@ -12,29 +12,37 @@ export default async function handler(req, res) {
   if (!authContext) return res.status(401).json({ error: 'Not authenticated' });
 
   const parentId = getParentId(authContext);
+  const isParent = authContext.type === 'parent';
   const supabase = createServerClient();
 
   const { data: balance } = await supabase.rpc('get_credit_balance', {
     p_parent_id: parentId
   });
 
-  // Get recent transactions (parent only)
-  const { data: transactions } = await supabase
-    .from('credit_ledger')
-    .select('*')
-    .eq('parent_id', parentId)
-    .order('created_at', { ascending: false })
-    .limit(10);
+  // Billing detail is parent-only. A child session token is widened to its parent's scope
+  // (getParentId) and uses the service-role client (RLS bypassed), so it must NOT receive the
+  // parent's payment history or subscription/billing metadata. Children only get the credit
+  // count, which their app needs to gate tutoring usage.
+  let transactions = [];
+  let subscription = null;
 
-  // Get subscription info (parent only) - include trialing status
-  const { data: subscription } = await supabase
-    .from('subscriptions')
-    .select('*')
-    .eq('parent_id', parentId)
-    .in('status', ['active', 'trialing'])
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single();
+  if (isParent) {
+    ({ data: transactions } = await supabase
+      .from('credit_ledger')
+      .select('*')
+      .eq('parent_id', parentId)
+      .order('created_at', { ascending: false })
+      .limit(10));
+
+    ({ data: subscription } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .eq('parent_id', parentId)
+      .in('status', ['active', 'trialing'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single());
+  }
 
   return res.status(200).json({
     credits: balance || 0,
