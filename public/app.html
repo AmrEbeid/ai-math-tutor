@@ -932,7 +932,7 @@
       const msgs = document.getElementById('chat-messages');
       const subjectNames = { math: 'Math', science: 'Science', english: 'English' };
       const icons = { math: '📐', science: '🔬', english: '📝' };
-      const name = currentChild ? currentChild.name : '';
+      const name = currentChild ? escapeHtml(currentChild.name) : '';
       msgs.innerHTML = `<div class="chat-bubble assistant">${icons[subject]} Hi${name ? ' ' + name : ''}! Let's work on <strong>${subjectNames[subject]}</strong> together. What would you like to learn?</div>`;
       // Create session immediately so send button works
       try {
@@ -1029,7 +1029,7 @@
                 addBubble(m.role === 'user' ? m.content : m.content, m.role === 'user' ? 'user' : 'assistant');
               });
             } else {
-              msgs.innerHTML = `<div class="chat-bubble assistant">Hi ${currentChild.name}! I'm Zeluu, your learning companion. Pick a subject above and ask me anything!</div>`;
+              msgs.innerHTML = `<div class="chat-bubble assistant">Hi ${escapeHtml(currentChild.name)}! I'm Zeluu, your learning companion. Pick a subject above and ask me anything!</div>`;
             }
             return;
           }
@@ -1054,7 +1054,7 @@
           if (!skipWelcome) {
             document.getElementById('chat-messages').innerHTML = `
               <div class="chat-bubble assistant">
-                Hi ${currentChild.name}! I'm Zeluu, your learning companion. Pick a subject above and ask me anything!
+                Hi ${escapeHtml(currentChild.name)}! I'm Zeluu, your learning companion. Pick a subject above and ask me anything!
               </div>
             `;
           }
@@ -1088,7 +1088,7 @@
       input.value = '';
 
       // Show typing indicator
-      const typingId = addBubble('<span class="spinner"></span> Thinking...', 'assistant');
+      const typingId = addTypingBubble();
 
       const btn = document.getElementById('send-btn');
       btn.disabled = true;
@@ -1138,9 +1138,15 @@
       msgs.scrollTop = msgs.scrollHeight;
     }
 
+    function escapeHtml(text) {
+      const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+      return String(text).replace(/[&<>"']/g, m => map[m]);
+    }
+
     function renderMarkdown(text) {
-      // Simple markdown: bold, line breaks, step formatting
-      return text
+      // SECURITY: escape FIRST so model output (stored and replayed on resume) can
+      // never inject markup/event handlers, then apply the simple markdown transforms.
+      return escapeHtml(text)
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
         .replace(/\*(.*?)\*/g, '<em>$1</em>')
         .replace(/`(.*?)`/g, '<code style="background:#F0F0FF; padding:2px 6px; border-radius:4px; font-size:14px;">$1</code>')
@@ -1154,11 +1160,26 @@
       div.className = `chat-bubble ${role}`;
       div.id = id;
       if (role === 'assistant') {
-        div.innerHTML = renderMarkdown(content);
-        div.innerHTML += '<br><button class="flag-btn" onclick="flagMessage(this)">Flag this response</button>';
+        div.innerHTML = renderMarkdown(content) + '<br><button class="flag-btn" onclick="flagMessage(this)">Flag this response</button>';
       } else {
-        div.innerHTML = content;
+        // User text is never interpreted as HTML; .chat-bubble has white-space:
+        // pre-wrap so newlines still render.
+        div.textContent = content;
       }
+      msgs.appendChild(div);
+      msgs.scrollTop = msgs.scrollHeight;
+      return id;
+    }
+
+    // Transient "Thinking..." indicator — the only bubble allowed to carry raw markup,
+    // and its content is a fixed app-controlled string (never model or user input).
+    function addTypingBubble() {
+      const id = 'msg-' + Date.now();
+      const msgs = document.getElementById('chat-messages');
+      const div = document.createElement('div');
+      div.className = 'chat-bubble assistant';
+      div.id = id;
+      div.innerHTML = '<span class="spinner"></span> Thinking...';
       msgs.appendChild(div);
       msgs.scrollTop = msgs.scrollHeight;
       return id;

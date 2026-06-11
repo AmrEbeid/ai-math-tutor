@@ -265,6 +265,13 @@
       return localStorage.getItem('zeluu_child_id') || null;
     }
 
+    // SECURITY: exam questions/options/explanations are AI-generated and answers are
+    // user-typed — escape everything interpolated into innerHTML templates.
+    function escapeHtml(text) {
+      const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+      return String(text == null ? '' : text).replace(/[&<>"']/g, m => map[m]);
+    }
+
     // Tab switching
     function showTab(tab) {
       document.querySelectorAll('.tab').forEach((t, i) => {
@@ -366,16 +373,16 @@
         optionsHTML = '<div class="options-list">' + q.options.map((opt, i) => {
           const selected = examState.answers[q.id] === letters[i] ? 'selected' : '';
           const optText = opt.replace(/^[A-D]\)\s*/, '');
-          return `<button class="option-btn ${selected}" onclick="selectOption('${q.id}', '${letters[i]}', this)">
+          return `<button class="option-btn ${selected}" onclick="selectOption('${escapeHtml(q.id)}', '${letters[i]}', this)">
             <span class="option-letter">${letters[i]}</span>
-            <span>${optText}</span>
+            <span>${escapeHtml(optText)}</span>
           </button>`;
         }).join('') + '</div>';
       } else if (q.question_type === 'true_false') {
         optionsHTML = '<div class="options-list">' +
           ['True', 'False'].map(v => {
             const selected = examState.answers[q.id] === v ? 'selected' : '';
-            return `<button class="option-btn ${selected}" onclick="selectOption('${q.id}', '${v}', this)">
+            return `<button class="option-btn ${selected}" onclick="selectOption('${escapeHtml(q.id)}', '${v}', this)">
               <span class="option-letter">${v.charAt(0)}</span>
               <span>${v}</span>
             </button>`;
@@ -383,17 +390,17 @@
       } else {
         const val = examState.answers[q.id] || '';
         optionsHTML = `<input type="text" class="short-answer-input" placeholder="Type your answer..."
-          value="${val}" oninput="examState.answers['${q.id}'] = this.value">`;
+          value="${escapeHtml(val)}" oninput="examState.answers['${escapeHtml(q.id)}'] = this.value">`;
       }
 
       document.getElementById('question-area').innerHTML = `
         <div class="question-card">
           <div class="question-number">Question ${idx + 1}</div>
           <div class="question-meta">
-            ${q.topic ? `<span class="badge badge-topic">${q.topic}</span>` : ''}
-            <span class="badge ${diffClass}">${q.difficulty}</span>
+            ${q.topic ? `<span class="badge badge-topic">${escapeHtml(q.topic)}</span>` : ''}
+            <span class="badge ${diffClass}">${escapeHtml(q.difficulty)}</span>
           </div>
-          <div class="question-text">${q.question_text}</div>
+          <div class="question-text">${escapeHtml(q.question_text)}</div>
           ${optionsHTML}
         </div>
       `;
@@ -472,11 +479,11 @@
 
       let weakHTML = '';
       if (data.weak_topics && data.weak_topics.length > 0) {
-        weakHTML = `<div class="topics-section"><h3>Needs Practice</h3>${data.weak_topics.map(t => `<span class="topic-tag topic-weak">${t}</span>`).join('')}</div>`;
+        weakHTML = `<div class="topics-section"><h3>Needs Practice</h3>${data.weak_topics.map(t => `<span class="topic-tag topic-weak">${escapeHtml(t)}</span>`).join('')}</div>`;
       }
       let strongHTML = '';
       if (data.strong_topics && data.strong_topics.length > 0) {
-        strongHTML = `<div class="topics-section"><h3>Strong Areas</h3>${data.strong_topics.map(t => `<span class="topic-tag topic-strong">${t}</span>`).join('')}</div>`;
+        strongHTML = `<div class="topics-section"><h3>Strong Areas</h3>${data.strong_topics.map(t => `<span class="topic-tag topic-strong">${escapeHtml(t)}</span>`).join('')}</div>`;
       }
 
       let reviewHTML = '<h3 style="font-size: 16px; margin: 24px 0 16px;">Review Answers</h3>';
@@ -485,10 +492,10 @@
         const icon = r.is_correct ? '✓' : '✗';
         reviewHTML += `
           <div class="review-item ${cls}">
-            <div class="review-q">${icon} Q${r.question_index}: ${r.question_text}</div>
-            <div class="review-answer">Your answer: <strong>${r.child_answer || '(no answer)'}</strong></div>
-            ${!r.is_correct ? `<div class="review-answer" style="color: var(--color-success);">Correct answer: <strong>${r.correct_answer}</strong></div>` : ''}
-            ${r.explanation ? `<div class="review-explanation">${r.explanation}</div>` : ''}
+            <div class="review-q">${icon} Q${r.question_index}: ${escapeHtml(r.question_text)}</div>
+            <div class="review-answer">Your answer: <strong>${escapeHtml(r.child_answer) || '(no answer)'}</strong></div>
+            ${!r.is_correct ? `<div class="review-answer" style="color: var(--color-success);">Correct answer: <strong>${escapeHtml(r.correct_answer)}</strong></div>` : ''}
+            ${r.explanation ? `<div class="review-explanation">${escapeHtml(r.explanation)}</div>` : ''}
           </div>
         `;
       }
@@ -561,8 +568,8 @@
               <span style="font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--color-accent);">${data.average_percentage}%</span>
             </div>
             <p style="font-size: 14px; color: var(--color-text-muted);">${data.total_exams} exam${data.total_exams > 1 ? 's' : ''} completed</p>
-            ${data.top_weak_topics.length > 0 ? `<div class="topics-section"><h3>Focus Areas</h3>${data.top_weak_topics.map(t => `<span class="topic-tag topic-weak">${t.topic} (${t.count}x)</span>`).join('')}</div>` : ''}
-            ${data.top_strong_topics.length > 0 ? `<div class="topics-section"><h3>Strengths</h3>${data.top_strong_topics.map(t => `<span class="topic-tag topic-strong">${t.topic} (${t.count}x)</span>`).join('')}</div>` : ''}
+            ${data.top_weak_topics.length > 0 ? `<div class="topics-section"><h3>Focus Areas</h3>${data.top_weak_topics.map(t => `<span class="topic-tag topic-weak">${escapeHtml(t.topic)} (${t.count}x)</span>`).join('')}</div>` : ''}
+            ${data.top_strong_topics.length > 0 ? `<div class="topics-section"><h3>Strengths</h3>${data.top_strong_topics.map(t => `<span class="topic-tag topic-strong">${escapeHtml(t.topic)} (${t.count}x)</span>`).join('')}</div>` : ''}
           </div>
         `;
 
@@ -572,8 +579,8 @@
           html += `
             <div class="history-card">
               <div class="history-info">
-                <h4>${exam.subject.charAt(0).toUpperCase() + exam.subject.slice(1)} — ${exam.topic || 'General'}</h4>
-                <p>${date} · ${exam.score}/${exam.max_score} · ${exam.difficulty}</p>
+                <h4>${escapeHtml(exam.subject.charAt(0).toUpperCase() + exam.subject.slice(1))} — ${escapeHtml(exam.topic || 'General')}</h4>
+                <p>${date} · ${exam.score}/${exam.max_score} · ${escapeHtml(exam.difficulty)}</p>
               </div>
               <div class="history-score" style="color: ${pctColor}">${Math.round(exam.percentage)}%</div>
             </div>
@@ -583,7 +590,7 @@
         document.getElementById('history-area').innerHTML = html;
 
       } catch (err) {
-        document.getElementById('history-area').innerHTML = `<p style="text-align:center; color: var(--color-error);">Error loading history: ${err.message}</p>`;
+        document.getElementById('history-area').innerHTML = `<p style="text-align:center; color: var(--color-error);">Error loading history: ${escapeHtml(err.message)}</p>`;
       }
     }
 
