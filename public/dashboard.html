@@ -484,6 +484,19 @@
         display: none;
       }
     }
+
+    /* ===== UI-4: classes extracted from repeated inline styles ===== */
+    .m-0 { margin: 0; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .info-cell { padding: 10px 14px; background: var(--color-warm-bg); border-radius: 8px; }
+    .info-cell-label { font-size: 11px; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .info-cell-value { font-size: 14px; font-weight: 500; }
+    .empty-note { color: var(--color-text-muted); font-size: 14px; }
+    .modal-close { background: none; border: none; font-size: 24px; cursor: pointer; }
+    .btn-sm { font-size: 12px; padding: 6px 14px; }
+    .btn-block-lg { width: 100%; padding: 14px 0; font-size: 15px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-row-item { justify-content: space-between; padding: 14px 16px; }
+    .stack-12 { display: flex; flex-direction: column; gap: 12px; }
   </style>
 </head>
 <body>
@@ -532,7 +545,7 @@
     <!-- Usage Card -->
     <div class="card mb-6" id="usage-card" style="display:none;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <h3 style="margin:0;">Credit Usage</h3>
+        <h3 class="m-0">Credit Usage</h3>
         <span id="usage-label" style="font-size:13px; color:var(--color-text-muted);">0 / 0 credits used</span>
       </div>
       <div style="width:100%; height:8px; background:var(--color-border); border-radius:999px; overflow:hidden;">
@@ -547,34 +560,34 @@
 
     <!-- Parent Profile -->
     <div class="card mb-6" id="parent-profile-card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h3 style="margin:0;">My Profile</h3>
-        <button class="btn btn-secondary" style="font-size:12px; padding:6px 14px;" onclick="openEditProfileModal()">Edit Profile</button>
+      <div class="card-header">
+        <h3 class="m-0">My Profile</h3>
+        <button class="btn btn-secondary btn-sm" onclick="openEditProfileModal()">Edit Profile</button>
       </div>
       <div id="parent-profile-info" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-        <div style="padding:10px 14px; background:var(--color-warm-bg); border-radius:8px;">
-          <div style="font-size:11px; color:var(--color-text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Email</div>
-          <div style="font-size:14px; font-weight:500;" id="profile-email">--</div>
+        <div class="info-cell">
+          <div class="info-cell-label">Email</div>
+          <div class="info-cell-value" id="profile-email">--</div>
         </div>
-        <div style="padding:10px 14px; background:var(--color-warm-bg); border-radius:8px;">
-          <div style="font-size:11px; color:var(--color-text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Phone</div>
-          <div style="font-size:14px; font-weight:500;" id="profile-phone">--</div>
+        <div class="info-cell">
+          <div class="info-cell-label">Phone</div>
+          <div class="info-cell-value" id="profile-phone">--</div>
         </div>
-        <div style="padding:10px 14px; background:var(--color-warm-bg); border-radius:8px;">
-          <div style="font-size:11px; color:var(--color-text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Country</div>
-          <div style="font-size:14px; font-weight:500;" id="profile-country">--</div>
+        <div class="info-cell">
+          <div class="info-cell-label">Country</div>
+          <div class="info-cell-value" id="profile-country">--</div>
         </div>
-        <div style="padding:10px 14px; background:var(--color-warm-bg); border-radius:8px;">
-          <div style="font-size:11px; color:var(--color-text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Children</div>
-          <div style="font-size:14px; font-weight:500;" id="profile-children-count">0</div>
+        <div class="info-cell">
+          <div class="info-cell-label">Children</div>
+          <div class="info-cell-value" id="profile-children-count">0</div>
         </div>
-        <div style="padding:10px 14px; background:var(--color-warm-bg); border-radius:8px;">
-          <div style="font-size:11px; color:var(--color-text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Plan</div>
-          <div style="font-size:14px; font-weight:500;" id="profile-plan">Free</div>
+        <div class="info-cell">
+          <div class="info-cell-label">Plan</div>
+          <div class="info-cell-value" id="profile-plan">Free</div>
         </div>
-        <div style="padding:10px 14px; background:var(--color-warm-bg); border-radius:8px;">
-          <div style="font-size:11px; color:var(--color-text-muted); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px;">Renewal Date</div>
-          <div style="font-size:14px; font-weight:500;" id="profile-renewal">--</div>
+        <div class="info-cell">
+          <div class="info-cell-label">Renewal Date</div>
+          <div class="info-cell-value" id="profile-renewal">--</div>
         </div>
       </div>
     </div>
@@ -582,12 +595,12 @@
     <div class="grid-2">
       <!-- Your Children -->
       <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div class="card-header">
           <h3>Your Children</h3>
-          <button class="btn btn-primary" style="font-size:12px; padding:6px 14px;" onclick="openAddChildModal()">+ Add Child</button>
+          <button class="btn btn-primary btn-sm" onclick="openAddChildModal()">+ Add Child</button>
         </div>
         <div id="children-list">
-          <p style="color:var(--color-text-muted); font-size:14px;">No children yet. Click "Add Child" to get started.</p>
+          <p class="empty-note">No children yet. Click "Add Child" to get started.</p>
         </div>
       </div>
 
@@ -595,17 +608,17 @@
       <div class="card">
         <h3 class="mb-4">Notifications</h3>
         <div id="notifications-list">
-          <p style="color:var(--color-text-muted); font-size:14px;">No notifications yet.</p>
+          <p class="empty-note">No notifications yet.</p>
         </div>
       </div>
 
       <!-- Subscription & Add-ons Buttons -->
       <div class="card">
-        <div style="display:flex; flex-direction:column; gap:12px;">
-          <button class="btn btn-primary" onclick="openSubscriptionModal()" style="width:100%; padding:14px 0; font-size:15px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:8px;">
+        <div class="stack-12">
+          <button class="btn btn-primary btn-block-lg" onclick="openSubscriptionModal()">
             &#9881; Edit Your Subscription
           </button>
-          <button class="btn btn-secondary" onclick="openExtraCreditsModal()" style="width:100%; padding:14px 0; font-size:15px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:8px;">
+          <button class="btn btn-secondary btn-block-lg" onclick="openExtraCreditsModal()">
             &#9889; Extra Credits
           </button>
         </div>
@@ -614,9 +627,9 @@
       <!-- Subscription Modal -->
       <div class="modal-overlay" id="subscription-modal" role="dialog" aria-modal="true" aria-label="Upgrade your package">
         <div class="modal" style="max-width:520px; max-height:85vh; overflow-y:auto;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <div class="card-header">
             <h2>Upgrade Your Package</h2>
-            <button onclick="closeSubscriptionModal()" aria-label="Close" style="background:none; border:none; font-size:24px; cursor:pointer;">&times;</button>
+            <button onclick="closeSubscriptionModal()" aria-label="Close" class="modal-close">&times;</button>
           </div>
           <!-- Billing toggle -->
           <div style="display:flex; gap:8px; margin-bottom:16px; background:var(--color-warm-bg); border-radius:8px; padding:4px;">
@@ -632,18 +645,18 @@
       <!-- Extra Credits Modal -->
       <div class="modal-overlay" id="extra-credits-modal" role="dialog" aria-modal="true" aria-label="Extra credits">
         <div class="modal" style="max-width:420px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <div class="card-header">
             <h2>Extra Credits</h2>
-            <button onclick="closeExtraCreditsModal()" aria-label="Close" style="background:none; border:none; font-size:24px; cursor:pointer;">&times;</button>
+            <button onclick="closeExtraCreditsModal()" aria-label="Close" class="modal-close">&times;</button>
           </div>
           <div class="flex flex-col gap-2">
-            <button class="btn btn-secondary" onclick="buyCredits('quick_topup')" style="justify-content:space-between; padding:14px 16px;">
+            <button class="btn btn-secondary btn-row-item" onclick="buyCredits('quick_topup')">
               <span>&#9889; Quick Top-Up - 100 credits</span><strong>$15</strong>
             </button>
-            <button class="btn btn-secondary" onclick="buyCredits('credit_pack')" style="justify-content:space-between; padding:14px 16px;">
+            <button class="btn btn-secondary btn-row-item" onclick="buyCredits('credit_pack')">
               <span>&#128230; Credit Pack - 300 credits</span><strong>$35</strong>
             </button>
-            <button class="btn btn-secondary" onclick="buyCredits('credit_tank')" style="justify-content:space-between; padding:14px 16px;">
+            <button class="btn btn-secondary btn-row-item" onclick="buyCredits('credit_tank')">
               <span>&#128640; Credit Tank - 1,000 credits</span><strong>$100</strong>
             </button>
           </div>
@@ -656,9 +669,9 @@
       <div class="modal" style="max-width:600px; max-height:80vh; overflow-y:auto;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
           <h2 id="transcript-title">Session Transcript</h2>
-          <button onclick="closeTranscript()" aria-label="Close" style="background:none; border:none; font-size:24px; cursor:pointer;">&times;</button>
+          <button onclick="closeTranscript()" aria-label="Close" class="modal-close">&times;</button>
         </div>
-        <div id="transcript-content" style="display:flex; flex-direction:column; gap:12px;">
+        <div id="transcript-content" class="stack-12">
           <p style="color:var(--color-text-muted);">Loading...</p>
         </div>
       </div>
@@ -667,12 +680,12 @@
     <!-- Credit History (collapsed by default) -->
     <div class="card mt-6 mb-6">
       <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer;" role="button" tabindex="0" aria-expanded="false" onclick="toggleCreditHistory(); this.setAttribute('aria-expanded', document.getElementById('credit-history-wrapper').style.display !== 'none')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
-        <h3 style="margin:0;">Credit History</h3>
+        <h3 class="m-0">Credit History</h3>
         <span id="credit-history-toggle" aria-hidden="true" style="font-size:20px; color:var(--color-text-muted); transition:transform .2s;">&#9660;</span>
       </div>
       <div id="credit-history-wrapper" style="display:none; margin-top:16px;">
         <div id="credit-history">
-          <p style="color:var(--color-text-muted); font-size:14px;">No transactions yet.</p>
+          <p class="empty-note">No transactions yet.</p>
         </div>
       </div>
     </div>
