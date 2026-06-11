@@ -3,7 +3,17 @@
 > Manual pre-deploy checklist. Verify env presence **without printing values** (Vercel
 > shows "Set" without revealing the value). Claude does not read Vercel env or deploy.
 
-**Status:** Ready (manual). **Owner:** Amr. **Date:** 2026-06-03
+**Status:** **VERIFIED 2026-06-11 (PROD-ENV-1)** — names-only `vercel env ls` (no values
+read or printed): 7/8 vars were set in Production; **`ALLOWED_ORIGIN` was missing**
+(API fell back to permissive `*`, the exact STAGE1-C-predicted failure). Fixed: added
+`ALLOWED_ORIGIN=https://zeluu.com` (Production only; public origin, not a secret;
+`www.zeluu.com` confirmed non-resolving so the exact origin is safe) and redeployed
+(`dpl_3rccRhRKpYHfEAwPeSoXFEsyhQef`). Verified live: preflight now returns
+`access-control-allow-origin: https://zeluu.com`; full re-smoke green. Extra var
+present: `LEMONSQUEEZY_STORE_ID` (unused by code — checkout hardcodes the store id).
+**Hygiene note for owner:** all secrets are scoped to Development+Preview+Production
+together — §2 wants separate preview values; split when convenient.
+**Owner:** Amr. **Date:** 2026-06-03 (verified 2026-06-11)
 
 ## 1. Required env vars (all 8, validated via `lib/env.js`)
 
@@ -18,9 +28,9 @@
 | `CHILD_JWT_SECRET` | Yes | **auth/HMAC secret** | `lib/child-auth.js` | "Set"; strong/random | sign throws; verify fails closed → child login broken |
 | `ALLOWED_ORIGIN` | Yes (prod) | runtime config | all endpoints + `getAllowedOrigin()` | "Set" to exact prod origin (e.g. `https://zeluu.com`) | falls back to `'*'` (permissive) — set it for prod |
 
-- [ ] All 8 set in Vercel **Production**.
-- [ ] No secret duplicated into `*_PUBLIC` / `NEXT_PUBLIC_*` / the client bundle.
-- [ ] `SUPABASE_SERVICE_ROLE_KEY` ≠ `SUPABASE_ANON_KEY`.
+- [x] All 8 set in Vercel **Production** (2026-06-11; `ALLOWED_ORIGIN` added this day).
+- [x] No `*_PUBLIC` / `NEXT_PUBLIC_*` duplicates in the env list (names-only check).
+- [x] `SUPABASE_SERVICE_ROLE_KEY` and `SUPABASE_ANON_KEY` are distinct entries (values not compared — runtime behavior correct: anon-auth 401s, service-role queries work).
 
 ## 2. Vercel environment scope
 - [ ] Production scope holds all 8.

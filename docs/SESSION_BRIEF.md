@@ -63,6 +63,15 @@ no deploy.** `PROJECT_BRIEF.md` still held out (drift).
 
 ## 5. Recently Completed
 
+* **PROD-ENV-1 done (2026-06-11)** — production env verification via names-only
+  `vercel env ls` (no values read/printed): 7/8 required vars were set;
+  **`ALLOWED_ORIGIN` was missing** and the live API confirmed the permissive `*`
+  fallback. Fixed: added `ALLOWED_ORIGIN=https://zeluu.com` to Production (public
+  origin, checklist-prescribed; `www` non-resolving) and redeployed
+  (`dpl_3rccRhRKpYHfEAwPeSoXFEsyhQef`, READY). Verified live: preflight returns
+  `access-control-allow-origin: https://zeluu.com`; full re-smoke green. Follow-ups
+  noted: unused `LEMONSQUEEZY_STORE_ID` env entry; secrets shared across
+  Dev/Preview/Prod scopes (owner may split preview values).
 * **PROD-DEPLOY-1 done (2026-06-11)** — production deploy + smoke, owner-approved.
   Owner disabled Vercel Git auto-deploy and cleared the platform block; the dashboard
   redeploy never registered, so the deploy ran via Vercel CLI (owner completed the
@@ -339,6 +348,7 @@ storage, install packages, or start React/Vite without explicit approval.
 
 | Date       | Action                                                                 | Evidence                                              | Next                                                |
 | ---------- | ---------------------------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------- |
+| 2026-06-11 | PROD-ENV-1 — verified all 8 prod env vars (names only). Found + fixed the missing `ALLOWED_ORIGIN` (live CORS was `*`; now exact `https://zeluu.com`, verified post-redeploy `dpl_3rccRhRKpYHfEAwPeSoXFEsyhQef`). Re-smoke green. No values read or printed; no secrets touched. | `vercel env ls` names; before/after `access-control-allow-origin` headers; smoke matrix. | Remaining (owner-only): LS dashboard checks + runbook tests 1–10; preview-env secret split (hygiene); re-pause prod Supabase decision. |
 | 2026-06-11 | PROD-DEPLOY-1 — owner-approved production deploy of the UI slices. Sequence: owner disabled Vercel auto-deploy → cleared platform block → dashboard redeploy never created a deployment record → owner authorized Vercel CLI device login → linked project → `vercel deploy --prod` → `dpl_E2Xbt6CWzdByRuUggYscUHY1ehoC` READY. Smoke: 13 pages + 8 rewrites 200; webhook 405/401; balance 401; child-login 401; logs clean. UI-2/3/7 fingerprints live on zeluu.com. | Deploy output; curl status matrix; `vercel logs` (4 smoke requests only). | Remaining gates: owner-manual LS dashboard checks + runbook tests 1–10 (PROD-LS-1), prod env verification (PROD-ENV-1), re-pause prod Supabase decision. |
 | 2026-06-11 | PROD-LS-1 — read-only Lemon Squeezy pre-verification (no LS API/keys, per runbook). Evidence: `GET zeluu.com/api/webhooks/lemonsqueezy` → 405; invalid-signature POST → 401 (secret configured, fail-closed; no event processed); code config documented (store 315398, 11 variants, 8 events, trial logic); `*.vercel.app` domains → 401 (deployment protection). **CRITICAL: discovered Vercel Git auto-deploy on `origin/main`** — PUSH-2 deployed `d0c7b2a` to production zeluu.com (unreviewed SEC-FIX-1/2/3 + UI-1 now live; fingerprint-verified); `34d4562`/`92109b7` deployments BLOCKED in Vercel. No code/SQL/migration/deploy/push/charges; no secrets printed. | curl status codes; Vercel MCP project/deployment records; page fingerprints. | Owner: complete LS dashboard checks + runbook tests 1–10; decide auto-deploy policy (disable vs. accept push-to-deploy); review BLOCKED deployments; then PROD-ENV-1 (Vercel env verification). |
 | 2026-06-11 | PROD-RLS-1 — **enabled RLS on production `processed_webhooks`** (project `gstjvjynkdvqncjyybwm`) with exactly one statement, `ALTER TABLE processed_webhooks ENABLE ROW LEVEL SECURITY;`, after the exact owner phrase. Preflight (read-only): table exists, RLS disabled, 0 rows, 0 policies; handler confirmed on service-role client (not edited). Post-apply (read-only): RLS enabled, not forced, 0 policies (deny-by-default), table empty, `credit_ledger` 53 rows intact, no remaining RLS-disabled public tables. No other table/policy touched; no migration file; no deploy; no push. Docs-only commit. | Pre/post `pg_class.relrowsecurity` false→true; `pg_policies` count 0; advisor finding closed. | Next gates: PROD-LS-1 (manual Lemon Squeezy verification), prod env verification (8 vars), deploy + smoke. STAGE1-8 insert-first wiring still future. Decide prod re-pause. |
