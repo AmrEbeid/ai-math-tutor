@@ -1,3 +1,7 @@
+> **⚠️ Historical document (March 2026).** Current deployment procedure: see the root
+> `README.md` ("Deploying") and `docs/checklists/CHECKLIST-production-env-and-deploy.md`
+> (verified 2026-06-11). Vercel Git auto-deploy is now disabled — deploys are explicit.
+
 # Deployment Checklist
 
 ## Pre-Deployment

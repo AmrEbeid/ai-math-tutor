@@ -11,24 +11,20 @@ backend, and a static frontend currently under stabilization.
 
 ## 2. Current Priority
 
-**Stage 1 is complete locally (env validation now fully wired + tested) and Stage 2 static
-UX is partially done locally.** Source is committed in clean slices (C4a `15d62f5` / C4b
-`8a60d2d` / C4c `b3f043f` / C5 `f0b4c87`); env validation + `.env.example` (`2a32f76`);
-**LOCAL-CORRECTION-1 `948baa8` wired all 8 env vars through `lib/env.js`** (OpenAI/LS-key/
-webhook-secret/CHILD_JWT now fail secret-free; ALLOWED_ORIGIN documented `'*'` fallback);
-**36-test** `npm test` baseline; migration `002` (NOT applied); static child-chat UX
-(`4360957`); PENDING-CLOSURE-1 prepared the production-gate pack. **PROD-APPLY-1A** then ran
-the **live read-only preflight** (prod project `gstjvjynkdvqncjyybwm`, resumed from INACTIVE):
-parts 1–2 of migration 002 PASS (0 duplicate payment refs, no unique index, `processed_webhooks`
-absent), but **live↔repo schema drift** was found — the live `notifications_type_check` already
-allows all needed types + `subscription_expired`/`subscription_expiring`, so **002's CHECK
-rewrite was removed** (it would have regressed prod). Migration 002 (unique index +
-`processed_webhooks`) was **APPLIED to production on 2026-06-11 (PROD-APPLY-1B)** after the
-exact confirmation phrase; post-apply verification PASS. UI-MASTER-STATIC-1 also completed
-the full static frontend polish (UI-2…UI-7, 6 slice commits). The next priorities are the
-remaining **PROD-GATE-1** manual gates — LS verification, prod env verification (8 vars),
-deploy + smoke — plus the new gated RLS-on-`processed_webhooks` slice. **No data mutated;
-no deploy.** `PROJECT_BRIEF.md` still held out (drift).
+**The product is live, hardened, and fully deployed at zeluu.com (2026-06-11).** In one
+day the project closed: migration 002 (webhook idempotency, APPLIED), RLS on
+`processed_webhooks`, the full static design polish UI-2…UI-7 + UI-2B (legacy purple
+system retired), a full-stack review with all code-fixable findings fixed AND deployed
+(XSS escaping in the child app, exams child-token pinning via centralized
+`resolveChildId`, timing-safe token compare, distress/PII notification dedup, expiry-aware
+balance), `search_path` pinned on all DB functions (migration 003), `temp_transfer`
+dropped (004), production env verified with the missing `ALLOWED_ORIGIN` found+fixed
+(CORS now exact-origin), and the **schema-reconciliation gap closed** —
+`supabase/migrations/live/` holds the checksum-verified 22-migration production history.
+Vercel auto-deploy is OFF (deploys are explicit); both remotes in sync.
+**Remaining items are owner-only:** Supabase Auth leaked-password toggle, Lemon Squeezy
+dashboard checks + runbook tests 1–10, and the prod re-pause decision (note: pausing now
+takes the live product down). `PROJECT_BRIEF.md` still held out (drift).
 
 ## 3. Must-Read Files
 
@@ -36,17 +32,21 @@ no deploy.** `PROJECT_BRIEF.md` still held out (drift).
 * `docs/PROJECT_TRACKER.md`
 * `docs/SESSION_BRIEF.md`
 * `docs/specs/README.md`
-* the active spec (currently `docs/specs/SPEC-A0.6-public-repo-benchmark.md`)
+* the spec for whatever you touch (UI: `SPEC-003`; security/RLS backlog:
+  `SPEC-SECURITY-RLS-SECDEF-hardening-backlog`; payments: the LS runbook; schema:
+  `supabase/migrations/README.md`)
 
 ## 4. Current Branch / PRs
 
-* **Branch:** `main`.
-* **Both remotes in sync (last push 2026-06-11, PUSH-3: `d0c7b2a..34d4562`)** —
-  `origin` (`amrabdelglill-pixel/ai-math-tutor`) and `fork` (`AmrEbeid/ai-math-tutor`)
-  both carry all commits incl. SEC-FIX-1/2/3, the six UI-MASTER-STATIC-1 slices, and
-  the PROD-APPLY-1B + PROD-RLS-1 evidence docs. The earlier origin `push: false`
-  limitation was resolved by the owner (PUSH-2). Older "not pushed" notes in §5/§9
+* **Branch:** `main`. **Both remotes (`origin` = `amrabdelglill-pixel/ai-math-tutor`,
+  `fork` = `AmrEbeid/ai-math-tutor`) stay in sync** — pushed after every slice since
+  PUSH-2 resolved the origin access limitation. Older "not pushed" notes in §5/§9
   predate the pushes.
+* **Vercel Git auto-deploy is DISABLED** (owner, 2026-06-11, after the PROD-LS-1
+  finding that a push had auto-deployed) — production deploys are explicit
+  (`npx vercel deploy --prod`; CLI authorized + project linked this day).
+* **Production = zeluu.com** serves the latest deployed slice; only `zeluu.com` is
+  public (the `*.vercel.app` project domains sit behind deployment protection, 401).
 * **The 14 former source diffs (Stage 0 `api/*` + A0.5 `public/*`) are COMMITTED** —
   landed in the earlier source slices C4a `15d62f5` / C4b `8a60d2d` / C4c `b3f043f` /
   C5 `f0b4c87` (plus env validation `2a32f76` and LOCAL-CORRECTION-1 `948baa8`).
@@ -261,67 +261,54 @@ no deploy.** `PROJECT_BRIEF.md` still held out (drift).
 
 ## 6. Current Blockers / Gates
 
-* Lemon Squeezy trial / card settings verification.
-* Stage 0 manual verification evidence, if not fully confirmed.
-* No React / Vite approval.
-* No dependency install approval.
-* No migration approval.
-* A0.6 is complete; **no implementation is authorized** from it — all adoptions remain
-  gated (license/security/privacy review; migrations, RLS/auth, token storage, payment
-  logic, dependency installs, React/Vite are hard gates).
-* Doc-sync follow-up resolved: `docs/specs/README.md` A0.6 entry now reads "Complete".
-* **Stage 1 implementation is gated** — the recommended first slice (STAGE1-1 working-tree
-  cleanup) and all later implementation slices (env validation, `.env.example`, test
-  install/files, idempotency/RLS migrations, CI) require explicit approval; see
-  `SPEC-STAGE1-FINAL` §6–§7.
-* **Stage 2 is blocked** pending Stage 1 implementation readiness; its plan is drafted but
-  no Stage 2 code is authorized (token-storage change, moderation, and React/Vite remain
-  hard gates).
-* Source is now committed (C4a/C4b/C4c/C5). `PROJECT_BRIEF.md` still held out (drift).
-* **External gates remain (NOT done — need approval/live access):** apply migration `002`
-  to live Supabase (after de-duping existing `credit_ledger.stripe_payment_id`); manual
-  Lemon Squeezy webhook replay verification (grant-once) + card/14-day/10-credit config;
-  production env verification in Vercel (8 vars; `ALLOWED_ORIGIN`); deployment + prod smoke;
-  RLS/SECDEF `search_path` hardening; child token-storage migration (hard gate).
-* **Migration `002` APPLIED to production 2026-06-11** (`20260611085209`) — the webhook
-  double-grant race is closed at the DB level. (The notifications CHECK part had been
-  removed after the PROD-APPLY-1A preflight; live CHECK already correct.) Follow-ups:
-  wire `processed_webhooks` insert-first into the handler (STAGE1-7/8); enable RLS on
-  `processed_webhooks` (gated).
-* Deeper Stage 2 deferred: streaming, KaTeX math, per-turn moderation, httpOnly token,
-  full a11y/Arabic QA, React/Vite decision.
+**Owner-only items (open):**
+
+* Supabase Auth **leaked-password protection** — dashboard toggle (no API).
+* **Lemon Squeezy dashboard checks + runbook tests 1–10** (`RUNBOOK-lemon-squeezy-…`):
+  store/variant/trial/card settings, webhook URL = `https://zeluu.com/api/webhooks/lemonsqueezy`,
+  enabled events, secret match, live-vs-test mode, then the end-to-end real-card trial test.
+  (The automatable half was pre-verified PASS in PROD-LS-1.)
+* **Prod Supabase re-pause decision** — project is ACTIVE and now backs the live
+  product; pausing takes zeluu.com's data layer down.
+* Vercel env hygiene (optional): split preview-scope secrets from production values;
+  unused `LEMONSQUEEZY_STORE_ID` env entry.
+
+**Still-gated future work (needs explicit approval per slice):**
+
+* Child token storage → httpOnly cookie (`SPEC-child-token-storage-httpOnly-…`).
+* Wire `processed_webhooks` insert-first into the webhook handler (STAGE1-8; payment logic).
+* RLS policy hardening (`(select auth.uid())` + `TO authenticated`; backlog item 1).
+* React / Vite / Tailwind migration; dependency installs; per-turn moderation; streaming;
+  KaTeX; distributed rate limiting (Upstash).
+
+**Resolved this cycle (no longer gates):** migration 002 applied; RLS on
+`processed_webhooks`; SECDEF/invoker `search_path` pinned (003); `temp_transfer`
+dropped (004); prod env verified + `ALLOWED_ORIGIN` fixed; deploy + smoke done; schema
+reconciliation done (`supabase/migrations/live/`); Vercel auto-deploy disabled.
 
 ## 7. Do Not Do
 
-* Do not edit app / API / frontend / source files during A0.OS.
-* Do not install packages.
-* Do not apply migrations.
-* Do not deploy.
-* Do not continue Stage 1.
-* Do not start React / Vite.
-* Do not copy public repo code.
+* Do not apply migrations / run write-SQL on production without an exact owner
+  confirmation phrase.
+* Do not change Lemon Squeezy webhook/payment/credit-grant logic without approval.
+* Do not change RLS/auth or child token storage without approval.
+* Do not push secrets or child/parent PII into the repo, logs, or docs.
+* Do not install dependencies or start React / Vite without approval.
+* Do not re-enable Vercel Git auto-deploy (deploys must stay explicit).
+* Do not copy public repo code without license/security review.
 
 ## 8. Next Action
 
-Stage 1 complete locally; Stage 2 partial; static frontend polish UI-1…UI-7 complete locally;
-`npm test` green (**50 pass / 1 skip**; the skip is the chat handler test, which needs
-`node_modules` to import `openai`). All four 360-review security fixes are landed
-(SEC-FIX-1/2/3) and **migration 002 is APPLIED to production** (PROD-APPLY-1B, 2026-06-11,
-remote migration `20260611085209`) — the webhook double-grant race is closed at the DB level.
-The next actions are the remaining **PROD-GATE-1 manual gates**: (1) Lemon Squeezy
-verification (card-required 14-day trial, 10 credits, webhook events, success URL);
-(2) production env verification in Vercel (8 vars incl. `ALLOWED_ORIGIN`); (3) deploy + prod
-smoke — **but note (PROD-LS-1 finding): Vercel auto-deploy already shipped `d0c7b2a` to
-zeluu.com (SEC-FIX-1/2/3 + UI-1 live, unreviewed), and the UI-2…7 pushes sit BLOCKED in
-Vercel; the owner must decide the auto-deploy policy and unblock/review deployments before
-any further push**; plus the gated follow-ups:
-~~enable RLS on `processed_webhooks`~~ (**DONE — PROD-RLS-1, 2026-06-11**), wire the
-`processed_webhooks` insert-first pattern into the webhook handler (STAGE1-7/8),
-`verify_child_login` DB hardening + live↔repo schema reconciliation, and retiring
-`public/css/styles.css` via a `sw.js` precache edit. The prod project `gstjvjynkdvqncjyybwm`
-is currently **ACTIVE** — decide whether to re-pause. `PROJECT_BRIEF.md` held out (drift).
-Do not run further live SQL, mutate production data, deploy, change RLS/auth/child token
-storage, install packages, or start React/Vite without explicit approval.
+**Everything automatable is done and live** (see §2). `npm test` green (**52 pass /
+1 skip** — the skip is the chat handler test, which needs `node_modules` to import
+`openai`). The next actions are the three owner-only items in §6: (1) flip the Supabase
+Auth leaked-password toggle; (2) run the Lemon Squeezy dashboard checks + runbook tests
+1–10 against zeluu.com (the full trial flow is now end-to-end testable); (3) decide
+whether the prod Supabase project stays ACTIVE (it backs the live site). After those,
+the next engineering slices, each gated on explicit approval, are in priority order:
+httpOnly child-token migration, `processed_webhooks` insert-first wiring (STAGE1-8),
+and RLS policy hardening (backlog item 1). `PROJECT_BRIEF.md` remains held out (drift —
+recommend archiving as legacy per its reconciliation spec).
 
 > **Key STAGE1-C findings to action later (all gated):** only
 > `LEMONSQUEEZY_WEBHOOK_SECRET` is guarded today; others fail late/silently
@@ -348,6 +335,7 @@ storage, install packages, or start React/Vite without explicit approval.
 
 | Date       | Action                                                                 | Evidence                                              | Next                                                |
 | ---------- | ---------------------------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------- |
+| 2026-06-11 | DOCS-SYNC-2 — full project-docs consistency pass after the day's production sprint. Root `README.md` written (was a 1-line stub): product, stack, architecture, repo layout, dev/deploy, operating model. Brief §2/§3/§4/§6/§7/§8 rewritten to current truth (gates pruned to the 3 owner-only items + gated future slices; stale A0.OS-era "Do Not Do" replaced with the standing gate list). Tracker: header, S0/A0.5/STAGE1/STAGE2 rows updated to deployed status, Stage-0 gate row superseded, resolved risks struck. Specs README: SPEC-002 marked Decided. March-era root docs (`DEPLOYMENT_CHECKLIST`/`SETUP_GUIDE`/`IMPLEMENTATION_SUMMARY`) got historical-document banners pointing at current docs. Docs-only. | `git diff --stat` docs+README only. | Owner items unchanged (leaked-password toggle, LS runbook tests, re-pause decision). |
 | 2026-06-11 | SCHEMA-RECON-1 — captured the full production migration history (all 22 applied migrations) from `supabase_migrations.schema_migrations` into `supabase/migrations/live/` (read-only; CLI naming). Integrity-verified: whitespace-normalized MD5 of every file matches the live DB (22/22). README documents live/ as authoritative, marks root `001` stale/reference-only, maps `002–004` to their live counterparts, and records the out-of-history pg_cron job (`enforce-subscription-expiry` @ 03:00 UTC, verified) + dashboard-managed Auth settings. Secret scan clean. The repo can now rebuild the production schema. | md5 verification script output 22/22; cron.job query. | Schema-reconciliation gap CLOSED. Remaining owner items: leaked-password toggle, LS dashboard checks + runbook tests, prod re-pause decision. |
 | 2026-06-11 | PROD-SQL-3 — dropped the leftover `temp_transfer` table after the exact owner phrase (owner reviewed its single row first; no code references). Live migration `drop_temp_transfer_table`, mirrored to repo `004_*.sql`. Verified: table gone, 19 public tables remain, all RLS-enabled. | post-drop to_regclass NULL; RLS sweep true. | Remaining gated/owner items: leaked-password protection (dashboard), schema reconciliation slice, LS dashboard checks + runbook tests, prod re-pause decision. |
 | 2026-06-11 | PROD-SQL-2 — pinned `search_path` on the 14 remaining public DB functions (11 SECDEF + 3 invoker) after the exact owner phrase. Pre-apply prosrc check confirmed crypt calls are `extensions.`-qualified; `match_knowledge_chunks` pinned to `public, extensions` for the pgvector operator, all others `public`. Live migration `pin_search_path_on_remaining_functions`, mirrored to repo `003_*.sql`. Verified: 0 unpinned functions; SQL probes of crypt/vector/balance/limits paths pass; live child-login 401. Closes advisor `function_search_path_mutable` + backlog item 3. | pg_proc proconfig query 0; probe results; migration recorded. | Remaining gated: `temp_transfer` drop (owner reviews the 1 row first), leaked-password protection (owner dashboard), schema reconciliation slice. |

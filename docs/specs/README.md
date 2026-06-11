@@ -30,10 +30,10 @@ ID (e.g. `A0.5`, `A0.6`, `STAGE1`).
 * **Purpose:** Docs-only evaluation of GitHub **Spec Kit** vs. the existing hand-rolled
   specs workflow — concept mapping, where each is stronger, fit assessment, and a
   recommendation. No tooling installed; no `specify init`; no scaffolding; no source.
-* **Status:** Drafted / awaiting GPT and user review. Recommendation: **inspiration-only**
-  (do not install/adopt in Zeluu now).
+* **Status:** **Decided (2026-06-10): inspiration-only** — not installed/adopted in Zeluu
+  (recorded in the tracker decision log).
 * **Risk level:** Low (research / docs only).
-* **Next action:** Owner/GPT picks an option (§8). Full adoption / install remains a hard gate.
+* **Next action:** None for Zeluu; reconsider `specify init` only for a future greenfield project.
 
 ### `SPEC-003-frontend-uiux-audit-and-design-plan.md`
 * **Purpose:** Read-only UI/UX audit of `public/*` + a prioritized, gate-aware design

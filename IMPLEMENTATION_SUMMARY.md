@@ -1,3 +1,8 @@
+> **⚠️ Historical document (March 2026).** Describes the original dual-auth
+> implementation; the auth seam has since been hardened (SEC-FIX-1/2/3, REVIEW-FIX-1,
+> timing-safe compares, centralized child pinning). Current truth: `lib/child-auth.js`
+> and `docs/PROJECT_TRACKER.md`.
+
 # AI Math Tutor - Separate Parent & Child Auth Implementation
 
 ## Summary

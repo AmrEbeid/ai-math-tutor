@@ -4,18 +4,20 @@
 > gates, and remaining risks. Update this file as part of every meaningful task,
 > and update `SESSION_BRIEF.md` last.
 
-**Last Updated:** 2026-06-11 (UI-MASTER-STATIC-1)
+**Last Updated:** 2026-06-11 (DOCS-SYNC-2 — full consistency pass after the 2026-06-11
+production sprint: migration 002 + RLS + search_path + temp_transfer drop applied; UI
+polish + review fixes deployed; env verified; schema history reconciled)
 
 ## Global Status Table
 
 | ID     | Workstream                                          | Status                                                  | Current Spec                                | Current Task                      | Risk        | Last Updated | Notes                                                |
 | ------ | --------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------- | --------------------------------- | ----------- | ------------ | ---------------------------------------------------- |
-| S0     | Stage 0 Emergency Backend/Security/Payment Fixes    | Accepted / pending manual verification where applicable | TBD                                         | Carry risks forward               | High        | 2026-06-03   | Stage 0 accepted earlier; remaining risks documented. NOTE: `api/*` changes currently sit uncommitted in the working tree. |
-| A0.5   | Trial Signup, Card-Based Onboarding & Activation UX | Implemented / pending manual LS verification            | `SPEC-A0.5-trial-signup-onboarding-flow.md` | Manual Lemon Squeezy verification | Low/Medium  | 2026-06-03   | Frontend-only flow/copy fix completed. NOTE: 4 `public/*` files currently sit uncommitted in the working tree. |
+| S0     | Stage 0 Emergency Backend/Security/Payment Fixes    | **Complete — committed (C4a–C4c) and DEPLOYED 2026-06-11**; DB-level idempotency added (migration 002) | TBD | — | High | 2026-06-11 | All Stage 0 `api/*` fixes live on zeluu.com. Webhook double-grant race closed at the DB level. |
+| A0.5   | Trial Signup, Card-Based Onboarding & Activation UX | **Complete — committed (C5) and DEPLOYED 2026-06-11** / LS dashboard settings still owner-manual | `SPEC-A0.5-trial-signup-onboarding-flow.md` | Manual Lemon Squeezy verification (runbook tests 1–10) | Low/Medium | 2026-06-11 | Trial flow live and end-to-end testable at zeluu.com. |
 | A0.6   | Public Repo Benchmark & Product Inspiration Sprint  | Complete (all 8 categories researched)                  | `SPEC-A0.6-public-repo-benchmark.md`        | Report complete; awaiting next gate | Low       | 2026-06-03   | Research only; docs/spec output. All 8 categories done incl. SaaS-billing + Supabase-security. No code copied. |
 | A0.OS  | Install Project Operating Docs                      | Complete / accepted                                     | n/a (process task)                          | Operating docs installed          | Low         | 2026-06-03   | CLAUDE.md + docs tracker/session/specs created; docs-only; no source changes. |
-| STAGE1 | Tests, Schema Documentation & Tooling Evaluation    | **Complete locally** (env validation fully wired + tested) / blocked externally on live gates | `SPEC-STAGE1-LOCAL-ACCEPTANCE.md` | External gate review (apply migration 002; manual LS verify; deploy) | Medium | 2026-06-03   | Source committed C4a `15d62f5` / C4b `8a60d2d` / C4c `b3f043f` / C5 `f0b4c87`; env validation + `.env.example` `2a32f76`; **LOCAL-CORRECTION-1 `948baa8` wired all 8 env vars through `lib/env.js`** (OpenAI/LS-key/webhook-secret/CHILD_JWT now fail secret-free; ALLOWED_ORIGIN documented fallback); test baseline now **36 tests** (`84d2084`+correction), 0 installs. Migration `002` (webhook unique index + processed_webhooks) **created, NOT applied** — its notification-CHECK part was **removed after PROD-APPLY-1A live preflight** (prod CHECK already allows all needed types +2 more; rewrite would regress). Preflight PASS for parts 1–2 (0 dup payment refs, no index, processed_webhooks absent). Live gates: apply migration 002 parts 1–2, manual LS replay, deploy, RLS hardening, token storage, live↔repo schema reconciliation. No React/Vite. |
-| STAGE2 | Child Chat UX Upgrade                               | Static UX improved locally (partial) / deeper items deferred | `SPEC-STAGE2-LOCAL-ACCEPTANCE.md` | External gate review; later slices (moderation, math, token storage) | Medium      | 2026-06-03   | Static `public/app.html` improvements committed `4360957` (a11y live region + labels, hint-first copy, session-expired state, no child payment surface, 9 smoke tests). No React/Vite, no new providers, no token-storage change, no deploy. Deferred: streaming, KaTeX, moderation, httpOnly token, full a11y/Arabic QA. |
+| STAGE1 | Tests, Schema Documentation & Tooling Evaluation    | **Complete — local AND live gates closed (2026-06-11)** | `SPEC-STAGE1-LOCAL-ACCEPTANCE.md` | — | Medium | 2026-06-11   | Env validation (8 vars) wired + verified in prod (`ALLOWED_ORIGIN` found missing → fixed, CORS exact-origin); 53-test baseline (52 pass / 1 skip, 0 installs); migration 002 **APPLIED** (webhook unique index + `processed_webhooks` w/ RLS); `search_path` pinned on all DB functions (003); `temp_transfer` dropped (004); **schema reconciliation DONE** (`supabase/migrations/live/`, 22 files checksum-verified). Remaining from the old gate list: STAGE1-8 insert-first wiring (gated), RLS policy hardening (gated). No React/Vite. |
+| STAGE2 | Child Chat UX Upgrade                               | Static UX improved locally (partial) / deeper items deferred | `SPEC-STAGE2-LOCAL-ACCEPTANCE.md` | External gate review; later slices (moderation, math, token storage) | Medium      | 2026-06-03   | Static `public/app.html` improvements committed `4360957` and **DEPLOYED 2026-06-11** (plus XSS output-escaping hardening, REVIEW-FIX-1) (a11y live region + labels, hint-first copy, session-expired state, no child payment surface, 9 smoke tests). No React/Vite, no new providers, no token-storage change, no deploy. Deferred: streaming, KaTeX, moderation, httpOnly token, full a11y/Arabic QA. |
 | STAGE3 | Parent Dashboard Upgrade                            | Blocked                                                 | TBD                                         | Await Stage 2                     | Medium      | 2026-06-03   |                                                      |
 | STAGE4 | Landing/Pricing Upgrade                             | Blocked                                                 | TBD                                         | Await earlier stages              | Low/Medium  | 2026-06-03   |                                                      |
 | STAGE5 | Advanced Learning Features                          | Future                                                  | TBD                                         | Not started                       | Medium/High | 2026-06-03   |                                                      |
@@ -183,7 +185,7 @@
 | Lemon Squeezy 14-day trial configured         | User / LS dashboard | confirmation for all subscription variants                | Pending                                                   |
 | Success URL `/dashboard.html?payment=success` | User / LS dashboard | confirmation                                              | Pending                                                   |
 | Webhook events enabled                        | User / LS dashboard | confirmation                                              | Pending                                                   |
-| Stage 0 manual verification                   | User                | checklist / evidence                                      | Pending / partially complete depending on user confirmation |
+| Stage 0 manual verification                   | User                | checklist / evidence                                      | Superseded — Stage 0 fixes deployed 2026-06-11; remaining behavioral checks folded into the LS runbook tests 1–10 |
 | React/Vite approval                           | User                | explicit approval                                         | Not approved                                              |
 | Model provider / privacy approval             | User / legal        | provider review                                           | Not approved                                              |
 
@@ -198,14 +200,11 @@
   (Handler wiring of `processed_webhooks` insert-first remains a future slice; new
   gated follow-up: enable RLS on `processed_webhooks`.)
 * Credit deduction is improved but not fully transactional under high concurrency.
-* Low-credit notification dedupe is improved but not atomic.
+* Low-credit notification dedupe is improved but not atomic. (Distress/PII alerts now dedup once-per-session — REVIEW-FIX-1.)
 * `subscription_updated` trial-to-active credit path should be reviewed for explicit
   idempotency.
-* Trial expiry enforcement in `/api/credits/balance` must be verified.
+* ~~Trial expiry enforcement in `/api/credits/balance` must be verified.~~ **CLOSED 2026-06-11 (REVIEW-FIX-1):** balance.js now uses expiry-aware `get_valid_credit_balance`, matching chat gating.
 * Lemon Squeezy "require payment method for trial" must be manually verified.
 * Child token storage remains unchanged and should be reviewed separately.
 * Public repo research must not result in copied code without license / security review.
-* **Working-tree hygiene:** `api/*` and `public/*` files are currently modified but
-  uncommitted. These predate A0.OS and were NOT touched by the docs setup. They
-  should be reviewed and committed under their proper workstream (S0 / A0.5) before
-  further implementation work.
+* ~~**Working-tree hygiene:** `api/*` and `public/*` uncommitted.~~ **CLOSED:** all source committed (C4a–C5, 2026-06-03) and deployed (2026-06-11).

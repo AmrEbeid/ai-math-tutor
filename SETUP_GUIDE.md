@@ -1,3 +1,7 @@
+> **⚠️ Historical document (March 2026).** The env contract is now `lib/env.js` +
+> `.env.example` (8 vars), verified in production 2026-06-11 — see
+> `docs/checklists/CHECKLIST-production-env-and-deploy.md`.
+
 # Setup Guide: Parent & Child Dual Authentication
 
 ## Quick Start
