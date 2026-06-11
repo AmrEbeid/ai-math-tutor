@@ -63,6 +63,22 @@ no deploy.** `PROJECT_BRIEF.md` still held out (drift).
 
 ## 5. Recently Completed
 
+* **PROD-LS-1 partially done / BLOCKED on owner-manual checks (2026-06-11)** — read-only
+  LS pre-verification without calling LS (per runbook): webhook endpoint **live and
+  publicly reachable** at `https://zeluu.com/api/webhooks/lemonsqueezy` (GET→405);
+  **signing secret configured** in prod (invalid-signature POST→401 "Invalid signature";
+  a missing secret would 500; no event processed, no data touched); code expectations
+  documented (store `315398`, 11 variant IDs, 8 handled events, trial = $0 subscription
+  order → 10 credits/14 days); DB idempotency live since PROD-APPLY-1B. **Remaining
+  owner-manual (runbook):** LS dashboard store/variant/trial/card settings, webhook URL +
+  events list, secret match, live-vs-test mode, runbook tests 1–10. **CRITICAL incidental
+  finding: Vercel auto-deploys `origin/main`** — PUSH-2 unintentionally deployed
+  `d0c7b2a` to zeluu.com (SEC-FIX-1/2/3 + UI-1 now LIVE, verified by page fingerprint);
+  the newer pushes (`34d4562`/`92109b7`, incl. UI-2…7) are **BLOCKED** in Vercel (repo
+  flipped public→private between deploys — owner must review the Vercel dashboard).
+  The "no deploy" gate is not enforceable while auto-deploy is on; `*.vercel.app`
+  domains return 401 (deployment protection) so LS must target `zeluu.com`. See the
+  tracker Decision Log finding (2026-06-11).
 * **PROD-RLS-1 done (2026-06-11)** — enabled RLS on production `processed_webhooks`
   with the single approved statement (`ALTER TABLE processed_webhooks ENABLE ROW LEVEL
   SECURITY;`) after the exact owner phrase `ENABLE RLS ON PROCESSED_WEBHOOKS CONFIRMED`.
@@ -275,7 +291,10 @@ remote migration `20260611085209`) — the webhook double-grant race is closed a
 The next actions are the remaining **PROD-GATE-1 manual gates**: (1) Lemon Squeezy
 verification (card-required 14-day trial, 10 credits, webhook events, success URL);
 (2) production env verification in Vercel (8 vars incl. `ALLOWED_ORIGIN`); (3) deploy + prod
-smoke (which would also ship the reviewed SEC fixes and UI slices); plus the gated follow-ups:
+smoke — **but note (PROD-LS-1 finding): Vercel auto-deploy already shipped `d0c7b2a` to
+zeluu.com (SEC-FIX-1/2/3 + UI-1 live, unreviewed), and the UI-2…7 pushes sit BLOCKED in
+Vercel; the owner must decide the auto-deploy policy and unblock/review deployments before
+any further push**; plus the gated follow-ups:
 ~~enable RLS on `processed_webhooks`~~ (**DONE — PROD-RLS-1, 2026-06-11**), wire the
 `processed_webhooks` insert-first pattern into the webhook handler (STAGE1-7/8),
 `verify_child_login` DB hardening + live↔repo schema reconciliation, and retiring
@@ -309,6 +328,7 @@ storage, install packages, or start React/Vite without explicit approval.
 
 | Date       | Action                                                                 | Evidence                                              | Next                                                |
 | ---------- | ---------------------------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------- |
+| 2026-06-11 | PROD-LS-1 — read-only Lemon Squeezy pre-verification (no LS API/keys, per runbook). Evidence: `GET zeluu.com/api/webhooks/lemonsqueezy` → 405; invalid-signature POST → 401 (secret configured, fail-closed; no event processed); code config documented (store 315398, 11 variants, 8 events, trial logic); `*.vercel.app` domains → 401 (deployment protection). **CRITICAL: discovered Vercel Git auto-deploy on `origin/main`** — PUSH-2 deployed `d0c7b2a` to production zeluu.com (unreviewed SEC-FIX-1/2/3 + UI-1 now live; fingerprint-verified); `34d4562`/`92109b7` deployments BLOCKED in Vercel. No code/SQL/migration/deploy/push/charges; no secrets printed. | curl status codes; Vercel MCP project/deployment records; page fingerprints. | Owner: complete LS dashboard checks + runbook tests 1–10; decide auto-deploy policy (disable vs. accept push-to-deploy); review BLOCKED deployments; then PROD-ENV-1 (Vercel env verification). |
 | 2026-06-11 | PROD-RLS-1 — **enabled RLS on production `processed_webhooks`** (project `gstjvjynkdvqncjyybwm`) with exactly one statement, `ALTER TABLE processed_webhooks ENABLE ROW LEVEL SECURITY;`, after the exact owner phrase. Preflight (read-only): table exists, RLS disabled, 0 rows, 0 policies; handler confirmed on service-role client (not edited). Post-apply (read-only): RLS enabled, not forced, 0 policies (deny-by-default), table empty, `credit_ledger` 53 rows intact, no remaining RLS-disabled public tables. No other table/policy touched; no migration file; no deploy; no push. Docs-only commit. | Pre/post `pg_class.relrowsecurity` false→true; `pg_policies` count 0; advisor finding closed. | Next gates: PROD-LS-1 (manual Lemon Squeezy verification), prod env verification (8 vars), deploy + smoke. STAGE1-8 insert-first wiring still future. Decide prod re-pause. |
 | 2026-06-11 | PROD-APPLY-1B — **applied migration 002 (parts 1–2) to production** project `gstjvjynkdvqncjyybwm` after the exact owner phrase `APPLY MIGRATION 002 TO PRODUCTION CONFIRMED`. Remote migration `20260611085209_webhook_idempotency_unique_index_and_processed_webhooks` = partial unique index on `credit_ledger.stripe_payment_id` + `processed_webhooks` table. Post-apply verification PASS (index present; table present/empty; credit_ledger 53 rows intact). Security advisors flag the new table as the only RLS-disabled public table (anon-visible via GraphQL) → gated follow-up to enable RLS. No data mutated; no deploy; project left ACTIVE. Updated migration file header, runbook, tracker, this brief. | `apply_migration` success; `list_migrations` shows `20260611085209`; post-apply SELECTs PASS. | Remaining PROD-GATE-1: manual LS verification, prod env verify (8 vars), deploy + smoke; gated RLS-on-`processed_webhooks` slice; handler insert-first wiring (STAGE1-7/8); decide prod re-pause. |
 | 2026-06-11 | UI-MASTER-STATIC-1 — static frontend polish UI-2…UI-7 in 6 slice commits: `1758578` legal pages onto warm system (copy verbatim; `styles.css` 0 HTML refs, kept for `sw.js` precache), `b9b5b7e` a11y baseline (main/skip/aria/dialog/keyboard), `3299658` dashboard de-inline (static 65→25, file 167→127), `85256a4` font normalization (1 shared URL ×12 pages), `a3c09f2` responsive tap-targets + table overflow guards, `750ad19` RTL foundation. Docs updated per slice (SPEC-003 rows + §8) + tracker row + this brief. **Frontend/docs only; no backend/auth/payment/webhook/credit/Supabase changes; no installs; no deploy; no React/Vite; PROJECT_BRIEF held out.** | `git log --oneline` shows the 6 slice commits; `npm test` 50 pass / 1 skip after each slice; `grep styles.css public/*.html` = none; `grep zeluu-tokens.css public/*.html` = all 12 pages; tree clean except `?? PROJECT_BRIEF.md`. | Owner visual review of the slices; follow-ups: retire `styles.css` via `sw.js` precache edit (separate slice), JS-template ARIA/inline-style pass. Main gate unchanged: PROD-APPLY-1B. |
