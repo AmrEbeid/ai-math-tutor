@@ -21,3 +21,4 @@ scripts/knowledge-pipeline/cookies.txt
 # Claude/AI assistant working files
 .claude/
 .impeccable.md
+.vercel
