@@ -203,9 +203,18 @@ ID (e.g. `A0.5`, `A0.6`, `STAGE1`).
 * **Risk level:** Low (docs-only); items carry their own risk + gates.
 * **Next action:** Owner/GPT review; execute the recommended next sprint via the task backlog.
 
+### `SPEC-SLICE-trial-enforcement.md`
+* **Purpose:** Design/slice spec for enforcing the free trial as both time- and credit-limited
+  (7 days / 50 total / 10 per-day / 15 min per-day) on top of the existing `credit_limit_*` columns +
+  `get_child_limits_summary`, plus per-action credit metering. Migration DDL authored, **not applied**.
+* **Status:** Drafted 2026-06-15 (design-only).
+* **Risk level:** Low to write; **High to implement** (credit/payment logic + migration = hard gate).
+* **Next action:** Owner review; implementation only via a separate approved + reviewed slice.
+
 > **Research & tasks:** competitive/product research is saved under `docs/research/`
-> (`RESEARCH-competitive-product-strategy-2026-06-15.md`); the executable, gate-aware backlog (T-01…T-24)
-> is under `docs/tasks/` (`TASKS-product-strategy-roadmap.md`).
+> (`RESEARCH-competitive-product-strategy-2026-06-15.md`, `RESEARCH-coppa-vpc-options.md`);
+> the MVP build plan is `docs/plans/PLAN-MVP-foundation.md`; the executable, gate-aware backlog
+> (T-01…T-24) is under `docs/tasks/` (`TASKS-product-strategy-roadmap.md`).
 
 > **Runbooks & checklists:** see `docs/runbooks/` (production gate, migration 002, Lemon Squeezy)
 > and `docs/checklists/` (production env & deploy). Read-only preflight SQL:
