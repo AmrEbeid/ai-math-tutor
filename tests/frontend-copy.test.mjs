@@ -10,6 +10,7 @@ const pages = {
   pricing: read('pricing.html'),
   login: read('login.html'),
   dashboard: read('dashboard.html'),
+  safety: read('safety.html'),
 };
 
 const CONTRADICTIONS = /no (credit )?card required|no payment information is required/i;
@@ -41,6 +42,37 @@ test('login signup flow mentions card + 14-day window', () => {
 
 test('dashboard shows a post-checkout activation/waiting state', () => {
   assert.match(pages.dashboard, /activating your trial/i);
+});
+
+test('safety page has the accessibility baseline (main landmark + skip link)', () => {
+  assert.match(pages.safety, /class="skip-link"/);
+  assert.match(pages.safety, /id="main"/);
+  assert.match(pages.safety, /<title>Safety/i);
+});
+
+test('safety page states the core implemented safety claims', () => {
+  // Hint-first pedagogy, the layered chat protections, and data isolation are LIVE.
+  assert.match(pages.safety, /guide children to the answer/i);
+  assert.match(pages.safety, /distress detection/i);
+  assert.match(pages.safety, /personal-information detection/i);
+  assert.match(pages.safety, /at the database level/i);
+});
+
+test('safety page references COPPA and the UK Children\'s Code', () => {
+  assert.match(pages.safety, /COPPA/);
+  assert.match(pages.safety, /Children's Code|Age-Appropriate Design Code/i);
+});
+
+test('safety page does not over-promise: digest/email alerts are marked not-yet-available', () => {
+  // Weekly digest + instant email alerts are planned, not built — must be flagged "coming soon",
+  // and consent is "in review" (no absolute compliance guarantee).
+  assert.match(pages.safety, /badge-soon/);
+  assert.match(pages.safety, /Coming soon/i);
+  assert.match(pages.safety, /finalized with legal review/i);
+});
+
+test('safety page is linked from the public landing footer', () => {
+  assert.match(pages.index, /href="\/safety\.html"/);
 });
 
 test('child/parent pages do not leak a service-role-looking secret', () => {
