@@ -4,9 +4,39 @@
 > gates, and remaining risks. Update this file as part of every meaningful task,
 > and update `SESSION_BRIEF.md` last.
 
-**Last Updated:** 2026-06-11 (DOCS-SYNC-2 — full consistency pass after the 2026-06-11
-production sprint: migration 002 + RLS + search_path + temp_transfer drop applied; UI
-polish + review fixes deployed; env verified; schema history reconciled)
+**Last Updated:** 2026-06-15 (RESEARCH-STRATEGY-1 — competitive/product research saved;
+product repositioned math-only → all-subject learning companion (math-first); pricing/credits,
+roadmap, and task-backlog specs created. Docs-only.) Prior: 2026-06-11 (DOCS-SYNC-2 — full
+consistency pass after the production sprint: migration 002 + RLS + search_path + temp_transfer
+drop applied; UI polish + review fixes deployed; env verified; schema history reconciled)
+
+## Product Strategy & Roadmap (2026-06-15, RESEARCH-STRATEGY-1) — docs-only
+
+> Concise pointer section (no research duplicated here — see the linked docs).
+
+* **Research saved:** [`docs/research/RESEARCH-competitive-product-strategy-2026-06-15.md`](research/RESEARCH-competitive-product-strategy-2026-06-15.md)
+  — two adversarially-verified deep-research passes (landscape/safety/UX/GCC + pricing/Arabic),
+  with confirmed facts, citations, NCC flags, and refuted-claim warnings preserved.
+* **Positioning change:** Zeluu reframed from a **math-only tutor** to a **child-safe bilingual
+  AI learning companion for school subjects, math-first** →
+  [`SPEC-PRODUCT-learning-companion-strategy`](specs/SPEC-PRODUCT-learning-companion-strategy.md).
+* **Pricing/credits spec:** [`SPEC-PRICING-packages-credits-cost-model`](specs/SPEC-PRICING-packages-credits-cost-model.md)
+  — Free Trial (7-day / 50-credit / 10-per-day / 15-min), Family, Family Premium, optional Student
+  Plus + School Pilot (later); per-action credit metering; cost/MoR/margin model. Parent-facing copy =
+  "fair daily learning usage"; credits are an internal lever.
+* **Roadmap spec:** [`SPEC-ROADMAP-product-revamp-implementation`](specs/SPEC-ROADMAP-product-revamp-implementation.md)
+  — Quick wins (1–2 wk) → MVP (2–6 wk) → Strategic (2–4 mo) → Differentiating (4–12 mo).
+* **Task backlog:** [`TASKS-product-strategy-roadmap`](tasks/TASKS-product-strategy-roadmap.md)
+  — 24 gate-aware tasks (T-01…T-24) with priority/complexity/code-required/legal/React-gate flags.
+* **Immediate next sprint:** (1) KaTeX/rich formatting, (2) streaming spike, (3) weekly parent digest,
+  (4) free-trial time+credit enforcement **design**, (5) COPPA/VPC research + legal gate, (6) Safety &
+  Privacy page, (7) age-banded tutor tone, (8) pricing/credits implementation **design**.
+* **Open validation gaps:** competitor pricing needs periodic refresh; competitor Arabic *quality*
+  (QANDA/Gauth/Photomath) needs hands-on testing; bilingual GCC positioning is a hypothesis until
+  validated; school/teacher pricing deferred until classroom mode is scoped; AI cost assumptions to be
+  reviewed against real usage logs post-launch.
+* **Gates unchanged:** no product code, credit/payment/auth/RLS/migration/deploy/install/React-Vite
+  changes without explicit owner approval (CLAUDE.md). This work is **docs-only**.
 
 ## Global Status Table
 
@@ -26,6 +56,7 @@ polish + review fixes deployed; env verified; schema history reconciled)
 
 | ID       | Task                                | Status              | Branch/PR/Migration | Notes                                    |
 | -------- | ----------------------------------- | ------------------- | ------------------- | ---------------------------------------- |
+| RESEARCH-STRATEGY-1 | Save competitive research; create product strategy, pricing/credits, roadmap & task-backlog specs; reposition math-only → all-subject (math-first) | Done (docs-only) | branch `docs/research-product-strategy-specs` | Created `docs/research/RESEARCH-competitive-product-strategy-2026-06-15.md` + `docs/specs/SPEC-PRODUCT-learning-companion-strategy.md` + `SPEC-PRICING-packages-credits-cost-model.md` + `SPEC-ROADMAP-product-revamp-implementation.md` + `docs/tasks/TASKS-product-strategy-roadmap.md`; updated tracker/brief/specs-README. No product code; no installs; no live actions. Confirmed facts/NCC/refuted warnings preserved. |
 | A0.OS    | Install project operating docs      | Done                | local docs only     | Operating docs installed; docs-only; no source changes. |
 | A0.OS-GPT | Document Amr's GPT → Claude operating workflow | Done       | local docs only     | Docs-only; no source changes. Created SPEC-001. |
 | A0.5-LS  | Verify Lemon Squeezy trial settings | External gate       | none                | Must verify 14-day trial + card required. |
@@ -63,6 +94,22 @@ polish + review fixes deployed; env verified; schema history reconciled)
 | SEC-FIX-1 | Fix cross-tenant access bugs from 360 security review (sessions/history + chat) | Done (local) | commit `e6b1696` (main) | **Vuln 1** `api/sessions/history.js`: child tokens were widened to parent scope and could read every sibling's session transcripts by omitting `child_id`; now pinned to own `child_id` (client value ignored), parents may still filter. **Vuln 4** `api/chat.js`: `child_id` came from the request body (spoofable to skip parent-set usage limits); now the session is ownership-checked up front, `child_id` is derived from the session row, a child acting on another child's session gets 403, and ownership is validated before content-flag writes (also closes the write-before-ownership gap). 8 handler tests added (`tests/sessions-history.test.mjs` 5 pass via real signed-token pipeline + mocked `lib/supabase.js`; `tests/chat-handler.test.mjs` 3, self-skip until `node_modules` present because `api/chat.js` imports `openai`). `package.json` test script gains `--experimental-test-module-mocks`. `npm test` = 41 pass / 1 skip. **Medium/High-risk source — manual review required before deploy; not yet pushed.** |
 
 ## Decision Log
+
+* 2026-06-15 — **Decision (RESEARCH-STRATEGY-1): reposition Zeluu from "AI math tutor" to a
+  "child-safe bilingual AI learning companion for school subjects, starting with math as the first
+  polished vertical."** **Reason:** the codebase, RAG, chat pipeline, credits, and safety layer are
+  subject-agnostic; naming the product "math tutor" caps the addressable market, the pricing narrative,
+  and the long-term vision. Math stays the first wedge (objective correctness, KaTeX, exam relevance).
+  **Impact:** all surfaces and docs use "learning companion, math-first"; subject features are built
+  subject-agnostic; science/English are the next verticals (ship only at the math quality bar). See
+  `SPEC-PRODUCT-learning-companion-strategy.md`.
+* 2026-06-15 — **Finding (research, verified):** the defensible market lane is guided "build
+  understanding" tutoring (Khanmigo pattern), not scan-and-answer homework help (crowded/commoditized,
+  QANDA archetype). Safety is table stakes (COPPA binding now; UK Children's Code extraterritorial) —
+  *communicating* it is the differentiator. Bilingual GCC differentiation is **Arabic quality, not
+  Arabic presence**, and remains a **hypothesis to validate**. **Standing warnings preserved in the
+  research doc:** do not claim QANDA lacks Arabic, do not claim no bilingual K-12 competitor exists, do
+  not use the refuted Duolingo retention stat or unsupported market-size numbers.
 
 * Card / payment method is required before trial activation.
 * Trial is 14 days.
