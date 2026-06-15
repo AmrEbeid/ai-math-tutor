@@ -26,6 +26,29 @@ Vercel auto-deploy is OFF (deploys are explicit); both remotes in sync.
 dashboard checks + runbook tests 1–10, and the prod re-pause decision (note: pausing now
 takes the live product down). `PROJECT_BRIEF.md` still held out (drift).
 
+## 2b. Product Strategy & Roadmap (NEW — 2026-06-15, RESEARCH-STRATEGY-1)
+
+**Zeluu is repositioned from a math-only tutor to a child-safe bilingual AI learning companion
+for school subjects, with math as the first polished vertical.** Competitive/product research was
+saved and converted into specs + a task backlog (docs-only; no product code). Links:
+
+* Research: [`docs/research/RESEARCH-competitive-product-strategy-2026-06-15.md`](research/RESEARCH-competitive-product-strategy-2026-06-15.md)
+* Product strategy: [`SPEC-PRODUCT-learning-companion-strategy`](specs/SPEC-PRODUCT-learning-companion-strategy.md)
+* Pricing/credits: [`SPEC-PRICING-packages-credits-cost-model`](specs/SPEC-PRICING-packages-credits-cost-model.md)
+* Roadmap: [`SPEC-ROADMAP-product-revamp-implementation`](specs/SPEC-ROADMAP-product-revamp-implementation.md)
+* Tasks: [`TASKS-product-strategy-roadmap`](tasks/TASKS-product-strategy-roadmap.md)
+
+**Immediate next sprint (recommended):** KaTeX/rich formatting · streaming spike · weekly parent
+digest · free-trial time+credit enforcement design · COPPA/VPC research+legal gate · Safety &
+Privacy page · age-banded tutor tone · pricing/credits implementation design.
+
+**Open validation gaps:** competitor pricing needs periodic refresh; competitor Arabic *quality*
+needs hands-on testing; bilingual GCC positioning is a hypothesis until validated; school/teacher
+pricing deferred until classroom mode scoped; AI cost assumptions reviewed against real logs
+post-launch. **Standing warnings (do not violate):** don't claim QANDA lacks Arabic; don't claim no
+bilingual K-12 competitor exists; don't use the refuted Duolingo retention stat or unsupported
+market-size numbers.
+
 ## 3. Must-Read Files
 
 * `CLAUDE.md`
@@ -63,6 +86,14 @@ takes the live product down). `PROJECT_BRIEF.md` still held out (drift).
 
 ## 5. Recently Completed
 
+* **RESEARCH-STRATEGY-1 done (2026-06-15, docs-only)** — saved the verified competitive/product
+  research and converted it into 4 docs: `RESEARCH-competitive-product-strategy-2026-06-15.md`,
+  `SPEC-PRODUCT-learning-companion-strategy.md`, `SPEC-PRICING-packages-credits-cost-model.md`,
+  `SPEC-ROADMAP-product-revamp-implementation.md`, plus `TASKS-product-strategy-roadmap.md`
+  (24 gate-aware tasks). **Repositioned Zeluu from math-only → all-subject child-safe bilingual
+  learning companion, math-first.** Tracker + this brief + specs README updated. Confirmed facts,
+  citations, NCC flags, and refuted-claim warnings preserved. Branch `docs/research-product-strategy-specs`.
+  **No product code; no installs; no live SQL/deploy; no React/Vite.**
 * **PROD-ENV-1 done (2026-06-11)** — production env verification via names-only
   `vercel env ls` (no values read/printed): 7/8 required vars were set;
   **`ALLOWED_ORIGIN` was missing** and the live API confirmed the permissive `*`
@@ -335,6 +366,9 @@ recommend archiving as legacy per its reconciliation spec).
 
 | Date       | Action                                                                 | Evidence                                              | Next                                                |
 | ---------- | ---------------------------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------- |
+| 2026-06-15 | MVP-FOUNDATION-WAVE-1 — executed the owner-approved no-/low-gate wave (5 tasks), task-by-task, small commits, tests after each: (1) COPPA/VPC research doc (decision pending legal review); (2) **KaTeX math rendering** — shared XSS-safe `public/js/render.js` (escape-first), pinned CDN (no install), wired into `app.html`+`exam-prep.html`, sw v6→v7, +9 tests; (3) **Safety & Privacy page** `public/safety.html` (implemented/clearly-planned claims only, "now" vs "coming soon"), linked from index, +5 tests; (4) **age-banded tone** verified + locked, +7 tests; (5) **trial-enforcement design** spec (7d/50/10/15min, design-only, migration NOT applied). Commits `47a46c4`/`2c4d385`/`28b3c8d`/`2c501be`/`25b528b`. **No payment/auth/migration/cron/email/React-Vite/deploy.** | `npm test` **73 pass / 1 skip**; tree clean except `?? PROJECT_BRIEF.md`; pushed to PR #2. | Owner review of PR #2; not-yet-approved items (streaming, worked-example, try-before-signup, weekly digest+email, credit/payment enforcement) each need explicit approval; COPPA VPC awaits legal. |
+| 2026-06-15 | MVP-FOUNDATION-1 — authored `docs/plans/PLAN-MVP-foundation.md`: execution-ready, file-exact, test-backed plan for the MVP sprint, **reconciled against the live codebase** (found age-banding in `lib/prompts.js`, subject support + XSS-safe `renderMarkdown` in `app.html`, scaffolding L1–L4 + safety detection in `api/chat.js`, and `credit_limit_*` + `get_child_limits_summary` RPCs already exist → MVP is mostly frontend polish + small backend extensions). 10 tasks, each gate-tagged; all code tasks BLOCKED pending owner approval. Updated tracker + this brief. **Docs-only; no product code written; no installs/live SQL/deploy/React-Vite.** | New file under `docs/plans/`; `npm test` 52 pass / 1 skip; tree clean except `?? PROJECT_BRIEF.md`. | Owner lifts the MVP build hold per task; start wave: COPPA/VPC research (no gate beyond legal) → KaTeX + Safety page + age-band verify → pricing/trial design → streaming/worked-example → try-before-signup + weekly digest (need consent + email-provider decisions). | 
+| 2026-06-15 | RESEARCH-STRATEGY-1 — saved verified competitive/product research and converted it into specs + a task backlog; repositioned Zeluu math-only → all-subject child-safe bilingual learning companion (math-first). Created `docs/research/RESEARCH-competitive-product-strategy-2026-06-15.md`, `docs/specs/SPEC-PRODUCT-learning-companion-strategy.md`, `SPEC-PRICING-packages-credits-cost-model.md`, `SPEC-ROADMAP-product-revamp-implementation.md`, `docs/tasks/TASKS-product-strategy-roadmap.md`; updated tracker, this brief, specs README. **Docs-only; no product code; no installs; no live SQL/deploy; no React/Vite.** | New branch `docs/research-product-strategy-specs`; `git status` clean except `?? PROJECT_BRIEF.md`; facts/NCC/refuted warnings preserved. | Owner/GPT review of the strategy/pricing/roadmap specs; then start the recommended next sprint (KaTeX, streaming, weekly digest, trial enforcement design, COPPA/VPC gate, Safety page, age-banded tone, pricing design). |
 | 2026-06-11 | DOCS-SYNC-2 — full project-docs consistency pass after the day's production sprint. Root `README.md` written (was a 1-line stub): product, stack, architecture, repo layout, dev/deploy, operating model. Brief §2/§3/§4/§6/§7/§8 rewritten to current truth (gates pruned to the 3 owner-only items + gated future slices; stale A0.OS-era "Do Not Do" replaced with the standing gate list). Tracker: header, S0/A0.5/STAGE1/STAGE2 rows updated to deployed status, Stage-0 gate row superseded, resolved risks struck. Specs README: SPEC-002 marked Decided. March-era root docs (`DEPLOYMENT_CHECKLIST`/`SETUP_GUIDE`/`IMPLEMENTATION_SUMMARY`) got historical-document banners pointing at current docs. Docs-only. | `git diff --stat` docs+README only. | Owner items unchanged (leaked-password toggle, LS runbook tests, re-pause decision). |
 | 2026-06-11 | SCHEMA-RECON-1 — captured the full production migration history (all 22 applied migrations) from `supabase_migrations.schema_migrations` into `supabase/migrations/live/` (read-only; CLI naming). Integrity-verified: whitespace-normalized MD5 of every file matches the live DB (22/22). README documents live/ as authoritative, marks root `001` stale/reference-only, maps `002–004` to their live counterparts, and records the out-of-history pg_cron job (`enforce-subscription-expiry` @ 03:00 UTC, verified) + dashboard-managed Auth settings. Secret scan clean. The repo can now rebuild the production schema. | md5 verification script output 22/22; cron.job query. | Schema-reconciliation gap CLOSED. Remaining owner items: leaked-password toggle, LS dashboard checks + runbook tests, prod re-pause decision. |
 | 2026-06-11 | PROD-SQL-3 — dropped the leftover `temp_transfer` table after the exact owner phrase (owner reviewed its single row first; no code references). Live migration `drop_temp_transfer_table`, mirrored to repo `004_*.sql`. Verified: table gone, 19 public tables remain, all RLS-enabled. | post-drop to_regclass NULL; RLS sweep true. | Remaining gated/owner items: leaked-password protection (dashboard), schema reconciliation slice, LS dashboard checks + runbook tests, prod re-pause decision. |

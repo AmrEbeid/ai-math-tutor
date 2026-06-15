@@ -178,6 +178,44 @@ ID (e.g. `A0.5`, `A0.6`, `STAGE1`).
 * **Purpose:** Roadmap for deferred Stage 2 work (moderation, KaTeX, RTL/a11y QA, React/Vite decision, streaming…).
 * **Status:** Drafted / awaiting review. **Risk:** Medium planning. **Next:** post-PROD-GATE-1 Stage 2 slices.
 
+### `SPEC-PRODUCT-learning-companion-strategy.md`
+* **Purpose:** Repositions Zeluu from a math-only tutor to a **child-safe bilingual AI learning
+  companion for school subjects, math-first** — positioning, target users, parent/student value,
+  subjects roadmap, bilingual/GCC opportunity, safety/trust positioning, risks, validation questions.
+* **Status:** Drafted / awaiting GPT + owner review (2026-06-15, RESEARCH-STRATEGY-1).
+* **Risk level:** Low (docs-only; positioning).
+* **Next action:** Owner/GPT review; positioning then governs homepage/store/copy + subject rollout.
+
+### `SPEC-PRICING-packages-credits-cost-model.md`
+* **Purpose:** Recommended pricing packages (Free Trial / Family / Family Premium / optional Student
+  Plus + School Pilot), credit system, per-action metering, and unit-economics (AI cost / MoR fee /
+  gross-margin) model. Parent-facing copy = "fair daily learning usage"; credits stay an internal lever.
+* **Status:** Drafted / awaiting GPT + owner review (2026-06-15).
+* **Risk level:** Low (docs-only); **High relevance** — implementing credit/payment/LS logic is a hard gate.
+* **Next action:** Owner/GPT review; verify LS MoR fees + competitor prices; gated implementation slice.
+
+### `SPEC-ROADMAP-product-revamp-implementation.md`
+* **Purpose:** Prioritized revamp roadmap (Quick wins → MVP → Strategic → Differentiating), adapted to
+  the all-subject companion positioning; KaTeX, streaming, try-before-signup, age-banded tone, step-reveal,
+  parent digest/alerts, Safety page, COPPA/VPC, Arabic/RTL, multi-subject, mastery/practice/mistakes,
+  curriculum/exam mode, React island-first, voice/whiteboard/graphing, teacher mode.
+* **Status:** Drafted / awaiting GPT + owner review (2026-06-15).
+* **Risk level:** Low (docs-only); items carry their own risk + gates.
+* **Next action:** Owner/GPT review; execute the recommended next sprint via the task backlog.
+
+### `SPEC-SLICE-trial-enforcement.md`
+* **Purpose:** Design/slice spec for enforcing the free trial as both time- and credit-limited
+  (7 days / 50 total / 10 per-day / 15 min per-day) on top of the existing `credit_limit_*` columns +
+  `get_child_limits_summary`, plus per-action credit metering. Migration DDL authored, **not applied**.
+* **Status:** Drafted 2026-06-15 (design-only).
+* **Risk level:** Low to write; **High to implement** (credit/payment logic + migration = hard gate).
+* **Next action:** Owner review; implementation only via a separate approved + reviewed slice.
+
+> **Research & tasks:** competitive/product research is saved under `docs/research/`
+> (`RESEARCH-competitive-product-strategy-2026-06-15.md`, `RESEARCH-coppa-vpc-options.md`);
+> the MVP build plan is `docs/plans/PLAN-MVP-foundation.md`; the executable, gate-aware backlog
+> (T-01…T-24) is under `docs/tasks/` (`TASKS-product-strategy-roadmap.md`).
+
 > **Runbooks & checklists:** see `docs/runbooks/` (production gate, migration 002, Lemon Squeezy)
 > and `docs/checklists/` (production env & deploy). Read-only preflight SQL:
 > `supabase/sql/preflight_002_webhook_idempotency.sql`.

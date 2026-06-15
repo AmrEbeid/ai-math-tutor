@@ -17,6 +17,17 @@
   <!-- Shared design tokens (UI-1); page styles below intentionally override -->
   <link rel="stylesheet" href="/css/zeluu-tokens.css">
 
+  <!-- KaTeX (math rendering) — pinned CDN with SRI. Math degrades gracefully to escaped text if unavailable. -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+  <script type="module">
+    // Expose the shared, tested, XSS-safe math-aware renderer (public/js/render.js).
+    import { renderMarkdown, escapeHtml } from '/js/render.js';
+    window.Zeluu = window.Zeluu || {};
+    window.Zeluu.renderMarkdown = renderMarkdown;
+    window.Zeluu.escapeHtml = escapeHtml;
+  </script>
+
   <style>
     :root {
       --color-cream: oklch(97.5% 0.004 60);
@@ -1144,6 +1155,12 @@
     }
 
     function renderMarkdown(text) {
+      // Delegate to the shared, tested, math-aware renderer (public/js/render.js) when it
+      // has loaded — it keeps the escape-first XSS model and adds KaTeX math rendering.
+      if (window.Zeluu && window.Zeluu.renderMarkdown) {
+        return window.Zeluu.renderMarkdown(text, window.katex);
+      }
+      // Fallback (module not yet loaded): original escape-first markdown, no math.
       // SECURITY: escape FIRST so model output (stored and replayed on resume) can
       // never inject markup/event handlers, then apply the simple markdown transforms.
       return escapeHtml(text)
