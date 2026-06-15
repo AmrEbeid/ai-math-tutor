@@ -136,6 +136,16 @@
       .nav-back { padding: 12px 0 12px 12px; }
     }
   </style>
+  <!-- KaTeX (math rendering) — pinned CDN. Degrades gracefully to escaped text if unavailable.
+       Follow-up hardening: add SRI integrity hashes once verified. -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
+  <script type="module">
+    import { renderMarkdown, escapeHtml } from '/js/render.js';
+    window.Zeluu = window.Zeluu || {};
+    window.Zeluu.renderMarkdown = renderMarkdown;
+    window.Zeluu.escapeHtml = escapeHtml;
+  </script>
 </head>
 <body>
   <nav class="nav" aria-label="App navigation">
@@ -272,6 +282,16 @@
       return String(text == null ? '' : text).replace(/[&<>"']/g, m => map[m]);
     }
 
+    // Render question/option DISPLAY text with math support, keeping the escape-first
+    // XSS model. Only use this for innerHTML display contexts — NEVER inside an HTML
+    // attribute or an onclick string (those must stay escapeHtml).
+    function renderMath(text) {
+      if (window.Zeluu && window.Zeluu.renderMarkdown) {
+        return window.Zeluu.renderMarkdown(text, window.katex);
+      }
+      return escapeHtml(text); // fallback before the module loads — safe, no math
+    }
+
     // Tab switching
     function showTab(tab) {
       document.querySelectorAll('.tab').forEach((t, i) => {
@@ -375,7 +395,7 @@
           const optText = opt.replace(/^[A-D]\)\s*/, '');
           return `<button class="option-btn ${selected}" onclick="selectOption('${escapeHtml(q.id)}', '${letters[i]}', this)">
             <span class="option-letter">${letters[i]}</span>
-            <span>${escapeHtml(optText)}</span>
+            <span>${renderMath(optText)}</span>
           </button>`;
         }).join('') + '</div>';
       } else if (q.question_type === 'true_false') {
@@ -400,7 +420,7 @@
             ${q.topic ? `<span class="badge badge-topic">${escapeHtml(q.topic)}</span>` : ''}
             <span class="badge ${diffClass}">${escapeHtml(q.difficulty)}</span>
           </div>
-          <div class="question-text">${escapeHtml(q.question_text)}</div>
+          <div class="question-text">${renderMath(q.question_text)}</div>
           ${optionsHTML}
         </div>
       `;
