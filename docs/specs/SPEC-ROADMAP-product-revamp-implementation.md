@@ -75,6 +75,77 @@
 
 ---
 
+## Product revamp by surface (RECOMMENDATION)
+
+> Carried over from the precursor research draft and adapted to the all-subject (math-first)
+> positioning. Tagged static vs needs-React. Citations use the research-doc labels (R/K/M/U).
+
+- **Homepage** *(static)* — lead with the hint-first virtue + trust, not features. Three above-the-fold
+  trust signals (never gives the answer K3; every message safety-checked + instant alert K1/K2; built
+  bilingual). Try-before-signup CTA (U1). Parent-proof section (alert + digest screenshot). Bilingual
+  toggle with RTL mirror. Frame as a *learning companion* (math-first), not "math tutor only."
+- **Student dashboard** *(static → React island)* — "Continue learning" hero + streak/daily-goal ring;
+  subject mastery map later; sparse + large tap targets for young kids; subject switcher when V2 lands.
+- **AI tutor / chat screen** *(static; streaming + whiteboard need React)* — KaTeX/rich formatting inline;
+  streaming + typing indicator; age-banded tone (R4, K4); "show worked example" escape hatch;
+  image→guided steps (not answer dump, M3); visible "a grown-up can see this chat" affordance.
+- **Math (and subject) answer/explanation layout** *(static)* — step cards revealed one at a time +
+  check-for-understanding; KaTeX everywhere; "Try a similar one" hook.
+- **Parent dashboard** *(static → richer React)* — **the differentiation surface**: safety/activity log,
+  dual-channel alert history (K2), time-on-task, subjects/topics, mastery trend; weekly email digest;
+  friendly per-child limits (framed as "daily learning time," not credits).
+- **Progress tracking** *(React island, medium-term)* — mastery map + streaks/badges tied to real skill
+  progress; curriculum-aligned ("on track for Grade 5 fractions").
+- **Pricing page** *(static)* — reframe from raw credits to outcomes + plans (Free Trial / Family /
+  Family Premium / credit-pack top-ups); clear 7-day trial; localized currency (SAR/AED/EGP).
+  ⚠️ Verify competitor price points first.
+- **Onboarding** *(static)* — child completes one learning session before any account (U1); lightweight
+  parent account + consent (COPPA VPC, R1) after the aha; progressive disclosure; capture
+  age/grade/language/subject.
+- **Safety / trust messaging** *(static)* — dedicated Safety & Privacy page explaining two-pass
+  moderation (R4), alerts (K2), RLS isolation, COPPA/Children's-Code alignment (R1, R2).
+- **Mobile UX** *(static, PWA)* — push installability + offline review; one-hand input; RTL-correct;
+  graceful streaming on slow networks.
+
+## Founder-ready summary (RECOMMENDATION)
+
+> Carried over from the precursor draft; feature/UX items map to the tasks in
+> [`TASKS-product-strategy-roadmap`](../tasks/TASKS-product-strategy-roadmap.md).
+
+**Top 10 features to build first:** 1) KaTeX/rich formatting (A1/T-01) · 2) Try-before-signup (B1/T-06)
+· 3) Verifiable parental consent — legally binding now (B6/T-11) · 4) Weekly parent digest (A4/T-04) ·
+5) Instant dual-channel safety alerts (B5/T-10) · 6) Age-banded tutor tone (B3/T-08) · 7) Step-reveal
+layout (B4/T-09) · 8) Response streaming (A2/T-02) · 9) Worked-example escape hatch (A3/T-03) ·
+10) Safety & Privacy page (A5/T-05).
+
+**Top 10 UX changes:** 1) Child completes a session before any signup wall · 2) Math renders as math
+everywhere · 3) Replies stream with a typing indicator · 4) Step cards one at a time + understanding
+checks · 5) Dashboard leads with "Continue learning" · 6) Parent dashboard shows a safety log + alert
+history · 7) Age-appropriate tone/vocab/length · 8) Streak ring + daily goal on the student home ·
+9) Header bilingual toggle with true RTL mirroring · 10) Homepage leads with hint-first promise + trust.
+
+**Top 5 differentiation opportunities** (see also [strategy spec](SPEC-PRODUCT-learning-companion-strategy.md) §7, §9):
+1) Hint-first pedagogy as a brand (research §7, K3, M3) · 2) Parent-trust as a product surface (K1, K2)
+· 3) Bilingual Arabic/English, RTL-native, grades 1–9 GCC (M2, M4) — *validate first* · 4) DB-level
+child data isolation (RLS) as a marketed trust claim · 5) Age-banded warmth winning where Khanmigo
+frustrates under-8s (K4).
+
+**Top 5 risks to avoid** (see also strategy spec §12): 1) Compliance miss — COPPA (R1) + UK Children's
+Code (R2); legal-gate it · 2) Betting positioning on refuted claims (QANDA Arabic gap; no-bilingual-
+competitor) · 3) Premature React/Vite big-bang — island-migrate only the tutor surface (C7, gated) ·
+4) Drifting into the commodity answer-dump zone (M3) · 5) Pure-Socratic rigidity frustrating young kids (K4).
+
+**Suggested MVP scope (~6 weeks):** KaTeX (T-01) + streaming (T-02) + worked-example escape hatch (T-03)
++ try-before-signup (T-06) + age-banded tone (T-08) + step-reveal (T-09) + weekly digest (T-04) +
+instant safety alerts (T-10) + Safety & Privacy page (T-05) + **COPPA consent design (T-11, legal-gated)**.
+All but the React items ship on the static stack.
+
+**Long-term vision (12–24 months):** the trusted bilingual AI **learning companion** for GCC families —
+Arabic/English, grades 1–9, multi-subject (math → science → English), that builds understanding (never
+just answers), proves its safety to parents, adapts to each child's mastery and mistakes, and expands
+from home into the classroom (B2B). React-island tutor with voice + whiteboard + graphing;
+curriculum-aligned mastery map; adaptive revision plan; teacher tier on the existing multi-tenant RLS foundation.
+
 ## Cross-cutting gates (from CLAUDE.md)
 
 - **Hard gates (owner approval required before code):** credit/payment/webhook/Lemon Squeezy changes
