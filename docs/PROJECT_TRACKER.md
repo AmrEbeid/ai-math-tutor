@@ -28,6 +28,11 @@ drop applied; UI polish + review fixes deployed; env verified; schema history re
   — Quick wins (1–2 wk) → MVP (2–6 wk) → Strategic (2–4 mo) → Differentiating (4–12 mo).
 * **Task backlog:** [`TASKS-product-strategy-roadmap`](tasks/TASKS-product-strategy-roadmap.md)
   — 24 gate-aware tasks (T-01…T-24) with priority/complexity/code-required/legal/React-gate flags.
+* **MVP foundation plan:** [`PLAN-MVP-foundation`](plans/PLAN-MVP-foundation.md) — execution-ready,
+  file-exact, test-backed plan for the MVP sprint, **reconciled against the actual codebase**
+  (key finding: age-banding, subjects, scaffolding L1–L4, and credit-limit RPCs already exist — MVP
+  is mostly frontend polish + small backend extensions). Each task carries its gate; all code tasks
+  are **BLOCKED pending owner approval**. Docs-only deliverable — no product code written.
 * **Immediate next sprint:** (1) KaTeX/rich formatting, (2) streaming spike, (3) weekly parent digest,
   (4) free-trial time+credit enforcement **design**, (5) COPPA/VPC research + legal gate, (6) Safety &
   Privacy page, (7) age-banded tutor tone, (8) pricing/credits implementation **design**.
