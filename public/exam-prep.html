@@ -136,10 +136,9 @@
       .nav-back { padding: 12px 0 12px 12px; }
     }
   </style>
-  <!-- KaTeX (math rendering) — pinned CDN. Degrades gracefully to escaped text if unavailable.
-       Follow-up hardening: add SRI integrity hashes once verified. -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
+  <!-- KaTeX (math rendering) — pinned CDN with SRI. Degrades gracefully to escaped text if unavailable. -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
   <script type="module">
     import { renderMarkdown, escapeHtml } from '/js/render.js';
     window.Zeluu = window.Zeluu || {};

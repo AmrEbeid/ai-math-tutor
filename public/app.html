@@ -17,10 +17,9 @@
   <!-- Shared design tokens (UI-1); page styles below intentionally override -->
   <link rel="stylesheet" href="/css/zeluu-tokens.css">
 
-  <!-- KaTeX (math rendering) — pinned CDN. Math degrades gracefully to escaped text if unavailable.
-       Follow-up hardening: add SRI integrity hashes once verified. -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
+  <!-- KaTeX (math rendering) — pinned CDN with SRI. Math degrades gracefully to escaped text if unavailable. -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
   <script type="module">
     // Expose the shared, tested, XSS-safe math-aware renderer (public/js/render.js).
     import { renderMarkdown, escapeHtml } from '/js/render.js';
