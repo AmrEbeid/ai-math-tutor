@@ -21,11 +21,14 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV" crossorigin="anonymous">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
   <script type="module">
-    // Expose the shared, tested, XSS-safe math-aware renderer (public/js/render.js).
+    // Expose the shared, tested, XSS-safe math-aware renderer (public/js/render.js)
+    // and the SSE stream parser (public/js/stream.js) to the page scripts.
     import { renderMarkdown, escapeHtml } from '/js/render.js';
+    import { parseSSEBuffer } from '/js/stream.js';
     window.Zeluu = window.Zeluu || {};
     window.Zeluu.renderMarkdown = renderMarkdown;
     window.Zeluu.escapeHtml = escapeHtml;
+    window.Zeluu.parseSSEBuffer = parseSSEBuffer;
   </script>
 
   <style>
@@ -1120,20 +1123,68 @@
       }
       clearAttachment();
 
-      const data = await apiCall('/api/chat', {
-        method: 'POST',
-        body: JSON.stringify(body)
-      });
+      // Ask the server to stream the reply token-by-token (SSE). Error/limit cases come
+      // back as a single JSON response; we detect that by content-type and handle it the
+      // same way the non-streaming path always did.
+      body.stream = true;
+      let data = null;
+      let assistantBubbleId = null;
+      let streamedText = '';
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + childToken },
+          body: JSON.stringify(body)
+        });
+        const contentType = res.headers.get('content-type') || '';
+        const parseSSE = window.Zeluu && window.Zeluu.parseSSEBuffer;
+        if (!res.ok || !res.body || !parseSSE || !contentType.includes('text/event-stream')) {
+          // Non-streaming response (error/limit, or streaming unsupported): handle as JSON.
+          data = await res.json().catch(() => null);
+        } else {
+          removeBubble(typingId); // tokens are arriving — drop the "Thinking…" indicator
+          const reader = res.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            const parsed = parseSSE(buffer);
+            buffer = parsed.rest;
+            for (const evt of parsed.events) {
+              if (evt.error) {
+                data = { error: evt.error };
+              } else if (evt.delta != null) {
+                streamedText += evt.delta;
+                if (!assistantBubbleId) assistantBubbleId = createAssistantStreamBubble();
+                updateAssistantStream(assistantBubbleId, streamedText);
+              } else if (evt.response !== undefined) {
+                data = evt; // final authoritative payload: clean text + credits + meta
+              }
+              // evt.done is the terminator; the read loop ends on its own.
+            }
+          }
+        }
+      } catch (err) {
+        console.error('[sendMessage] streaming failed', err);
+        data = null;
+      }
 
       btn.disabled = false;
       removeBubble(typingId);
 
-      if (data && data.response) {
-        addBubble(data.response, 'assistant');
+      if (data && data.response !== undefined) {
+        // Replace the streamed text with the server's clean, authoritative render.
+        if (assistantBubbleId) finalizeAssistantStream(assistantBubbleId, data.response);
+        else addBubble(data.response, 'assistant');
         if (data.credits_remaining !== undefined) {
           credits = data.credits_remaining;
           updateCreditBadge();
         }
+      } else if (streamedText && assistantBubbleId) {
+        // Tokens arrived but no final payload (e.g. dropped connection) — keep what we got.
+        finalizeAssistantStream(assistantBubbleId, streamedText);
       } else if (data && data.error === 'No credits remaining') {
         document.getElementById('credits-modal').classList.add('active');
       } else if (data && /not authenticated|unauthorized|expired|invalid token/i.test(data.error || '')) {
@@ -1145,6 +1196,38 @@
       }
 
       // Auto scroll
+      const msgs = document.getElementById('chat-messages');
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    // Streaming assistant bubble helpers. Content always passes through renderMarkdown,
+    // which escapes first (XSS-safe) before applying markdown + KaTeX — same invariant as
+    // addBubble(). The bubble starts as a spinner, grows as tokens arrive, then is finalized
+    // with the clean render plus the flag button.
+    function createAssistantStreamBubble() {
+      const id = 'msg-' + Date.now();
+      const msgs = document.getElementById('chat-messages');
+      const div = document.createElement('div');
+      div.className = 'chat-bubble assistant';
+      div.id = id;
+      div.innerHTML = '<span class="spinner"></span>';
+      msgs.appendChild(div);
+      msgs.scrollTop = msgs.scrollHeight;
+      return id;
+    }
+
+    function updateAssistantStream(id, text) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.innerHTML = renderMarkdown(text);
+      const msgs = document.getElementById('chat-messages');
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function finalizeAssistantStream(id, text) {
+      const el = document.getElementById(id);
+      if (!el) { addBubble(text, 'assistant'); return; }
+      el.innerHTML = renderMarkdown(text) + '<br><button class="flag-btn" onclick="flagMessage(this)">Flag this response</button>';
       const msgs = document.getElementById('chat-messages');
       msgs.scrollTop = msgs.scrollHeight;
     }
