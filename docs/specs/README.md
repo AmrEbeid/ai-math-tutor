@@ -221,6 +221,17 @@ ID (e.g. `A0.5`, `A0.6`, `STAGE1`).
 * **Risk level:** Low to write; **High to implement** (credit/payment/webhook/LS logic + migration = hard gate).
 * **Next action:** Owner/GPT review; verify live LS variant IDs + MoR fees; then gated step-1 (shadow-mode config).
 
+### `SPEC-SLICE-weekly-digest.md`
+* **Purpose:** Design (T-04) for a weekly per-parent digest of each child's learning + safety-flag
+  counts, delivered in-app and (phase 2) by email on a `pg_cron` job. Surfaces the blocking decision —
+  **no email-sending infra exists yet** — and recommends phasing (in-app first, email once a provider is
+  chosen). Aggregates only: time-on-task, subjects/topics, flag counts; **no child message content / no
+  PII** (CLAUDE.md). Grounded in the live `notifications` pipeline + `sessions`/`messages` schema + the
+  existing pg_cron job.
+* **Status:** Drafted 2026-06-17 (design-only). **No code.**
+* **Risk level:** Low to write; **High to implement** (email provider + secret + pg_cron + migration = hard gates).
+* **Next action:** Owner picks the email channel; then a gated phase-1 (read-only aggregation + in-app digest).
+
 > **Research & tasks:** competitive/product research is saved under `docs/research/`
 > (`RESEARCH-competitive-product-strategy-2026-06-15.md`, `RESEARCH-coppa-vpc-options.md`);
 > the MVP build plan is `docs/plans/PLAN-MVP-foundation.md`; the executable, gate-aware backlog
