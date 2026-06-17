@@ -98,6 +98,12 @@ low-severity signals in-app only (avoid alert fatigue).
 - 🟡 **Medium / phase-1 candidate:** a **non-blocking dispatch seam** in `api/chat.js` (a no-op
   `dispatchAlert()` that only writes the existing in-app notification) — refactor-only, no new channel,
   so the channel can be slotted in later without touching the detection/credit path again.
+  → **DONE (severity config):** `lib/alerts.js` (+`tests/alerts.test.mjs`, +6 tests) ships the §1 model
+  as pure config — `ALERT_POLICY` (distress=High in-app+email+push, personal-info=Medium, stuck=Low
+  in-app) + `alertPlanFor` / `needsSecondChannel` / `secondaryChannels`, in-app always included, unknown
+  → safe Low/in-app default. **Pure and UNWIRED.** Remaining for this seam: the `api/chat.js` refactor to
+  route the existing in-app inserts through a `dispatchAlert()` that consumes this config (chat path → its
+  own reviewed slice).
 - This doc is **docs-only, low-risk**.
 
 ## 7. Open gaps
