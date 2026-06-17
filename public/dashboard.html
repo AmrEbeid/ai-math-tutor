@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Zeluu Parent Dashboard - AI Tutoring for Math, Science & English">
-  <meta name="theme-color" content="#fdfbf8">
+  <meta name="theme-color" content="#1b1714">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
@@ -112,7 +112,7 @@
 
     /* ===== NAV ===== */
     .nav {
-      background: rgba(255, 253, 251, 0.85);
+      background: var(--color-surface-glass);
       backdrop-filter: blur(8px);
       border-bottom: 1px solid var(--color-border);
       position: sticky;
@@ -910,11 +910,11 @@
               html += '<button onclick="confirmRemoveChild(\'' + c.id + '\', \'' + c.name + '\')" style="background:none; border:none; cursor:pointer; font-size:16px; padding:2px 6px; color:var(--color-error);" title="Remove child">&times;</button>';
               html += '</div></div>';
               html += '<div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;">';
-              if (c.phone) html += '<span style="font-size:12px; background:white; padding:4px 8px; border-radius:4px; color:var(--color-text-muted);">Phone: <strong style="color:var(--color-text-dark);">' + c.phone + '</strong></span>';
-              if (bday) html += '<span style="font-size:12px; background:white; padding:4px 8px; border-radius:4px; color:var(--color-text-muted);">Born: <strong style="color:var(--color-text-dark);">' + bday + '</strong></span>';
+              if (c.phone) html += '<span style="font-size:12px; background:var(--gray-100); padding:4px 8px; border-radius:4px; color:var(--color-text-muted);">Phone: <strong style="color:var(--color-text-dark);">' + c.phone + '</strong></span>';
+              if (bday) html += '<span style="font-size:12px; background:var(--gray-100); padding:4px 8px; border-radius:4px; color:var(--color-text-muted);">Born: <strong style="color:var(--color-text-dark);">' + bday + '</strong></span>';
               html += '</div>';
               if (c.username) {
-                html += '<div style="font-size:12px; background:white; padding:6px 8px; border-radius:4px; margin-bottom:8px; color:var(--color-text-muted);">Username: <strong style="color:var(--color-text-dark);">' + c.username + '</strong></div>';
+                html += '<div style="font-size:12px; background:var(--gray-100); padding:6px 8px; border-radius:4px; margin-bottom:8px; color:var(--color-text-muted);">Username: <strong style="color:var(--color-text-dark);">' + c.username + '</strong></div>';
                 html += '<div style="display:flex; gap:6px; flex-wrap:wrap;">';
                 html += '<button class="btn btn-secondary" style="font-size:12px; padding:6px 12px;" onclick="openSetCredentialsModal(\'' + c.id + '\', \'' + c.name + '\')">Change Login</button>';
                 if (['premium','family'].indexOf(window._currentPlan) !== -1) {
