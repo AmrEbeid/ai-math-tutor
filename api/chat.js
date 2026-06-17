@@ -4,6 +4,7 @@ import { createServerClient, getUser } from '../lib/supabase.js';
 import { getChildOrUser, getParentId, getChildId } from '../lib/child-auth.js';
 import { getSystemPrompt, checkForBlockedContent, detectStuckLoop, detectChildDistress, detectPersonalInfo, COUNTRY_CODE_MAP } from '../lib/prompts.js';
 import { checkRateLimit, getClientIP, RATE_LIMITS } from '../lib/rate-limit.js';
+import { formatSSE, formatSSEEvent } from '../lib/sse.js';
 
 // ============================================
 // Tutoring Mode Detection
@@ -164,7 +165,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const { message, session_id, language: langOverride, image } = req.body;
+    const { message, session_id, language: langOverride, image, stream: wantsStream } = req.body;
     if (!message || !session_id) {
       return res.status(400).json({ error: 'Missing required fields: message, session_id' });
     }
@@ -356,80 +357,139 @@ export default async function handler(req, res) {
       { role: 'user', content: userContent }
     ];
 
-    // 10. Call OpenAI
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages,
-      max_tokens: 1200,
-      temperature: 0.7,
-    });
-
-    const aiResponse = completion.choices[0].message.content;
-    const tokensUsed = completion.usage?.total_tokens || 0;
-    const cleanResponse = aiResponse
-      .replace('[STUCK_LOOP]', '')
-      .replace('[CHILD_DISTRESS]', '')
-      .replace('[PERSONAL_INFO]', '')
-      .replace('[OFF_TOPIC_REPEAT]', '')
-      .trim();
-
-    // 11. Save messages first — must happen before credit count so the modulo is correct
-    await supabase.from('messages').insert([
-      { session_id, role: 'user', content: message },
-      { session_id, role: 'assistant', content: cleanResponse, tokens_used: tokensUsed }
-    ]);
-
-    // 12. Deduct credit — 1 credit per 5 text msgs, 1 per 2 image msgs
-    // Count is queried AFTER the save so the first message yields count=1, not count=0
-    const msgsPerCredit = image ? 2 : 5;
-    const { count: msgCount } = await supabase
-      .from('messages')
-      .select('*', { count: 'exact', head: true })
-      .eq('session_id', session_id)
-      .eq('role', 'user');
-
-    let newBalance = await getBalance(supabase, parentId);
-    if (msgCount !== null && msgCount % msgsPerCredit === 0) {
-      const { data: bal } = await supabase.rpc('deduct_credit', {
-        p_parent_id: parentId,
-        p_session_id: session_id
-      });
-      newBalance = bal;
-    }
-
-    // 13. Low credit notification — at most once per 24 hours to prevent flooding
-    if (newBalance !== null && newBalance <= 5 && newBalance > 0) {
-      const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      const { data: recentNotif } = await supabase
-        .from('notifications')
-        .select('id')
-        .eq('parent_id', parentId)
-        .eq('type', 'credits_low')
-        .gte('created_at', since)
-        .limit(1);
-      if (!recentNotif || recentNotif.length === 0) {
-        await supabase.from('notifications').insert({
-          parent_id: parentId,
-          type: 'credits_low',
-          title: 'Credits running low',
-          body: `You have ${newBalance} credits remaining. Top up to keep the learning going!`
-        });
-      }
-    }
-
-    return res.status(200).json({
-      response: cleanResponse,
-      credits_remaining: newBalance,
+    // 10. Call OpenAI. Model params and turn metadata are identical for both paths —
+    // defined once so the streaming and non-streaming branches can never drift apart.
+    const openaiParams = { model: 'gpt-4o-mini', messages, max_tokens: 1200, temperature: 0.7 };
+    const meta = {
       session_id,
       is_stuck: isStuck,
       tutoring_mode: detectedMode || 'default',
-      math_level: mathLevel || null
+      math_level: mathLevel || null,
+    };
+
+    if (wantsStream) {
+      // STREAMING PATH — tokens flow to the client as SSE for a live "typing" feel.
+      // Persistence + credit metering still run AFTER the stream completes, via the SAME
+      // finalizeTurn() the non-stream path uses, so the credit/payment logic is unchanged
+      // and has a single source of truth.
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache, no-transform');
+      res.setHeader('Connection', 'keep-alive');
+      res.flushHeaders?.();
+
+      let aiResponse = '';
+      let tokensUsed = 0;
+      try {
+        const streamResp = await openai.chat.completions.create({
+          ...openaiParams,
+          stream: true,
+          stream_options: { include_usage: true },
+        });
+        for await (const part of streamResp) {
+          const delta = part.choices?.[0]?.delta?.content || '';
+          if (delta) {
+            aiResponse += delta;
+            res.write(formatSSE(delta));
+          }
+          if (part.usage?.total_tokens) tokensUsed = part.usage.total_tokens;
+        }
+      } catch (streamErr) {
+        // The stream may have failed after headers were sent, so we cannot switch to a
+        // JSON error — report it as an SSE error event and close cleanly.
+        console.error('Chat stream error:', streamErr);
+        res.write(formatSSEEvent({ error: 'Something went wrong. Please try again.' }));
+        res.write(formatSSE(null, true));
+        return res.end();
+      }
+
+      const { cleanResponse, newBalance } = await finalizeTurn(supabase, {
+        session_id, parentId, message, aiResponse, tokensUsed, image,
+      });
+
+      // Final authoritative event: the cleaned full reply (marker tokens stripped) plus
+      // turn metadata. The client replaces the streamed text with this clean render.
+      res.write(formatSSEEvent({ ...meta, response: cleanResponse, credits_remaining: newBalance }));
+      res.write(formatSSE(null, true));
+      return res.end();
+    }
+
+    // NON-STREAMING PATH (fallback) — one OpenAI call, one JSON reply.
+    const completion = await openai.chat.completions.create(openaiParams);
+    const aiResponse = completion.choices[0].message.content;
+    const tokensUsed = completion.usage?.total_tokens || 0;
+
+    const { cleanResponse, newBalance } = await finalizeTurn(supabase, {
+      session_id, parentId, message, aiResponse, tokensUsed, image,
+    });
+
+    return res.status(200).json({
+      ...meta,
+      response: cleanResponse,
+      credits_remaining: newBalance,
     });
 
   } catch (error) {
     console.error('Chat error:', error);
     return res.status(500).json({ error: 'Something went wrong. Please try again.' });
   }
+}
+
+// Persist the turn and run credit metering. Shared by the streaming and non-streaming
+// paths so the credit/payment logic has ONE source of truth (unchanged from the original
+// inline steps 11-13). Returns the cleaned reply text and the resulting credit balance.
+async function finalizeTurn(supabase, { session_id, parentId, message, aiResponse, tokensUsed, image }) {
+  const cleanResponse = aiResponse
+    .replace('[STUCK_LOOP]', '')
+    .replace('[CHILD_DISTRESS]', '')
+    .replace('[PERSONAL_INFO]', '')
+    .replace('[OFF_TOPIC_REPEAT]', '')
+    .trim();
+
+  // Save messages first — must happen before credit count so the modulo is correct
+  await supabase.from('messages').insert([
+    { session_id, role: 'user', content: message },
+    { session_id, role: 'assistant', content: cleanResponse, tokens_used: tokensUsed }
+  ]);
+
+  // Deduct credit — 1 credit per 5 text msgs, 1 per 2 image msgs
+  // Count is queried AFTER the save so the first message yields count=1, not count=0
+  const msgsPerCredit = image ? 2 : 5;
+  const { count: msgCount } = await supabase
+    .from('messages')
+    .select('*', { count: 'exact', head: true })
+    .eq('session_id', session_id)
+    .eq('role', 'user');
+
+  let newBalance = await getBalance(supabase, parentId);
+  if (msgCount !== null && msgCount % msgsPerCredit === 0) {
+    const { data: bal } = await supabase.rpc('deduct_credit', {
+      p_parent_id: parentId,
+      p_session_id: session_id
+    });
+    newBalance = bal;
+  }
+
+  // Low credit notification — at most once per 24 hours to prevent flooding
+  if (newBalance !== null && newBalance <= 5 && newBalance > 0) {
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { data: recentNotif } = await supabase
+      .from('notifications')
+      .select('id')
+      .eq('parent_id', parentId)
+      .eq('type', 'credits_low')
+      .gte('created_at', since)
+      .limit(1);
+    if (!recentNotif || recentNotif.length === 0) {
+      await supabase.from('notifications').insert({
+        parent_id: parentId,
+        type: 'credits_low',
+        title: 'Credits running low',
+        body: `You have ${newBalance} credits remaining. Top up to keep the learning going!`
+      });
+    }
+  }
+
+  return { cleanResponse, newBalance };
 }
 
 async function getBalance(supabase, parentId) {
