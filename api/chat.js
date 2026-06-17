@@ -2,7 +2,7 @@ import OpenAI from 'openai';
 import { getEnv } from '../lib/env.js';
 import { createServerClient, getUser } from '../lib/supabase.js';
 import { getChildOrUser, getParentId, getChildId } from '../lib/child-auth.js';
-import { getSystemPrompt, checkForBlockedContent, detectStuckLoop, detectChildDistress, detectPersonalInfo, COUNTRY_CODE_MAP } from '../lib/prompts.js';
+import { getSystemPrompt, checkForBlockedContent, detectStuckLoop, detectChildDistress, detectPersonalInfo, getWorkedExampleGuard, COUNTRY_CODE_MAP } from '../lib/prompts.js';
 import { checkRateLimit, getClientIP, RATE_LIMITS } from '../lib/rate-limit.js';
 import { formatSSE, formatSSEEvent } from '../lib/sse.js';
 
@@ -165,7 +165,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const { message, session_id, language: langOverride, image, stream: wantsStream } = req.body;
+    const { message, session_id, language: langOverride, image, stream: wantsStream, worked_example: wantsWorkedExample } = req.body;
     if (!message || !session_id) {
       return res.status(400).json({ error: 'Missing required fields: message, session_id' });
     }
@@ -337,6 +337,13 @@ export default async function handler(req, res) {
       modeContext += `\n\nMATH SCAFFOLDING: ${levelGuidance[mathLevel] || ''}`;
     }
 
+    // Worked-example escape hatch (T-03): student asked to SEE a fully worked PARALLEL
+    // example. The guard forbids solving their own submitted problem — overrides any
+    // scaffolding level above for this one turn.
+    if (wantsWorkedExample) {
+      modeContext += `\n\n${getWorkedExampleGuard()}`;
+    }
+
     // 9. Build messages for OpenAI
     let userContent;
     if (image) {
@@ -363,7 +370,7 @@ export default async function handler(req, res) {
     const meta = {
       session_id,
       is_stuck: isStuck,
-      tutoring_mode: detectedMode || 'default',
+      tutoring_mode: wantsWorkedExample ? 'worked_example' : (detectedMode || 'default'),
       math_level: mathLevel || null,
     };
 
