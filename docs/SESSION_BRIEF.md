@@ -336,18 +336,35 @@ reconciliation done (`supabase/migrations/live/`); Vercel auto-deploy disabled.
 * Do not re-enable Vercel Git auto-deploy (deploys must stay explicit).
 * Do not copy public repo code without license/security review.
 
-## 8. Next Action
+## 8. Next Action — Tomorrow's plan (set 2026-06-17 EOD)
 
-**Everything automatable is done and live** (see §2). `npm test` green (**52 pass /
-1 skip** — the skip is the chat handler test, which needs `node_modules` to import
-`openai`). The next actions are the three owner-only items in §6: (1) flip the Supabase
-Auth leaked-password toggle; (2) run the Lemon Squeezy dashboard checks + runbook tests
-1–10 against zeluu.com (the full trial flow is now end-to-end testable); (3) decide
-whether the prod Supabase project stays ACTIVE (it backs the live site). After those,
-the next engineering slices, each gated on explicit approval, are in priority order:
-httpOnly child-token migration, `processed_webhooks` insert-first wiring (STAGE1-8),
-and RLS policy hardening (backlog item 1). `PROJECT_BRIEF.md` remains held out (drift —
-recommend archiving as legacy per its reconciliation spec).
+**State at handoff:** zero open PRs; `main` = teal-Spark brand app-wide; `npm test` **140 pass /
+1 skip** (skip = chat-handler test, needs `node_modules`). All Phase-A code shipped; all Phase-B
+features designed; pure foundation modules `lib/{credits,plans,digest,alerts}.js` merged but
+**UNWIRED**. The homepage/brand/login **revamp is complete** (PRs #19–23). Everything else is gated.
+
+### A. Ready to build immediately — NO approval needed (start here)
+1. **A11y skip-links** (audited, not yet built): add a "Skip to content" link to the 8 pages missing
+   one — `index`, `exam-prep`, `app`, `login`, `child-login`, `verify-email` (`pricing`/`dashboard`/
+   legal already have them). All have a `<main id="main">` to target. Self-mergeable. *(One small PR.)*
+2. **Homepage/auth polish** (optional): Arabic/RTL content pass (CSS is already RTL-ready via logical
+   properties; needs `dir="rtl"` + translated copy), and a real Spark wordmark on `dashboard.html`/
+   `exam-prep.html` navs (still text-only).
+
+### B. Gated — needs ONE owner decision first, then I build
+Decisions live in **`docs/DECISIONS-gated-work-register.md`**. Fastest unblock path:
+1. **D1 = "in-app first"** + approve the **two small D2 migrations** (`notifications.type += weekly_digest`,
+   `profiles.weekly_digest_opt_out`) + **D4** (verify live Lemon Squeezy variant IDs + MoR fee).
+   → Unblocks: wiring `digest`/`credits`/`plans`/`alerts` into real slices; the in-app weekly digest;
+   the per-action-metering **shadow-mode logging** wire-in to `api/chat.js` (low-risk, build + hold for review).
+2. **Legal sign-off** on the VPC method (card-with-notice vs email-plus) → build the redesigned
+   signup/consent flow (`docs/superpowers/specs/2026-06-17-login-signup-flow-design.md`).
+3. **"Wire it" approval** on a chat-backend slice → the `dispatchAlert()` seam (consumes `lib/alerts.js`).
+
+### C. Reference
+Decision register `docs/DECISIONS-gated-work-register.md`; design specs in `docs/superpowers/specs/` +
+`docs/specs/SPEC-SLICE-*`; homepage plan `docs/superpowers/plans/2026-06-17-homepage-revamp.md`.
+`PROJECT_BRIEF.md` still held out (drift — archive as legacy per its reconciliation spec).
 
 > **Key STAGE1-C findings to action later (all gated):** only
 > `LEMONSQUEEZY_WEBHOOK_SECRET` is guarded today; others fail late/silently
@@ -374,6 +391,7 @@ recommend archiving as legacy per its reconciliation spec).
 
 | Date       | Action                                                                 | Evidence                                              | Next                                                |
 | ---------- | ---------------------------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------- |
+| 2026-06-17 | SESSION-HANDOFF — end-of-session checkpoint per owner. Updated §8 "Next Action" with **tomorrow's ready-to-go plan**: (A) non-gated build-now items (a11y skip-links on 8 pages — audited; homepage/auth polish + RTL pass), (B) gated items each unlocked by one owner decision (D1–D5 in the decision register → wire the foundation modules + shadow-mode metering; legal VPC sign-off → signup/consent flow; chat-backend approval → dispatchAlert seam), (C) reference docs. Session shipped ~25 PRs: Phase-A features, full brand/homepage/login **revamp** (research→brainstorm→plan→build), all Phase-B designs + decision register, and pure foundation modules (credits/plans/digest/alerts). Zero open PRs; `npm test` 140/1. **Docs-only.** | Stop signal received from owner. | Owner picks A (I build immediately) or unlocks a B item. |
 | 2026-06-17 | ALERT-SEVERITY-CONFIG — added `lib/alerts.js` (+`tests/alerts.test.mjs`, +6 tests), the safety-alert **severity→channel config** from the T-10 design's `dispatchAlert()` seam: `ALERT_POLICY` (child_distress=High → in-app+email+push; personal_info_shared=Medium; stuck_loop=Low → in-app only) + `alertPlanFor`/`needsSecondChannel`/`secondaryChannels`; **in-app always included** (durable record never skipped), unknown type → safe Low/in-app default. **Pure config, UNWIRED** — the gated `api/chat.js` `dispatchAlert()` refactor consumes it later. Completes the design-foundation pure-module set (credits/plans/digest/alerts). Updated the design doc. `npm test` 140/1. **Additive pure module; no schema/auth/payment/migration/deploy.** PR open → `main` (low-risk). | `npm test` 140 pass / 1 skip (+6); `node --check` clean; zero runtime importers. | Owner merge (or self, low-risk); gated next = the `dispatchAlert()` chat-path refactor + a real second channel. |
 | 2026-06-17 | WEEKLY-DIGEST-AGGREGATION — added `lib/digest.js` (+`tests/digest.test.mjs`, +11 tests), the **pure weekly-digest aggregation** from the T-04 design: `summarizeWeek({sessions,messages,notifications})` + `timeOnTaskMinutes()` (**idle-gap-capped**, resolving the design's open time-on-task question) + `DIGEST_FLAG_TYPES`. Returns **aggregates only — no message content / no names / no PII** (asserted in a privacy test). **Pure, UNWIRED** (no DB/email/Supabase) — the gated slice feeds it real rows + handles delivery. The phase-1 'read-only aggregation' from the decision register. Updated the design doc. `npm test` 134/1. **Additive pure module; no schema/auth/payment/migration/deploy.** PR open → `main` (low-risk). | `npm test` 134 pass / 1 skip (+11); `node --check` clean; grep confirms zero runtime importers. | Owner merge (or self, low-risk); gated next = the read-only query/RPC that feeds it + in-app `weekly_digest` insert. |
 | 2026-06-17 | BRAND-ROLLOUT-REMAINING (revamp polish) — **MERGED flow-design PR #22** (`c4ec461`), then finished the staged teal rollout across the **remaining 9 pages** (`pricing`, `dashboard`, `exam-prep`, `app`, `privacy`, `terms`, `gdpr`, `refund`, `safety`): inserted the same surgical **`--color-accent`→`--brand-*`** teal override (light+dark) as one `<style id="brand-rollout">` block before each `</head>`. **Whole app is now teal-consistent** (favicons already teal from PR #19). No JS/markup/copy changed; `sw.js` v12→v13. Verified pricing screenshot (teal, disclosure intact); `npm test` 123/1 green. **Frontend CSS only; no auth/payment/schema/migration/deploy.** PR open → `main`. | `npm test` 123/1; pricing page screenshot reviewed. | Owner review/merge; the revamp + brand rollout are complete. Remaining gated: auth-flow build (legal), and the earlier backlog (digest aggregation, per-action metering wire-in, etc.). | 
