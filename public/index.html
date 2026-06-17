@@ -3,983 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zeluu - AI Learning That Actually Teaches Your Child</title>
+    <title>Zeluu — the AI tutor that teaches the how, not the answer</title>
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#1b1714">
+    <meta name="theme-color" content="#14181a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Zeluu">
     <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="icon" type="image/png" sizes="96x96" href="/icons/icon-96.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
     <link rel="shortcut icon" href="/icons/icon-96.png">
-    <meta name="description" content="AI tutor for Math, Science & English — teaches your child step by step.">
+    <meta name="description" content="Zeluu is a bilingual (English + Arabic) AI tutor for Math, Science & English that guides your child step by step — with full parent oversight and safety built in.">
     <meta name="mobile-web-app-capable" content="yes">
 
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,800;1,9..144,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Shared design tokens (UI-1); page styles below intentionally override -->
+    <!-- Shared design tokens (incl. --brand-* teal/amber, light + dark) -->
     <link rel="stylesheet" href="/css/zeluu-tokens.css">
 
     <style>
-        /* ===== GLOBAL STYLES ===== */
-        :root {
-            --color-cream: oklch(97.5% 0.004 60);
-            --color-warm-bg: oklch(98.8% 0.005 62);
-            --color-text-dark: oklch(15% 0.02 60);
-            --color-text-muted: oklch(50% 0.015 65);
-            --color-text-light: oklch(75% 0.01 65);
-            --color-border: oklch(92% 0.008 65);
-            --color-accent: oklch(55% 0.15 50);
-            --color-accent-dark: oklch(45% 0.18 48);
-            --color-accent-light: oklch(82% 0.1 55);
-            --color-success: oklch(65% 0.16 142);
-
-            --font-display: 'Fraunces', serif;
-            --font-body: 'Plus Jakarta Sans', sans-serif;
-
-            --spacing-xs: 8px;
-            --spacing-sm: 16px;
-            --spacing-md: 24px;
-            --spacing-lg: 40px;
-            --spacing-xl: 64px;
-            --spacing-2xl: 100px;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            font-family: var(--font-body);
-            color: var(--color-text-dark);
-            background: var(--color-warm-bg);
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
-
-        /* Typography */
-        h1, h2, h3, h4, h5, h6 {
-            font-family: var(--font-display);
-            font-weight: 700;
-            line-height: 1.15;
-            color: var(--color-text-dark);
-        }
-
-        h1 {
-            font-size: clamp(32px, 5vw, 56px);
-            font-weight: 800;
-            margin-bottom: var(--spacing-md);
-        }
-
-        h2 {
-            font-size: clamp(28px, 4vw, 42px);
-            font-weight: 700;
-            margin-bottom: var(--spacing-lg);
-        }
-
-        h3 {
-            font-size: 20px;
-            font-weight: 700;
-        }
-
-        p {
-            font-size: 16px;
-            color: var(--color-text-muted);
-            line-height: 1.7;
-        }
-
-        a {
-            text-decoration: none;
-            color: var(--color-accent);
-            transition: color 0.3s ease-out;
-        }
-
-        a:hover {
-            color: var(--color-accent-dark);
-        }
-
-        /* ===== NAV ===== */
-        .nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 100;
-            background: var(--color-surface-glass);
-            border-bottom: 1px solid var(--color-border);
-            padding: 16px 0;
-        }
-
-        .nav-inner {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .nav-brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 24px;
-            font-weight: 800;
-            font-family: var(--font-display);
-            color: var(--color-text-dark);
-            text-decoration: none;
-        }
-
-        .nav-brand-text {
-            display: block;
-        }
-
-        .nav-signin {
-            background: var(--color-accent);
-            color: white;
-            padding: 10px 24px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 14px;
-            text-decoration: none;
-            transition: all 0.3s ease-out;
-        }
-
-        .nav-signin:hover {
-            background: var(--color-accent-dark);
-            transform: translateY(-1px);
-        }
-
-        /* ===== HERO SECTION ===== */
-        .hero {
-            margin-top: 70px;
-            padding: 80px 0 60px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero-grid {
-            display: grid;
-            grid-template-columns: 1fr 1.2fr;
-            gap: 60px;
-            align-items: center;
-        }
-
-        .hero-text h1 {
-            margin-bottom: 24px;
-            line-height: 1.2;
-        }
-
-        .hero-text h1 .accent {
-            color: var(--color-accent);
-        }
-
-        .hero-subtitle {
-            font-size: 18px;
-            color: var(--color-text-muted);
-            margin-bottom: 32px;
-            max-width: 500px;
-            line-height: 1.8;
-        }
-
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: var(--color-accent-light);
-            color: var(--color-accent-dark);
-            border-radius: 50px;
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 24px;
-        }
-
-        .pulse-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--color-success);
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-        }
-
-        .hero-ctas {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 40px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 14px 32px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 15px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease-out;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background: var(--color-accent);
-            color: white;
-            box-shadow: 0 4px 16px rgba(217, 119, 6, 0.3);
-        }
-
-        .btn-primary:hover {
-            background: var(--color-accent-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 24px rgba(217, 119, 6, 0.4);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            color: var(--color-accent);
-            border: 2px solid var(--color-accent);
-        }
-
-        .btn-secondary:hover {
-            background: var(--color-accent-light);
-        }
-
-        .hero-trust {
-            display: flex;
-            gap: 32px;
-            font-size: 14px;
-            color: var(--color-text-muted);
-            flex-wrap: wrap;
-        }
-
-        .trust-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        /* Hero visual */
-        .hero-visual {
-            position: relative;
-            perspective: 1000px;
-        }
-
-        .chat-container {
-            background: var(--color-surface);
-            border-radius: 16px;
-            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
-            overflow: hidden;
-            transform: rotateY(-2deg) rotateX(1deg);
-            transition: transform 0.4s ease-out;
-        }
-
-        .chat-container:hover {
-            transform: rotateY(0) rotateX(0);
-        }
-
-        .chat-header {
-            background: var(--color-accent);
-            color: white;
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .chat-avatar {
-            width: 32px;
-            height: 32px;
-            background: rgba(255, 255, 255, 0.25);
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-        }
-
-        .chat-body {
-            padding: 20px;
-            min-height: 300px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .msg {
-            padding: 12px 16px;
-            border-radius: 12px;
-            font-size: 14px;
-            line-height: 1.5;
-            max-width: 85%;
-            opacity: 0;
-            animation: msgSlideIn 0.5s ease-out forwards;
-        }
-
-        .msg-child {
-            align-self: flex-end;
-            background: var(--color-accent);
-            color: white;
-            border-bottom-right-radius: 4px;
-        }
-
-        .msg-tutor {
-            align-self: flex-start;
-            background: var(--color-border);
-            color: var(--color-text-dark);
-            border-bottom-left-radius: 4px;
-        }
-
-        .msg:nth-child(1) { animation-delay: 0.6s; }
-        .msg:nth-child(2) { animation-delay: 1.6s; }
-        .msg:nth-child(3) { animation-delay: 2.8s; }
-        .msg:nth-child(4) { animation-delay: 4.2s; }
-
-        @keyframes msgSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(8px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .typing-indicator {
-            display: flex;
-            gap: 4px;
-            padding: 12px 16px;
-            align-self: flex-start;
-            opacity: 0;
-            animation: msgSlideIn 0.5s ease-out 2.2s forwards;
-        }
-
-        .typing-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--color-text-light);
-            border-radius: 50%;
-            animation: typingBounce 1.4s infinite;
-        }
-
-        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes typingBounce {
-            0%, 60%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-6px); }
-        }
-
-        .mascot {
-            position: absolute;
-            top: -30px;
-            right: -20px;
-            width: 80px;
-            height: 80px;
-            background: var(--color-accent);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 40px;
-            box-shadow: 0 8px 32px rgba(217, 119, 6, 0.3);
-            animation: mascotBob 3s ease-in-out infinite;
-        }
-
-        @keyframes mascotBob {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-12px); }
-        }
-
-        /* ===== PARENT MESSAGE ===== */
-        .parent-message {
-            padding: 60px 0;
-            background: var(--color-surface);
-            border-top: 1px solid var(--color-border);
-        }
-
-        .parent-message-inner {
-            max-width: 700px;
-            margin: 0 auto;
-            text-align: center;
-        }
-
-        .parent-message-inner h2 {
-            margin-bottom: 20px;
-        }
-
-        .parent-message-inner p {
-            font-size: 17px;
-            color: var(--color-text-muted);
-        }
-
-        .parent-message-inner strong {
-            color: var(--color-accent);
-        }
-
-        /* ===== FEATURES ===== */
-        .features {
-            padding: 100px 0 80px;
-        }
-
-        .section-header {
-            margin-bottom: 60px;
-        }
-
-        .section-header h2 {
-            margin-bottom: 12px;
-        }
-
-        .section-header p {
-            font-size: 17px;
-            max-width: 600px;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 32px;
-        }
-
-        .feature {
-            padding: 32px 0;
-            border-bottom: 1px solid var(--color-border);
-            display: grid;
-            grid-template-columns: 80px 1fr;
-            gap: 24px;
-            align-items: flex-start;
-        }
-
-        .feature:last-child {
-            border-bottom: none;
-        }
-
-        .feature-icon {
-            font-size: 40px;
-            line-height: 1;
-        }
-
-        .feature h3 {
-            margin-bottom: 8px;
-            font-size: 18px;
-        }
-
-        .feature p {
-            font-size: 15px;
-            color: var(--color-text-muted);
-        }
-
-        /* ===== HOW IT WORKS ===== */
-        .how-works {
-            padding: 80px 0;
-            background: var(--color-surface);
-        }
-
-        .steps-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 40px;
-            position: relative;
-        }
-
-        .steps-grid::before {
-            content: '';
-            position: absolute;
-            top: 36px;
-            left: 5%;
-            right: 5%;
-            height: 2px;
-            background: linear-gradient(90deg, var(--color-accent) 0%, var(--color-accent-light) 100%);
-            z-index: 0;
-        }
-
-        .step {
-            position: relative;
-            z-index: 1;
-        }
-
-        .step-num {
-            width: 72px;
-            height: 72px;
-            background: var(--color-accent);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            font-weight: 800;
-            font-family: var(--font-display);
-            margin: 0 auto 16px;
-            box-shadow: 0 4px 16px rgba(217, 119, 6, 0.3);
-        }
-
-        .step h3 {
-            font-size: 16px;
-            margin-bottom: 8px;
-            text-align: center;
-        }
-
-        .step p {
-            font-size: 14px;
-            text-align: center;
-            color: var(--color-text-muted);
-        }
-
-        /* ===== STATS ===== */
-        .stats {
-            padding: 60px 0;
-            background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%);
-            color: white;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 40px;
-            text-align: center;
-        }
-
-        .stat {
-            opacity: 0;
-            animation: statFade 0.6s ease-out forwards;
-        }
-
-        .stat:nth-child(1) { animation-delay: 0.2s; }
-        .stat:nth-child(2) { animation-delay: 0.4s; }
-        .stat:nth-child(3) { animation-delay: 0.6s; }
-        .stat:nth-child(4) { animation-delay: 0.8s; }
-
-        @keyframes statFade {
-            from { opacity: 0; transform: translateY(12px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .stat-num {
-            font-size: 42px;
-            font-weight: 800;
-            font-family: var(--font-display);
-            margin-bottom: 8px;
-        }
-
-        .stat-text {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-
-        /* ===== PRICING PREVIEW ===== */
-        .pricing {
-            padding: 80px 0;
-        }
-
-        .pricing-preview {
-            background: var(--color-surface);
-            border: 1px solid var(--color-border);
-            border-radius: 12px;
-            padding: 48px;
-            text-align: center;
-        }
-
-        .pricing-preview h3 {
-            font-size: 24px;
-            margin-bottom: 12px;
-        }
-
-        .pricing-preview p {
-            color: var(--color-text-muted);
-            margin-bottom: 28px;
-        }
-
-        /* ===== CTA SECTION ===== */
-        .cta {
-            padding: 80px 0;
-        }
-
-        .cta-box {
-            background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%);
-            border-radius: 12px;
-            padding: 60px 48px;
-            text-align: center;
-            color: white;
-        }
-
-        .cta-box h2 {
-            margin-bottom: 16px;
-            color: white;
-        }
-
-        .cta-box p {
-            color: rgba(255, 255, 255, 0.85);
-            font-size: 17px;
-            margin-bottom: 32px;
-            max-width: 500px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .btn-white {
-            background: white;
-            color: var(--color-accent);
-            padding: 14px 40px;
-            border-radius: 8px;
-            font-weight: 600;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease-out;
-            border: none;
-            cursor: pointer;
-        }
-
-        .btn-white:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-        }
-
-        /* ===== FOOTER ===== */
-        .footer {
-            padding: 48px 0;
-            border-top: 1px solid var(--color-border);
-            text-align: center;
-        }
-
-        .footer-brand {
-            font-family: var(--font-display);
-            font-size: 22px;
-            font-weight: 800;
-            color: var(--color-accent);
-            margin-bottom: 8px;
-        }
-
-        .footer p {
-            font-size: 14px;
-            color: var(--color-text-light);
-            margin-bottom: 16px;
-        }
-
-        .footer-links {
-            display: flex;
-            gap: 24px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .footer-links a {
-            font-size: 13px;
-            color: var(--color-text-light);
-        }
-
-        .footer-links a:hover {
-            color: var(--color-accent);
-        }
-
-        /* ===== SCROLL REVEAL ===== */
-        .reveal {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .reveal.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 1024px) {
-            .hero-grid {
-                grid-template-columns: 1fr;
-                gap: 40px;
-            }
-
-            .hero-visual {
-                order: -1;
-            }
-
-            .features-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 24px;
-            }
-
-            .feature {
-                grid-template-columns: 60px 1fr;
-                gap: 16px;
-                padding: 24px 0;
-            }
-
-            .steps-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 32px;
-            }
-
-            .steps-grid::before {
-                display: none;
-            }
-
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 32px;
-            }
-        }
-
-        @media (max-width: 640px) {
-            .container {
-                padding: 0 16px;
-            }
-
-            .nav-signin {
-                padding: 12px 24px;
-            }
-
-            .footer-links a {
-                padding: 8px 4px;
-                display: inline-block;
-            }
-
-            .hero {
-                margin-top: 60px;
-                padding: 50px 0 40px;
-            }
-
-            .hero-subtitle {
-                font-size: 16px;
-            }
-
-            .hero-ctas {
-                flex-direction: column;
-                gap: 12px;
-            }
-
-            .btn {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .hero-trust {
-                flex-direction: column;
-                gap: 16px;
-            }
-
-            .features {
-                padding: 60px 0;
-            }
-
-            .features-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .feature {
-                grid-template-columns: 50px 1fr;
-                gap: 12px;
-                padding: 20px 0;
-            }
-
-            .feature-icon {
-                font-size: 32px;
-            }
-
-            .steps-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-
-            .how-works {
-                padding: 60px 0;
-            }
-
-            .cta-box {
-                padding: 40px 24px;
-            }
-
-            .cta-box h2 {
-                font-size: 28px;
-            }
-
-            .pricing {
-                padding: 60px 0;
-            }
-
-            .pricing-preview {
-                padding: 32px 20px;
-            }
-
-            .parent-message {
-                padding: 40px 0;
-            }
-        }
-
-        /* ===== INSTALL POPUP ===== */
-        #app-install-popup {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 9999;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .install-modal {
-            background: var(--color-surface);
-            border-radius: 16px;
-            padding: 32px 28px;
-            max-width: 340px;
-            width: 100%;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-            animation: popIn 0.4s ease-out;
-        }
-
-        .install-icon {
-            width: 72px;
-            height: 72px;
-            background: var(--color-accent);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 16px;
-            box-shadow: 0 8px 24px rgba(217, 119, 6, 0.3);
-        }
-
-        .install-icon img {
-            width: 48px;
-            height: 48px;
-            border-radius: 10px;
-        }
-
-        .install-modal h3 {
-            font-size: 20px;
-            margin-bottom: 8px;
-        }
-
-        .install-modal p {
-            font-size: 14px;
-            color: var(--color-text-muted);
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-
-        .install-btns {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .btn-install {
-            width: 100%;
-            padding: 14px;
-            background: var(--color-accent);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease-out;
-        }
-
-        .btn-install:hover {
-            background: var(--color-accent-dark);
-        }
-
-        .btn-install-cancel {
-            background: var(--color-border);
-            color: var(--color-text-muted);
-        }
-
-        .btn-install-cancel:hover {
-            background: oklch(26% 0.01 65);
-        }
-
-        .ios-guide {
-            display: none;
-            text-align: left;
-            background: var(--color-border);
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 10px;
-            font-size: 13px;
-        }
-
-        .ios-guide p {
-            margin-bottom: 6px;
-            font-size: 13px;
-        }
-
-        @keyframes popIn {
-            from {
-                opacity: 0;
-                transform: scale(0.9) translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
-        }
+        :root{
+            --font-display:'Fraunces',Georgia,serif;
+            --font-body:'Plus Jakarta Sans',system-ui,sans-serif;
+            --maxw:1140px;
+            --r-sm:10px; --r-md:16px; --r-lg:24px; --r-xl:30px;
+            --shadow:0 1px 2px rgba(20,30,40,.04), 0 12px 32px -12px rgba(20,30,40,.14);
+        }
+        *{margin:0;padding:0;box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{
+            font-family:var(--font-body);
+            background:var(--color-cream);
+            color:var(--color-text-dark);
+            line-height:1.6;
+            -webkit-font-smoothing:antialiased;
+            text-rendering:optimizeLegibility;
+        }
+        .container{max-width:var(--maxw);margin-inline:auto;padding-inline:24px}
+        h1,h2,h3{font-family:var(--font-display);font-weight:600;line-height:1.12;letter-spacing:-.012em;color:var(--color-text-dark)}
+        a{color:inherit;text-decoration:none}
+        .eyebrow{font-family:var(--font-body);font-weight:600;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--brand-primary)}
+        .icon{width:24px;height:24px;flex:none}
+        .muted{color:var(--color-text-muted)}
+
+        /* Buttons */
+        .btn{display:inline-flex;align-items:center;gap:9px;font-weight:600;font-size:16px;border-radius:999px;padding:13px 24px;cursor:pointer;border:1.5px solid transparent;transition:transform .15s ease, background .2s ease, box-shadow .2s ease;white-space:nowrap}
+        .btn:hover{transform:translateY(-1px)}
+        .btn-primary{background:var(--brand-primary);color:var(--brand-on-primary);box-shadow:0 8px 20px -8px var(--brand-primary)}
+        .btn-primary:hover{background:var(--brand-primary-strong)}
+        .btn-ghost{background:transparent;color:var(--color-text-dark);border-color:var(--color-border)}
+        .btn-ghost:hover{border-color:var(--brand-primary);color:var(--brand-primary)}
+        .btn-white{background:var(--color-surface);color:var(--brand-primary);box-shadow:var(--shadow)}
+
+        /* Nav */
+        .nav{position:sticky;top:0;z-index:50;background:var(--color-surface-glass);backdrop-filter:saturate(180%) blur(14px);border-bottom:1px solid var(--color-border)}
+        .nav-inner{display:flex;align-items:center;justify-content:space-between;height:68px}
+        .brand{display:inline-flex;align-items:center;gap:10px}
+        .brand .mark{width:28px;height:28px;color:var(--brand-primary)}
+        .brand-text{font-family:var(--font-display);font-weight:700;font-size:23px;letter-spacing:-.01em}
+        .nav-right{display:flex;align-items:center;gap:18px}
+        .nav-signin{font-weight:600;color:var(--color-text-muted)}
+        .nav-signin:hover{color:var(--color-text-dark)}
+        .nav .btn{padding:9px 18px;font-size:15px}
+
+        /* Hero */
+        .hero{padding:72px 0 40px}
+        .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center}
+        .badge{display:inline-flex;align-items:center;gap:8px;background:var(--brand-primary-tint);color:var(--brand-primary);font-weight:600;font-size:13px;padding:6px 13px;border-radius:999px;margin-bottom:22px}
+        .badge .dot{width:7px;height:7px;border-radius:50%;background:var(--brand-primary);box-shadow:0 0 0 0 var(--brand-primary);animation:pulse 2.4s infinite}
+        @keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in oklab,var(--brand-primary) 55%,transparent)}70%{box-shadow:0 0 0 9px transparent}100%{box-shadow:0 0 0 0 transparent}}
+        .hero h1{font-size:clamp(36px,5vw,56px);font-weight:600}
+        .hero h1 .accent{color:var(--brand-primary)}
+        .hero-sub{font-size:clamp(17px,2vw,20px);color:var(--color-text-muted);margin:20px 0 28px;max-width:30em}
+        .hero-ctas{display:flex;gap:14px;flex-wrap:wrap}
+        .hero-trust{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
+        .chip{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:500;color:var(--color-text-muted);background:var(--color-surface);border:1px solid var(--color-border);border-radius:999px;padding:7px 13px}
+        .chip .icon{width:16px;height:16px;color:var(--brand-primary)}
+
+        /* Chat mock */
+        .chatcard{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--r-xl);box-shadow:var(--shadow);overflow:hidden}
+        .chatcard .top{display:flex;align-items:center;gap:11px;padding:15px 18px;border-bottom:1px solid var(--color-border)}
+        .chatcard .av{width:34px;height:34px;border-radius:10px;background:var(--brand-primary);display:grid;place-items:center;color:#fff}
+        .chatcard .av .icon{width:20px;height:20px}
+        .chatcard .who{font-weight:600;font-size:14.5px}
+        .chatcard .who small{display:block;font-weight:500;color:var(--color-text-light);font-size:12px}
+        .chatcard .body{padding:18px;display:flex;flex-direction:column;gap:11px;background:var(--color-warm-bg)}
+        .msg{max-width:84%;padding:11px 14px;border-radius:16px;font-size:14.5px;line-height:1.5}
+        .msg.kid{align-self:flex-end;background:var(--brand-primary);color:var(--brand-on-primary);border-end-end-radius:5px}
+        .msg.tut{align-self:flex-start;background:var(--color-surface);border:1px solid var(--color-border);border-end-start-radius:5px}
+        .msg.tut b{color:var(--brand-primary)}
+
+        /* Sections */
+        section{padding:64px 0}
+        .sec-head{max-width:40em;margin-bottom:40px}
+        .sec-head.center{margin-inline:auto;text-align:center}
+        .sec-head h2{font-size:clamp(28px,3.4vw,40px)}
+        .sec-head p{color:var(--color-text-muted);font-size:17px;margin-top:12px}
+
+        /* Pillars */
+        .pillars{background:var(--color-warm-bg);border-block:1px solid var(--color-border)}
+        .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+        .card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--r-lg);padding:28px}
+        .card .ic{width:46px;height:46px;border-radius:13px;background:var(--brand-primary-tint);color:var(--brand-primary);display:grid;place-items:center;margin-bottom:16px}
+        .card .ic .icon{width:24px;height:24px}
+        .card h3{font-size:20px;margin-bottom:8px}
+        .card p{color:var(--color-text-muted);font-size:15px}
+
+        /* How it teaches demo */
+        .demo{max-width:660px;margin-inline:auto}
+        .demo .beats{display:flex;flex-direction:column;gap:14px;margin-top:8px}
+        .beat{display:flex;gap:14px;align-items:flex-start;background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--r-md);padding:16px 18px}
+        .beat .tag{flex:none;font-weight:700;font-size:12px;letter-spacing:.04em;color:var(--brand-primary);background:var(--brand-primary-tint);border-radius:8px;padding:5px 9px;text-transform:uppercase}
+        .beat p{font-size:15px}
+        .beat p b{color:var(--brand-primary)}
+        .demo .cap{text-align:center;color:var(--color-text-light);font-size:13.5px;margin-top:16px}
+
+        /* Transparency split */
+        .split{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+        .checks{display:flex;flex-direction:column;gap:14px;margin-top:8px}
+        .checks li{display:flex;gap:12px;align-items:flex-start;list-style:none}
+        .checks .icon{width:22px;height:22px;color:var(--brand-safe);margin-top:1px}
+        .checks b{display:block}
+        .checks span{color:var(--color-text-muted);font-size:14.5px}
+
+        /* Features */
+        .grid-feat{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+        .feat{display:flex;gap:14px;align-items:flex-start}
+        .feat .ic{width:40px;height:40px;border-radius:11px;background:var(--brand-primary-tint);color:var(--brand-primary);display:grid;place-items:center;flex:none}
+        .feat .ic .icon{width:21px;height:21px}
+        .feat h3{font-size:17px;margin-bottom:4px}
+        .feat p{font-size:14px;color:var(--color-text-muted)}
+
+        /* Steps */
+        .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:22px}
+        .step .n{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--brand-primary);color:var(--brand-primary);font-family:var(--font-display);font-weight:600;display:grid;place-items:center;margin-bottom:14px}
+        .step h3{font-size:17px;margin-bottom:6px}
+        .step p{font-size:14px;color:var(--color-text-muted)}
+
+        /* Proof band */
+        .proof{background:var(--brand-primary);color:var(--brand-on-primary)}
+        .proof .grid-4{gap:18px}
+        .proof .stat{text-align:center}
+        .proof .num{font-family:var(--font-display);font-weight:600;font-size:clamp(34px,5vw,48px);line-height:1}
+        .proof .lbl{margin-top:8px;font-size:14px;opacity:.9}
+
+        /* Pricing teaser + CTA */
+        .panel{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--r-xl);padding:48px;text-align:center;box-shadow:var(--shadow)}
+        .panel h2{font-size:clamp(26px,3vw,34px)}
+        .panel p{color:var(--color-text-muted);margin:12px auto 26px;max-width:34em}
+        .cta-box{background:linear-gradient(135deg,var(--brand-primary),var(--brand-primary-strong));color:var(--brand-on-primary);border-radius:var(--r-xl);padding:56px 40px;text-align:center}
+        .cta-box h2{color:var(--brand-on-primary);font-size:clamp(28px,3.4vw,40px)}
+        .cta-box p{opacity:.92;margin:14px auto 26px;max-width:32em}
+
+        /* Footer */
+        .footer{border-top:1px solid var(--color-border);padding:44px 0;background:var(--color-warm-bg)}
+        .footer .row{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+        .footer .brand .mark{width:24px;height:24px}
+        .footer .brand-text{font-size:19px}
+        .footer-links{display:flex;gap:20px;flex-wrap:wrap}
+        .footer-links a{color:var(--color-text-muted);font-size:14px}
+        .footer-links a:hover{color:var(--brand-primary)}
+        .footer .tag{color:var(--color-text-light);font-size:13.5px;margin-top:6px}
+
+        /* Install popup */
+        #install{display:none;position:fixed;inset:0;background:rgba(10,16,20,.5);z-index:100;align-items:flex-end;justify-content:center}
+        #install .modal{background:var(--color-surface);border-radius:22px 22px 0 0;padding:26px 22px 30px;max-width:440px;width:100%;text-align:center;box-shadow:0 -10px 40px rgba(0,0,0,.2)}
+        #install img{width:60px;height:60px;border-radius:14px;margin-bottom:12px}
+        #install h3{font-size:20px;margin-bottom:8px}
+        #install p{color:var(--color-text-muted);font-size:14.5px;margin-bottom:14px}
+        #install .ios{text-align:start;background:var(--color-warm-bg);border:1px solid var(--color-border);border-radius:12px;padding:13px;font-size:13.5px}
+        .btn-install{display:block;width:100%;background:var(--brand-primary);color:var(--brand-on-primary);border:none;border-radius:12px;padding:13px;font-weight:600;font-size:15px;cursor:pointer;margin-top:12px}
+        .btn-install.cancel{background:transparent;color:var(--color-text-muted)}
+
+        /* Reveal */
+        .reveal{opacity:0;transform:translateY(20px);transition:opacity .7s cubic-bezier(.2,.7,.3,1), transform .7s cubic-bezier(.2,.7,.3,1)}
+        .reveal.visible{opacity:1;transform:none}
+
+        @media (max-width:880px){
+            .hero-grid,.split{grid-template-columns:1fr;gap:36px}
+            .grid-3,.grid-feat{grid-template-columns:1fr}
+            .grid-4{grid-template-columns:1fr 1fr}
+            .panel,.cta-box{padding:36px 22px}
+        }
+        @media (max-width:520px){ .grid-4{grid-template-columns:1fr} .nav-signin{display:none} }
+        @media (prefers-reduced-motion:reduce){ *{animation:none!important;transition:none!important} .reveal{opacity:1;transform:none} html{scroll-behavior:auto} }
     </style>
 </head>
 <body>
 
-<a href="#main" class="skip-link">Skip to content</a>
+<!-- Icon sprite -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-spark" viewBox="0 0 32 32"><path fill="currentColor" d="M16 1.5C17.3 12 20 14.7 30.5 16C20 17.3 17.3 20 16 30.5C14.7 20 12 17.3 1.5 16C12 14.7 14.7 12 16 1.5Z"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.6-3 7.7-7 9-4-1.3-7-4.4-7-9V6l7-3Z"/><path d="M9 12l2 2 4-4"/></symbol>
+  <symbol id="i-guide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h13M4 12h9M4 18h5"/></symbol>
+  <symbol id="i-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8a2 2 0 0 1 2-2h1.5L9 4h6l1.5 2H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><circle cx="12" cy="13" r="3.4"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 2.8 2.8 15.2 0 18M12 3c-2.8 2.8-2.8 15.2 0 18"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M5 20V11M12 20V5M19 20v-6"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3 4 14h7l-1 7 9-11h-7l1-7Z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
+</svg>
 
 <!-- Install Popup -->
-<div id="app-install-popup" role="dialog" aria-modal="true" aria-label="Install the Zeluu app">
-    <div class="install-modal">
-        <div class="install-icon">
-            <img src="/icons/icon-96.png" alt="Zeluu">
-        </div>
-        <h3>Get the Zeluu App</h3>
-        <p>Install Zeluu on your phone for quick access, offline support, and the best learning experience.</p>
-        <div id="install-chrome-btns" style="display: none;">
-            <button class="btn-install" onclick="installPWA()">Install App</button>
-        </div>
-        <div class="ios-guide" id="install-ios-guide">
-            <p><strong>To install on iPhone/iPad:</strong></p>
-            <p>1. Tap the Share button at the bottom<br>2. Scroll down and tap "Add to Home Screen"<br>3. Tap "Add" — done!</p>
-        </div>
-        <button class="btn-install btn-install-cancel" onclick="closeInstallPopup()">Maybe Later</button>
+<div id="install" role="dialog" aria-modal="true" aria-label="Install the Zeluu app">
+    <div class="modal">
+        <img src="/icons/icon-192.png" alt="Zeluu">
+        <h3>Get the Zeluu app</h3>
+        <p>Install Zeluu for quick access, offline support, and the best learning experience.</p>
+        <div id="install-chrome" style="display:none"><button class="btn-install" onclick="installPWA()">Install app</button></div>
+        <div class="ios" id="install-ios" style="display:none"><strong>To install on iPhone/iPad:</strong><br>1. Tap the Share button · 2. "Add to Home Screen" · 3. "Add" — done.</div>
+        <button class="btn-install cancel" onclick="closeInstall()">Maybe later</button>
     </div>
 </div>
 
 <!-- Nav -->
 <nav class="nav" aria-label="Main navigation">
     <div class="container nav-inner">
-        <a href="/" class="nav-brand">
-            <span style="font-size: 28px;" aria-hidden="true">💡</span>
-            <span class="nav-brand-text">Zeluu</span>
+        <a href="/" class="brand" aria-label="Zeluu home">
+            <svg class="mark icon" aria-hidden="true"><use href="#i-spark"/></svg>
+            <span class="brand-text">Zeluu</span>
         </a>
-        <a href="/login.html" class="nav-signin">Sign In</a>
+        <div class="nav-right">
+            <a href="/login.html" class="nav-signin">Sign in</a>
+            <a href="/pricing.html" class="btn btn-primary">Start free</a>
+        </div>
     </div>
 </nav>
 
@@ -990,186 +241,164 @@
     <div class="container">
         <div class="hero-grid">
             <div>
-                <div class="hero-badge">
-                    <span class="pulse-dot"></span>
-                    Introducing Zeluu
-                </div>
-                <h1>Your child actually learns.<br><span class="accent">Not just the answers.</span></h1>
-                <p class="hero-subtitle">Zeluu is an AI tutor that teaches your child Math, Science & English step by step. No shortcuts, no final answers — just real understanding. Save your time and energy while your child builds confidence across every subject.</p>
+                <div class="badge"><span class="dot"></span> Bilingual AI tutor · Ages 6–15</div>
+                <h1>Your child learns <span class="accent">how</span> to get the answer.<br>Not just the answer.</h1>
+                <p class="hero-sub">Zeluu guides your child through Math, Science &amp; English step by step — in English and Arabic — and never just hands over the solution. You stay in control and see every conversation.</p>
                 <div class="hero-ctas">
-                    <a href="/pricing.html" class="btn btn-primary">Try it now →</a>
-                    <a href="#how-works" class="btn btn-secondary">See How It Works</a>
+                    <a href="/pricing.html" class="btn btn-primary">Start free <svg class="icon" style="width:18px;height:18px"><use href="#i-bolt"/></svg></a>
+                    <a href="#teaches" class="btn btn-ghost">See how it teaches</a>
                 </div>
                 <div class="hero-trust">
-                    <div class="trust-item">🔒 Safe for children</div>
-                    <div class="trust-item">🌍 English + Arabic</div>
-                    <div class="trust-item">⚡ Instant start</div>
+                    <span class="chip"><svg class="icon"><use href="#i-spark"/></svg> Guides, never gives answers</span>
+                    <span class="chip"><svg class="icon"><use href="#i-eye"/></svg> You see every chat</span>
+                    <span class="chip"><svg class="icon"><use href="#i-globe"/></svg> English + Arabic</span>
                 </div>
             </div>
             <div class="hero-visual">
-                <div class="chat-container">
-                    <div class="chat-header">
-                        <div class="chat-avatar">💡</div>
-                        Zeluu — Grade 4
+                <div class="chatcard">
+                    <div class="top">
+                        <span class="av"><svg class="icon"><use href="#i-spark"/></svg></span>
+                        <span class="who">Zeluu<small>Grade 4 · Math</small></span>
                     </div>
-                    <div class="chat-body">
-                        <div class="msg msg-child">What is 48 divided by 6?</div>
-                        <div class="typing-indicator">
-                            <span class="typing-dot"></span>
-                            <span class="typing-dot"></span>
-                            <span class="typing-dot"></span>
-                        </div>
-                        <div class="msg msg-tutor">Great question! Let's think about it together. Division means splitting into equal groups. If you have 48 cookies and want to share them among 6 friends, how many does each friend get?</div>
-                        <div class="msg msg-child">Hmm, I don't know...</div>
-                        <div class="msg msg-tutor">That's okay! Let's start smaller. Do you know 6 × 5? Try: 6, 12, 18, 24, 30. So 6 × 5 = 30. Now, what's 6 × 8?</div>
+                    <div class="body">
+                        <div class="msg kid">What is 48 divided by 6?</div>
+                        <div class="msg tut">Good one — let's work it out together. Division is sharing into equal groups. If 48 cookies are shared by 6 friends, how many each? Start with what you know: what's <b>6 × 8</b>?</div>
+                        <div class="msg kid">6 × 8 is 48!</div>
+                        <div class="msg tut">Exactly 👏 So if 6 groups of 8 make 48, then 48 ÷ 6 = <b>8</b>. You found it yourself.</div>
                     </div>
                 </div>
-                <div class="mascot">💡</div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Parent Message -->
-<section class="parent-message reveal">
+<!-- Trust pillars -->
+<section class="pillars">
     <div class="container">
-        <div class="parent-message-inner">
-            <h2>Built for busy parents like you</h2>
-            <p>You don't need to be an expert in every subject. Zeluu explains Math, Science & English to your child patiently, step by step, any time of day. <strong>Save hours every week</strong> on homework help while your child builds real understanding — not dependency on you for answers.</p>
+        <div class="sec-head center reveal">
+            <div class="eyebrow">Why parents choose Zeluu</div>
+            <h2>Built around what parents actually worry about</h2>
+            <p>The things that decide whether you trust an AI with your child — handled first, not as an afterthought.</p>
+        </div>
+        <div class="grid-3">
+            <div class="card reveal">
+                <div class="ic"><svg class="icon"><use href="#i-guide"/></svg></div>
+                <h3>Guides, never gives answers</h3>
+                <p>A Socratic tutor that asks, hints, and checks understanding — so your child builds real skill instead of copying a solution. Even photo problems get worked, never dumped.</p>
+            </div>
+            <div class="card reveal">
+                <div class="ic"><svg class="icon"><use href="#i-eye"/></svg></div>
+                <h3>You see everything</h3>
+                <p>Every conversation is visible in your parent dashboard, with instant alerts if your child seems stuck, upset, or shares personal information. Full transparency, always.</p>
+            </div>
+            <div class="card reveal">
+                <div class="ic"><svg class="icon"><use href="#i-shield"/></svg></div>
+                <h3>Safe by design</h3>
+                <p>Content filtering, prompt-injection blocking, and a learning-only scope keep the conversation on track. No ads, no data selling — just tutoring.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How it teaches -->
+<section id="teaches">
+    <div class="container">
+        <div class="sec-head center reveal">
+            <div class="eyebrow">How it teaches</div>
+            <h2>One step at a time — with a question back</h2>
+        </div>
+        <div class="demo reveal">
+            <div class="beats">
+                <div class="beat"><span class="tag">Asks</span><p>Your child: <em>"I don't get fractions."</em> Zeluu doesn't lecture — it asks what they already know and starts there.</p></div>
+                <div class="beat"><span class="tag">Hints</span><p>Instead of the answer, it offers a <b>hint</b> and a small, doable next step — then waits for your child to try.</p></div>
+                <div class="beat"><span class="tag">Checks</span><p>It checks understanding before moving on, and only reveals more once your child is ready. <b>The answer is earned, not handed over.</b></p></div>
+            </div>
+            <p class="cap">A real teaching pattern (L1–L4 scaffolding) — not a screenshot of an answer.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Transparency / parent control -->
+<section class="pillars">
+    <div class="container">
+        <div class="split">
+            <div class="reveal">
+                <div class="eyebrow">Parent control</div>
+                <h2 style="font-size:clamp(26px,3.2vw,36px);margin-top:8px">You stay fully in charge</h2>
+                <p class="muted" style="margin-top:14px;font-size:16px">Zeluu is built for the parent first. You decide how much your child uses it, you can read every session, and you're told the moment something needs your attention.</p>
+            </div>
+            <ul class="checks reveal">
+                <li><svg class="icon"><use href="#i-check"/></svg><div><b>Every conversation, readable</b><span>Open any session and see exactly what was asked and taught.</span></div></li>
+                <li><svg class="icon"><use href="#i-check"/></svg><div><b>Usage limits you set</b><span>Daily, weekly, or monthly caps per child — healthy learning time, not endless screen time.</span></div></li>
+                <li><svg class="icon"><use href="#i-check"/></svg><div><b>Safety alerts</b><span>Get notified if your child seems distressed, stuck, or shares personal info.</span></div></li>
+                <li><svg class="icon"><use href="#i-check"/></svg><div><b>Weekly summaries</b><span>A clear picture of strengths, struggles, and what to work on next.</span></div></li>
+            </ul>
         </div>
     </div>
 </section>
 
 <!-- Features -->
-<section id="features" class="features">
+<section>
     <div class="container">
-        <div class="section-header reveal">
-            <h2>Why parents trust Zeluu</h2>
-            <p>Designed with parents in mind, built with children at heart</p>
+        <div class="sec-head center reveal">
+            <div class="eyebrow">Everything included</div>
+            <h2>One tutor, every subject, both languages</h2>
         </div>
-        <div class="features-grid">
-            <div class="feature reveal">
-                <div class="feature-icon">🧠</div>
-                <div>
-                    <h3>Socratic Teaching</h3>
-                    <p>Guides children to discover answers through questions and hints. Never gives the final answer — builds real understanding.</p>
-                </div>
-            </div>
-            <div class="feature reveal">
-                <div class="feature-icon">👨‍👩‍👧</div>
-                <div>
-                    <h3>Full Parent Control</h3>
-                    <p>You manage credits, monitor every session, see what your child asked, and get alerts when they're stuck. Total visibility.</p>
-                </div>
-            </div>
-            <div class="feature reveal">
-                <div class="feature-icon">🛡️</div>
-                <div>
-                    <h3>Built-in Safety</h3>
-                    <p>Content filtering, prompt injection protection, and stuck-loop detection. Your child only gets learning help — nothing else.</p>
-                </div>
-            </div>
-            <div class="feature reveal">
-                <div class="feature-icon">📸</div>
-                <div>
-                    <h3>Photo Support</h3>
-                    <p>Snap a photo of homework or a textbook problem. The AI reads it and starts tutoring right away. No typing needed.</p>
-                </div>
-            </div>
-            <div class="feature reveal">
-                <div class="feature-icon">🌍</div>
-                <div>
-                    <h3>English + Arabic</h3>
-                    <p>Full bilingual support with RTL. Grade-appropriate curriculum from Grade 1 to Grade 9, in both languages.</p>
-                </div>
-            </div>
-            <div class="feature reveal">
-                <div class="feature-icon">📊</div>
-                <div>
-                    <h3>Weekly Progress Reports</h3>
-                    <p>Get detailed reports on your child's strengths, areas for development, and recommendations for their teacher.</p>
-                </div>
-            </div>
+        <div class="grid-feat">
+            <div class="feat reveal"><span class="ic"><svg class="icon"><use href="#i-guide"/></svg></span><div><h3>Math, Science &amp; English</h3><p>Grade-aligned tutoring from Grade 1 to 9, matched to your child's curriculum.</p></div></div>
+            <div class="feat reveal"><span class="ic"><svg class="icon"><use href="#i-camera"/></svg></span><div><h3>Photo problems</h3><p>Snap a homework or textbook question — Zeluu reads it and starts guiding. No typing needed.</p></div></div>
+            <div class="feat reveal"><span class="ic"><svg class="icon"><use href="#i-globe"/></svg></span><div><h3>English + Arabic</h3><p>Full bilingual support with right-to-left layout, so your child learns in the language that fits.</p></div></div>
+            <div class="feat reveal"><span class="ic"><svg class="icon"><use href="#i-chart"/></svg></span><div><h3>Progress you can act on</h3><p>Weekly reports highlight strengths, gaps, and clear next steps for each child.</p></div></div>
+            <div class="feat reveal"><span class="ic"><svg class="icon"><use href="#i-bolt"/></svg></span><div><h3>Instant, patient help</h3><p>Step-by-step answers stream in real time — and the AI never runs out of patience.</p></div></div>
+            <div class="feat reveal"><span class="ic"><svg class="icon"><use href="#i-lock"/></svg></span><div><h3>Private &amp; installable</h3><p>Works as an app on any phone, even offline-friendly, with your child's data kept private.</p></div></div>
         </div>
     </div>
 </section>
 
-<!-- How It Works -->
-<section id="how-works" class="how-works">
+<!-- How it works -->
+<section class="pillars">
     <div class="container">
-        <div class="section-header reveal">
-            <h2>How it works</h2>
-        </div>
-        <div class="steps-grid reveal">
-            <div class="step">
-                <div class="step-num">1</div>
-                <h3>Create your account</h3>
-                <p>Sign up in seconds. Add your child's name, grade, and preferred language.</p>
-            </div>
-            <div class="step">
-                <div class="step-num">2</div>
-                <h3>Child logs in</h3>
-                <p>Your child gets their own simple login with username and password. Safe and separate.</p>
-            </div>
-            <div class="step">
-                <div class="step-num">3</div>
-                <h3>AI teaches step by step</h3>
-                <p>They type or snap a photo of a problem. Zeluu explains, hints, and guides — never just gives the answer.</p>
-            </div>
-            <div class="step">
-                <div class="step-num">4</div>
-                <h3>You track progress</h3>
-                <p>See every session, get weekly reports, and know exactly where your child needs help.</p>
-            </div>
+        <div class="sec-head center reveal"><div class="eyebrow">Getting started</div><h2>Up and running in minutes</h2></div>
+        <div class="grid-4 reveal">
+            <div class="step"><div class="n">1</div><h3>Create your account</h3><p>Sign up as the parent and set your child's grade and language.</p></div>
+            <div class="step"><div class="n">2</div><h3>Add your child</h3><p>Give them a simple, separate login — safe and managed by you.</p></div>
+            <div class="step"><div class="n">3</div><h3>They learn, guided</h3><p>Your child asks or snaps a photo; Zeluu teaches step by step.</p></div>
+            <div class="step"><div class="n">4</div><h3>You stay in the loop</h3><p>Read sessions, get alerts, and see weekly progress.</p></div>
         </div>
     </div>
 </section>
 
-<!-- Stats -->
-<section class="stats reveal">
+<!-- Proof band -->
+<section class="proof">
     <div class="container">
-        <div class="stats-grid">
-            <div class="stat">
-                <div class="stat-num">13</div>
-                <div class="stat-text">Curricula (GCC, UK, US, India & more)</div>
-            </div>
-            <div class="stat">
-                <div class="stat-num">9</div>
-                <div class="stat-text">Grade Levels (Grades 1–9)</div>
-            </div>
-            <div class="stat">
-                <div class="stat-num">2</div>
-                <div class="stat-text">Languages (English + Arabic)</div>
-            </div>
-            <div class="stat">
-                <div class="stat-num">∞</div>
-                <div class="stat-text">Patience (AI Never Gets Tired)</div>
-            </div>
+        <div class="grid-4">
+            <div class="stat"><div class="num">13</div><div class="lbl">Curricula (GCC, UK, US, India &amp; more)</div></div>
+            <div class="stat"><div class="num">9</div><div class="lbl">Grade levels (1–9)</div></div>
+            <div class="stat"><div class="num">2</div><div class="lbl">Languages (English + Arabic)</div></div>
+            <div class="stat"><div class="num">100%</div><div class="lbl">Answers earned, never just given</div></div>
         </div>
     </div>
 </section>
 
-<!-- Pricing Preview -->
-<section class="pricing">
+<!-- Pricing teaser -->
+<section>
     <div class="container">
-        <div class="section-header reveal">
-            <h2>Flexible plans for every family</h2>
-        </div>
-        <div class="pricing-preview reveal">
-            <h3>Choose what works for you</h3>
-            <p>Pay-as-you-go credits, monthly plans, or annual plans. No long-term contracts. Cancel anytime.</p>
-            <a href="/pricing.html" class="btn btn-primary">See all plans →</a>
+        <div class="panel reveal">
+            <div class="eyebrow">Simple family plans</div>
+            <h2>Free to start. No surprises.</h2>
+            <p>Start with a <b>14-day free trial</b> — 10 free credits, card required, no charge today. Then pick a plan that fits your family; clear pricing, cancel anytime.</p>
+            <a href="/pricing.html" class="btn btn-primary">See plans</a>
         </div>
     </div>
 </section>
 
-<!-- CTA -->
-<section class="cta">
+<!-- Final CTA -->
+<section style="padding-top:24px">
     <div class="container">
         <div class="cta-box reveal">
-            <h2>Ready to help your child learn?</h2>
-            <p>Start your 14-day free trial. Includes 10 free credits. Card required — no charge today.</p>
-            <a href="/pricing.html" class="btn-white">Get Started →</a>
+            <h2>Help your child build real understanding</h2>
+            <p>Join families giving their kids a patient, bilingual tutor that teaches the how — with you in control.</p>
+            <a href="/pricing.html" class="btn btn-white">Start free</a>
         </div>
     </div>
 </section>
@@ -1179,87 +408,46 @@
 <!-- Footer -->
 <footer class="footer">
     <div class="container">
-        <div class="footer-brand">Zeluu</div>
-        <p>AI tutor for Math, Science & English that actually teaches your child</p>
-        <div class="footer-links">
-            <a href="/safety.html">Safety &amp; Privacy</a>
-            <a href="/privacy.html">Privacy</a>
-            <a href="/terms.html">Terms</a>
-            <a href="/gdpr.html">GDPR</a>
-            <a href="/refund.html">Refund Policy</a>
+        <div class="row">
+            <div>
+                <a href="/" class="brand"><svg class="mark icon" aria-hidden="true"><use href="#i-spark"/></svg><span class="brand-text">Zeluu</span></a>
+                <p class="tag">The AI tutor that teaches the how, not the answer.</p>
+            </div>
+            <div class="footer-links">
+                <a href="/safety.html">Safety &amp; Privacy</a>
+                <a href="/privacy.html">Privacy</a>
+                <a href="/terms.html">Terms</a>
+                <a href="/gdpr.html">GDPR</a>
+                <a href="/refund.html">Refund</a>
+            </div>
         </div>
     </div>
 </footer>
 
-<!-- Scroll Reveal Script -->
 <script>
-    function revealOnScroll() {
-        const reveals = document.querySelectorAll('.reveal');
-        reveals.forEach(el => {
-            const windowHeight = window.innerHeight;
-            const revealTop = el.getBoundingClientRect().top;
-            const revealPoint = 100;
-
-            if (revealTop < windowHeight - revealPoint) {
-                el.classList.add('visible');
-            }
+    // Scroll reveal
+    function revealOnScroll(){
+        document.querySelectorAll('.reveal').forEach(el=>{
+            if(el.getBoundingClientRect().top < window.innerHeight - 100) el.classList.add('visible');
         });
     }
+    window.addEventListener('scroll', revealOnScroll, {passive:true});
+    revealOnScroll();
 
-    window.addEventListener('scroll', revealOnScroll);
-    revealOnScroll(); // Initial check
-
-    // PWA Install Prompt
+    // PWA install
     let deferredPrompt;
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        showInstallPrompt();
-    });
-
-    function showInstallPrompt() {
-        const chromeBtns = document.getElementById('install-chrome-btns');
-        const iosGuide = document.getElementById('install-ios-guide');
-
-        // Detect if running on iOS
+    window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt = e; showInstall(); });
+    function showInstall(){
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-
-        if (isIOS) {
-            iosGuide.style.display = 'block';
-        } else if (deferredPrompt) {
-            chromeBtns.style.display = 'block';
-        }
-
-        // Show popup after 3 seconds
-        setTimeout(() => {
-            document.getElementById('app-install-popup').style.display = 'flex';
-        }, 3000);
+        if(isIOS) document.getElementById('install-ios').style.display='block';
+        else if(deferredPrompt) document.getElementById('install-chrome').style.display='block';
+        setTimeout(()=>{ document.getElementById('install').style.display='flex'; }, 3500);
     }
-
-    function installPWA() {
-        if (deferredPrompt) {
-            deferredPrompt.prompt();
-            deferredPrompt.userChoice.then((choiceResult) => {
-                if (choiceResult.outcome === 'accepted') {
-                    deferredPrompt = null;
-                    closeInstallPopup();
-                }
-            });
-        }
+    function installPWA(){
+        if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt.userChoice.then(c=>{ if(c.outcome==='accepted'){ deferredPrompt=null; closeInstall(); } }); }
     }
-
-    function closeInstallPopup() {
-        document.getElementById('app-install-popup').style.display = 'none';
-    }
-
-    // Dismiss popup when user taps outside
-    document.getElementById('app-install-popup').addEventListener('click', (e) => {
-        if (e.target.id === 'app-install-popup') {
-            closeInstallPopup();
-        }
-    });
+    function closeInstall(){ document.getElementById('install').style.display='none'; }
+    document.getElementById('install').addEventListener('click', e=>{ if(e.target.id==='install') closeInstall(); });
 </script>
-
 </body>
 </html>
