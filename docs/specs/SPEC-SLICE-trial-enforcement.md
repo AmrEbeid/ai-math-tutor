@@ -95,7 +95,9 @@ Replace `1 / 5 text, 1 / 2 image` with explicit per-action costs (pricing spec �
 ## 6. Gates
 - 🔴 **Hard gate** to implement: credit/payment logic (`api/chat.js` deduction), any Supabase
   migration/RPC change. Explicit owner approval + review required.
-- Depends on [`SPEC-SLICE-pricing-credits-impl`] (per-action metering + LS variants) — to be drafted.
+- Depends on [`SPEC-SLICE-pricing-credits-impl`](SPEC-SLICE-pricing-credits-impl.md) (product-wide
+  per-action metering + LS variants) — **drafted 2026-06-17 (T-12)**; that doc is the source of truth
+  for the per-action cost table and the current→per-action migration path.
 
 ## 7. Open gaps
 - Exact home for `trial_*` columns vs live schema (reconcile before migration).

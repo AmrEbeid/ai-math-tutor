@@ -211,6 +211,16 @@ ID (e.g. `A0.5`, `A0.6`, `STAGE1`).
 * **Risk level:** Low to write; **High to implement** (credit/payment logic + migration = hard gate).
 * **Next action:** Owner review; implementation only via a separate approved + reviewed slice.
 
+### `SPEC-SLICE-pricing-credits-impl.md`
+* **Purpose:** Implementation design (T-12) mapping the pricing model to gate-aware build slices:
+  product-wide per-action credit metering (replacing the message-count modulo), plan/package definitions
+  as config, Lemon Squeezy variant mapping for subscriptions + extra packs incl. **PPP currency**
+  (SAR/AED/EGP), and an ordered current→per-action migration path with rollback. Companion to (and the
+  per-action-metering home for) `SPEC-SLICE-trial-enforcement`.
+* **Status:** Drafted 2026-06-17 (design-only). **No code.**
+* **Risk level:** Low to write; **High to implement** (credit/payment/webhook/LS logic + migration = hard gate).
+* **Next action:** Owner/GPT review; verify live LS variant IDs + MoR fees; then gated step-1 (shadow-mode config).
+
 > **Research & tasks:** competitive/product research is saved under `docs/research/`
 > (`RESEARCH-competitive-product-strategy-2026-06-15.md`, `RESEARCH-coppa-vpc-options.md`);
 > the MVP build plan is `docs/plans/PLAN-MVP-foundation.md`; the executable, gate-aware backlog
