@@ -244,6 +244,18 @@ ID (e.g. `A0.5`, `A0.6`, `STAGE1`).
   migration = hard gates).
 * **Next action:** Owner picks the channel; then a phase-1 non-blocking `dispatchAlert()` seam (in-app only).
 
+### `SPEC-SLICE-try-before-signup.md`
+* **Purpose:** Design (T-06) for a **one-question, pre-signup** tutoring teaser that stores **no child PII
+  before consent** (COPPA). Proposes an isolated anonymous `POST /api/try` endpoint — separate from the
+  authed `api/chat.js` so its auth invariants stay untouched — that runs one method-only guided turn,
+  IP/daily rate-capped, persisting nothing child-identifying, then converts to the parent-account/consent
+  step (A0.5). Grounded in the COPPA/VPC research + A0.5 onboarding.
+* **Status:** Drafted 2026-06-17 (design-only). **No code.** Needs **legal** sign-off on the PII boundary.
+* **Risk level:** Low to write; **High to implement** (unauthenticated AI entry + COPPA/PII boundary + abuse
+  surface = hard gates; legal prerequisite).
+* **Next action:** Legal sign-off on no-PII-pre-consent + landing copy; then a gated phase-1 (static landing
+  UI with the teaser endpoint disabled).
+
 > **Research & tasks:** competitive/product research is saved under `docs/research/`
 > (`RESEARCH-competitive-product-strategy-2026-06-15.md`, `RESEARCH-coppa-vpc-options.md`);
 > the MVP build plan is `docs/plans/PLAN-MVP-foundation.md`; the executable, gate-aware backlog
