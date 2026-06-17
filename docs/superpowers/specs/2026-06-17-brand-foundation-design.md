@@ -2,7 +2,8 @@
 
 > **Sub-project 1 of 3** in the Zeluu revamp (Brand → Homepage → Login/Signup).
 > **Direction (owner-chosen):** premium / trust-forward · hand-authored SVG assets.
-> **Status:** Design — awaiting owner approval + logo pick before build (brainstorming gate).
+> **Status:** APPROVED 2026-06-17 — **logo A (Spark ✦)**, **deep-teal primary confirmed** (amber kept
+> as accent). Built in branch `design/brand-foundation`.
 > **Risk:** Low — frontend assets + CSS tokens only. No auth/payment/schema/migration/deploy.
 > **Grounds in:** the market research (trust = the conversion lever; calm/proof-forward beats
 > playful for parent buy-in), the existing `public/css/zeluu-tokens.css` (warm-OKLCH + dark theme),
@@ -88,9 +89,16 @@ Keep the pairing (it already reads premium) but formalize the scale:
 - **No auth/payment/schema/migration/deploy.** Frontend assets + CSS only.
 - The logo files under `design-scratch/` are exploration; only the approved mark is promoted to `public/`.
 
-## 7. Open decisions for the owner
+## 7. Decisions (resolved 2026-06-17)
 
-1. **Logo pick:** A (Spark, rec.) · B (Steps) · C (Dialogue, rec. alternate).
-2. **Teal shift OK?** Confirm moving the primary from orange to deep teal (amber kept as accent), or keep
-   orange primary + just refine/whitespace/logo.
-3. **Arabic type** can be chosen at build, or you can name a preferred Arabic typeface.
+1. **Logo:** ✅ **A — Spark ✦** (`design-scratch/brand/mark-spark.svg` → `public/logo-mark.svg`).
+2. **Color:** ✅ **Deep teal primary** confirmed; amber kept as warm accent.
+3. **Arabic type:** deferred to the homepage/login build (will pick a modern Arabic UI face then).
+
+## 8. Build status
+
+Shipped in this slice: `public/logo-mark.svg`, `public/favicon.svg`, regenerated `public/icons/*` (10 PNGs:
+Spark on teal, 72–512 + maskable), additive `--brand-*` tokens in `zeluu-tokens.css` (light + dark), and
+`sw.js` `v9→v10` precaching the new SVGs. Icon sources + the 3 candidates kept under `design-scratch/brand/`
+for reproducibility. **No HTML pages recolored** (staged rollout); existing icon refs pick up the new PNGs
+automatically. Verified: favicon legible at 16px, app icon renders correctly, `npm test` unaffected.
