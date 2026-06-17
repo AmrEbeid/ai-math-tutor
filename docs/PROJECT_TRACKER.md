@@ -61,6 +61,7 @@ drop applied; UI polish + review fixes deployed; env verified; schema history re
 
 | ID       | Task                                | Status              | Branch/PR/Migration | Notes                                    |
 | -------- | ----------------------------------- | ------------------- | ------------------- | ---------------------------------------- |
+| UI-DARK | Site-wide warm-dark theme | Done (local) | branch `feat/dark-theme` (8 commits, off `main`) | Added a high-specificity `html[data-theme="dark"]` token block to `public/css/zeluu-tokens.css` (warm dark surfaces/text/border/gray-scale/accent/status/child-variants/shadows + `--color-surface-glass` + `color-scheme:dark`); opted all 13 pages in via `<html ... data-theme="dark">`. Converted hardcoded light surfaces to tokens (white/rgba(255) → surface/glass) and darkened hardcoded light `oklch()` pastel surfaces (info boxes, badges, subject/difficulty chips, score circles, legal-page glass navs) with hue preserved, lightening their paired dark text. Fixed the inverted-surface pattern (`background:var(--color-text-dark)` flips light): pricing featured card → lifted warm surface + accent ring; dashboard refresh button → accent. SW cache `v7→v8` so returning users fetch fresh CSS. **Verified with headless Chrome screenshots** of landing/login/dashboard-gate/pricing/child-login/legal/exam-prep. `npm test` 73 pass / 1 skip. **Frontend/docs only; no backend/auth/payment/Supabase/installs/deploy/React-Vite; not pushed; `PROJECT_BRIEF.md` held out.** |
 | MVP-FOUNDATION-WAVE-1 | Approved no-/low-gate MVP foundation wave (5 tasks) | Done | branch `docs/research-product-strategy-specs` (PR #2) | Owner-approved low-gate wave: (1) COPPA/VPC research `docs/research/RESEARCH-coppa-vpc-options.md` (final decision **pending legal review**); (2) KaTeX math rendering — shared `public/js/render.js` (escape-first, XSS-safe), pinned CDN, **no install**, wired into `app.html`+`exam-prep.html`, sw `v6→v7`, +9 tests; (3) Safety & Privacy page `public/safety.html` (claims limited to implemented/clearly-planned; "Available now" vs "Coming soon"), linked from index, +5 tests; (4) age-banded tone (G1-3/4-6/7-9) verified + regression-locked, +7 tests; (5) trial-enforcement design `SPEC-SLICE-trial-enforcement.md` (7d/50cr/10-day/15min, design-only, migration authored-not-applied). Commits `47a46c4`/`2c4d385`/`28b3c8d`/`2c501be`/`25b528b`. `npm test` **73 pass / 1 skip**. **NOT done (not approved): streaming, worked-example, try-before-signup, weekly digest, email, cron, credit/payment enforcement, migrations, React/Vite, deploy.** |
 | RESEARCH-STRATEGY-1 | Save competitive research; create product strategy, pricing/credits, roadmap & task-backlog specs; reposition math-only → all-subject (math-first) | Done (docs-only) | branch `docs/research-product-strategy-specs` | Created `docs/research/RESEARCH-competitive-product-strategy-2026-06-15.md` + `docs/specs/SPEC-PRODUCT-learning-companion-strategy.md` + `SPEC-PRICING-packages-credits-cost-model.md` + `SPEC-ROADMAP-product-revamp-implementation.md` + `docs/tasks/TASKS-product-strategy-roadmap.md`; updated tracker/brief/specs-README. No product code; no installs; no live actions. Confirmed facts/NCC/refuted warnings preserved. |
 | A0.OS    | Install project operating docs      | Done                | local docs only     | Operating docs installed; docs-only; no source changes. |
@@ -101,6 +102,18 @@ drop applied; UI polish + review fixes deployed; env verified; schema history re
 
 ## Decision Log
 
+* 2026-06-17 — **Decision (UI-DARK): ship a site-wide warm-dark theme as the default, via a
+  `data-theme="dark"` opt-in rather than replacing the light tokens.** **Reason:** the warm-editorial
+  light system is deliberately differentiated and worth preserving as the underlying light layer; a
+  high-specificity `html[data-theme="dark"]` token block in the shared sheet overrides the inline
+  `:root` blocks several pages still ship (specificity 0,1,1 > 0,1,0) without editing each, and keeps a
+  clean path to a future light/dark toggle or `prefers-color-scheme`. **Impact:** all 13 pages set
+  `data-theme="dark"`; hardcoded light surfaces (white/rgba/pastel `oklch()`) were tokenized/darkened
+  with hue preserved; the inverted-surface pattern (`background:var(--color-text-dark)`) was fixed where
+  it was a card (kept where it was an intentional inverted primary button). Verified by headless
+  screenshots. Frontend-only; React/Vite + deploy remain gated. **Open follow-up:** the authed-only
+  views (child chat `app.html`, authed dashboard/exam-prep) were verified by code + the landing chat
+  mock, not a live authed screenshot — confirm in a real session before deploy.
 * 2026-06-15 — **Decision (RESEARCH-STRATEGY-1): reposition Zeluu from "AI math tutor" to a
   "child-safe bilingual AI learning companion for school subjects, starting with math as the first
   polished vertical."** **Reason:** the codebase, RAG, chat pipeline, credits, and safety layer are
