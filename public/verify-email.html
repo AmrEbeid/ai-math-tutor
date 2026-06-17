@@ -32,11 +32,18 @@
     .resend-btn { display: inline-block; margin-top: 16px; padding: 10px 28px; background: var(--color-surface); color: var(--color-accent); border: 1.5px solid var(--color-border); border-radius: 10px; font-family: var(--font-body); font-size: 14px; font-weight: 600; cursor: pointer; transition: background var(--transition-fast); }
     .resend-btn:hover { background: var(--color-cream); }
     .resend-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ===== Rebrand: route accent to the teal brand foundation (light + dark) ===== */
+    :root { --color-accent: var(--brand-primary); --color-accent-dark: var(--brand-primary-strong); }
+    html[data-theme="dark"] { --color-accent: var(--brand-primary); --color-accent-dark: var(--brand-primary-strong); }
+    .verify-icon { background: var(--brand-primary-tint) !important; color: var(--brand-primary) !important; }
+    .verify-brand .mark { width: 26px; height: 26px; color: var(--brand-primary); align-self: center; }
   </style>
 </head>
 <body>
   <main class="verify-card">
     <a href="/" class="verify-brand">
+      <svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M16 1.5C17.3 12 20 14.7 30.5 16C20 17.3 17.3 20 16 30.5C14.7 20 12 17.3 1.5 16C12 14.7 14.7 12 16 1.5Z"/></svg>
       <span class="verify-brand-name">Zeluu</span>
       <span class="verify-beta">Beta</span>
     </a>

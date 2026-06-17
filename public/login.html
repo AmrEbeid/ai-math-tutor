@@ -10,8 +10,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Zeluu">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="icon" type="image/png" sizes="96x96" href="/icons/icon-96.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
   <link rel="shortcut icon" href="/icons/icon-96.png">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -366,11 +366,23 @@
       font-weight: 600;
     }
     .auth-footer a:hover { text-decoration: underline; }
+
+    /* ===== Rebrand: route the page's accent to the teal brand foundation (light + dark) ===== */
+    :root { --color-accent: var(--brand-primary); --color-accent-dark: var(--brand-primary-strong); --color-accent-light: var(--brand-primary-tint); }
+    html[data-theme="dark"] { --color-accent: var(--brand-primary); --color-accent-dark: var(--brand-primary-strong); --color-accent-light: var(--brand-primary-tint); }
+    /* Premium polish to match the new homepage */
+    .auth-brand { display: inline-flex; align-items: center; gap: 9px; }
+    .auth-brand .mark { width: 26px; height: 26px; color: var(--brand-primary); }
+    .btn-primary { background: var(--brand-primary); color: var(--brand-on-primary); border-radius: 999px; }
+    .btn-primary:hover { background: var(--brand-primary-strong); opacity: 1; }
+    .auth-tab.active { color: var(--brand-primary); }
+    .choose-plan-box { background: var(--brand-primary-tint) !important; border-color: color-mix(in oklab, var(--brand-primary) 28%, transparent) !important; }
   </style>
 </head>
 <body>
   <main class="auth-wrap">
     <a href="/" class="auth-brand">
+      <svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M16 1.5C17.3 12 20 14.7 30.5 16C20 17.3 17.3 20 16 30.5C14.7 20 12 17.3 1.5 16C12 14.7 14.7 12 16 1.5Z"/></svg>
       <span class="auth-brand-name">Zeluu</span>
       <span class="auth-beta">Beta</span>
     </a>
