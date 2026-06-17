@@ -28,7 +28,11 @@ append-only ledger; the Lemon Squeezy webhook grants them (signature-verified,
 idempotent via a partial unique index); chat deducts them (1 credit per 5 text / 2 image
 messages) and enforces parent-set per-child limits. The chat pipeline layers safety:
 prompt-injection blocking, distress + personal-info detection with parent notifications,
-stuck-loop detection, and escaped rendering of all model output.
+stuck-loop detection, and escaped rendering of all model output. Replies stream
+token-by-token over SSE (with a non-streaming JSON fallback) and render as XSS-safe
+markdown + KaTeX math; tutoring stays method-first (L1–L4 scaffolding, hint/step modes),
+and a "worked example" button demonstrates a parallel problem without solving the
+student's own.
 
 ## Repository layout
 
