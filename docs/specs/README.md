@@ -221,6 +221,52 @@ ID (e.g. `A0.5`, `A0.6`, `STAGE1`).
 * **Risk level:** Low to write; **High to implement** (credit/payment/webhook/LS logic + migration = hard gate).
 * **Next action:** Owner/GPT review; verify live LS variant IDs + MoR fees; then gated step-1 (shadow-mode config).
 
+### `SPEC-SLICE-weekly-digest.md`
+* **Purpose:** Design (T-04) for a weekly per-parent digest of each child's learning + safety-flag
+  counts, delivered in-app and (phase 2) by email on a `pg_cron` job. Surfaces the blocking decision —
+  **no email-sending infra exists yet** — and recommends phasing (in-app first, email once a provider is
+  chosen). Aggregates only: time-on-task, subjects/topics, flag counts; **no child message content / no
+  PII** (CLAUDE.md). Grounded in the live `notifications` pipeline + `sessions`/`messages` schema + the
+  existing pg_cron job.
+* **Status:** Drafted 2026-06-17 (design-only). **No code.**
+* **Risk level:** Low to write; **High to implement** (email provider + secret + pg_cron + migration = hard gates).
+* **Next action:** Owner picks the email channel; then a gated phase-1 (read-only aggregation + in-app digest).
+
+### `SPEC-SLICE-safety-alerts.md`
+* **Purpose:** Design (T-10) for **instant, dual-channel** parent safety alerts (distress / personal-info /
+  stuck), building on the live detection + in-app `notifications` and adding a reliable second channel
+  (email/push) for high-severity distress. Severity model (distress=High dual-channel, PII=Medium,
+  stuck=Low in-app), in-app stays the durable record, second-channel dispatch is best-effort/non-blocking
+  to the chat turn, and **no child content/PII** in any payload. Shares the email-channel decision with
+  the weekly-digest slice.
+* **Status:** Drafted 2026-06-17 (design-only). **No code.**
+* **Risk level:** Low to write; **High to implement** (child-safety path + email/push provider + secret +
+  migration = hard gates).
+* **Next action:** Owner picks the channel; then a phase-1 non-blocking `dispatchAlert()` seam (in-app only).
+
+### `SPEC-SLICE-try-before-signup.md`
+* **Purpose:** Design (T-06) for a **one-question, pre-signup** tutoring teaser that stores **no child PII
+  before consent** (COPPA). Proposes an isolated anonymous `POST /api/try` endpoint — separate from the
+  authed `api/chat.js` so its auth invariants stay untouched — that runs one method-only guided turn,
+  IP/daily rate-capped, persisting nothing child-identifying, then converts to the parent-account/consent
+  step (A0.5). Grounded in the COPPA/VPC research + A0.5 onboarding.
+* **Status:** Drafted 2026-06-17 (design-only). **No code.** Needs **legal** sign-off on the PII boundary.
+* **Risk level:** Low to write; **High to implement** (unauthenticated AI entry + COPPA/PII boundary + abuse
+  surface = hard gates; legal prerequisite).
+* **Next action:** Legal sign-off on no-PII-pre-consent + landing copy; then a gated phase-1 (static landing
+  UI with the teaser endpoint disabled).
+
+### `SPEC-SLICE-step-reveal.md`
+* **Purpose:** Design (T-09) for one-step-at-a-time guided explanations with a comprehension check,
+  including on image/photo problems (anti-QANDA). Splits into **Slice A** (frontend progressive-reveal
+  stepper — medium risk, no backend) and **Slice B** (a chat-backend no-dump-on-image prompt guard, sibling
+  of the worked-example guard — high risk). Reuses the live `step_by_step` mode + L1–L4 scaffolding + Math
+  Answer Release Policy; rendering stays XSS-safe via `renderMarkdown`.
+* **Status:** Drafted 2026-06-17 (design-only). **No code.**
+* **Risk level:** Low to write; Slice A medium / Slice B high to implement (no migration/auth/payment/React).
+* **Next action:** Owner review; ship Slice A (frontend stepper) first; Slice B (image guard) via a reviewed
+  chat-backend slice.
+
 > **Research & tasks:** competitive/product research is saved under `docs/research/`
 > (`RESEARCH-competitive-product-strategy-2026-06-15.md`, `RESEARCH-coppa-vpc-options.md`);
 > the MVP build plan is `docs/plans/PLAN-MVP-foundation.md`; the executable, gate-aware backlog
