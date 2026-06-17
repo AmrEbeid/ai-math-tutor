@@ -113,6 +113,10 @@
    ============================================================ */
 
 html[data-theme="dark"] {
+  /* Tell the UA to render native controls, scrollbars and form
+     widgets in their dark variant too. */
+  color-scheme: dark;
+
   /* ---- Surfaces & text ---- */
   --color-cream: oklch(20% 0.012 60);
   --color-warm-bg: oklch(17% 0.012 62);
