@@ -72,6 +72,11 @@ Per parent, one digest covering all their children for the past 7 days:
 1. **Aggregation:** a `weekly_child_summary(p_parent_id, p_since)` RPC (or a read-only query in an
    API/edge function) that returns the §2 aggregates from `sessions`/`messages`/`notifications`.
    Pure read; no content selected.
+   → **DONE (pure compute):** `lib/digest.js` (+`tests/digest.test.mjs`, +11 tests) ships
+   `summarizeWeek({sessions, messages, notifications})` + `timeOnTaskMinutes()` (idle-gap-capped, the
+   §7 open question — resolved) + `DIGEST_FLAG_TYPES`. Aggregates only, **no content/PII** (asserted),
+   **pure and UNWIRED** (no DB/email/Supabase import). Remaining (gated): the read-only query/RPC that
+   feeds it real rows, the `weekly_digest` in-app insert, and delivery.
 2. **Compose + record:** build the digest; insert one in-app `notifications` row
    (`type:'weekly_digest'`) per parent so it shows in the dashboard regardless of email.
 3. **Send email (phase 2):** hand the composed digest to the chosen provider; never include content.
