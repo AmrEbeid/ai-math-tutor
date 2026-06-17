@@ -883,6 +883,7 @@
       </div>
       <div class="learning-info-bar-right">
         <button class="btn btn-secondary" id="lang-toggle" onclick="toggleLanguage()" style="font-size:12px; padding:4px 10px;">🌐 EN</button>
+        <button class="btn btn-secondary" id="worked-example-btn" onclick="sendMessage({ workedExample: true })" title="See a fully worked example of a similar problem" aria-label="Show a worked example of a similar problem">📝 Worked example</button>
         <button class="btn btn-secondary" onclick="newSession()">New Topic</button>
       </div>
     </div>
@@ -1080,11 +1081,14 @@
       }
     }
 
-    async function sendMessage() {
+    async function sendMessage(opts = {}) {
       if (limitBlocked) { alert("You have reached your usage limit."); return; }
+      const workedExample = opts && opts.workedExample === true;
       const input = document.getElementById('chat-input');
       const message = input.value.trim();
-      if (!message && !attachedFile) return;
+      // A worked-example request needs no typed text — the server demonstrates on a
+      // parallel problem from the conversation context.
+      if (!message && !attachedFile && !workedExample) return;
       if (!currentChild) { console.error('[sendMessage] No currentChild'); return; }
       // Safety net: create session if missing
       if (!currentSession) {
@@ -1097,6 +1101,8 @@
       let displayMsg = message;
       if (attachedFile) {
         displayMsg = (attachedFile.type.startsWith('image/') ? '📷 ' : '📎 ') + attachedFile.name + (message ? '\n' + message : '');
+      } else if (workedExample && !message) {
+        displayMsg = '📝 Show me a worked example of a similar problem';
       }
       addBubble(displayMsg, 'user');
       input.value = '';
@@ -1109,12 +1115,16 @@
 
       // Build request body
       let body = {
-        message: message || (attachedFile ? 'I uploaded a file: ' + attachedFile.name : ''),
+        message: message || (attachedFile ? 'I uploaded a file: ' + attachedFile.name
+          : workedExample ? 'Can you show me a fully worked example of a similar problem?' : ''),
         session_id: currentSession.id,
         child_id: currentChild.id,
         language: currentLang,
         subject: currentSubject
       };
+      // Worked-example escape hatch (T-03): the server demonstrates on a NEW parallel
+      // problem and is prompt-guarded against solving the student's own submitted one.
+      if (workedExample) body.worked_example = true;
 
       // If file attached, convert to base64
       if (attachedFile && attachedFile.type.startsWith('image/')) {
