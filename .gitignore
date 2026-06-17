@@ -22,3 +22,8 @@ scripts/knowledge-pipeline/cookies.txt
 .claude/
 .impeccable.md
 .vercel
+
+# Held out of version control due to drift (see
+# docs/specs/SPEC-PROJECT-BRIEF-drift-reconciliation). Kept on disk only;
+# ignored so `git add -A` can't accidentally commit it.
+/PROJECT_BRIEF.md
