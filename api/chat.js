@@ -409,13 +409,22 @@ export default async function handler(req, res) {
         return res.end();
       }
 
-      const { cleanResponse, newBalance } = await finalizeTurn(supabase, {
-        session_id, parentId, message, aiResponse, tokensUsed, image,
-      });
+      // Headers are already flushed, so a failure here CANNOT fall through to the JSON
+      // catch below (that would throw "headers after sent" and leave the stream hung with
+      // no terminator). Report it as an SSE error + [DONE] so the client closes cleanly and
+      // keeps the text it already streamed.
+      try {
+        const { cleanResponse, newBalance } = await finalizeTurn(supabase, {
+          session_id, parentId, message, aiResponse, tokensUsed, image,
+        });
 
-      // Final authoritative event: the cleaned full reply (marker tokens stripped) plus
-      // turn metadata. The client replaces the streamed text with this clean render.
-      res.write(formatSSEEvent({ ...meta, response: cleanResponse, credits_remaining: newBalance }));
+        // Final authoritative event: the cleaned full reply (marker tokens stripped) plus
+        // turn metadata. The client replaces the streamed text with this clean render.
+        res.write(formatSSEEvent({ ...meta, response: cleanResponse, credits_remaining: newBalance }));
+      } catch (finalizeErr) {
+        console.error('Chat finalize (stream) error:', finalizeErr);
+        res.write(formatSSEEvent({ error: 'We had trouble saving that reply. Please try again.' }));
+      }
       res.write(formatSSE(null, true));
       return res.end();
     }
