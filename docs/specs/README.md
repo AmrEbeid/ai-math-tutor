@@ -232,6 +232,18 @@ ID (e.g. `A0.5`, `A0.6`, `STAGE1`).
 * **Risk level:** Low to write; **High to implement** (email provider + secret + pg_cron + migration = hard gates).
 * **Next action:** Owner picks the email channel; then a gated phase-1 (read-only aggregation + in-app digest).
 
+### `SPEC-SLICE-safety-alerts.md`
+* **Purpose:** Design (T-10) for **instant, dual-channel** parent safety alerts (distress / personal-info /
+  stuck), building on the live detection + in-app `notifications` and adding a reliable second channel
+  (email/push) for high-severity distress. Severity model (distress=High dual-channel, PII=Medium,
+  stuck=Low in-app), in-app stays the durable record, second-channel dispatch is best-effort/non-blocking
+  to the chat turn, and **no child content/PII** in any payload. Shares the email-channel decision with
+  the weekly-digest slice.
+* **Status:** Drafted 2026-06-17 (design-only). **No code.**
+* **Risk level:** Low to write; **High to implement** (child-safety path + email/push provider + secret +
+  migration = hard gates).
+* **Next action:** Owner picks the channel; then a phase-1 non-blocking `dispatchAlert()` seam (in-app only).
+
 > **Research & tasks:** competitive/product research is saved under `docs/research/`
 > (`RESEARCH-competitive-product-strategy-2026-06-15.md`, `RESEARCH-coppa-vpc-options.md`);
 > the MVP build plan is `docs/plans/PLAN-MVP-foundation.md`; the executable, gate-aware backlog
