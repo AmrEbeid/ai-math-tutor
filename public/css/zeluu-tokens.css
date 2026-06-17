@@ -124,7 +124,9 @@ html[data-theme="dark"] {
   --color-surface-glass: oklch(20% 0.014 60 / 0.82);
   --color-text-dark: oklch(95% 0.008 75);
   --color-text-muted: oklch(73% 0.015 70);
-  --color-text-light: oklch(56% 0.013 65);
+  /* 63% (not 56%) so tertiary text clears WCAG AA 4.5:1 on dark surfaces
+     while staying clearly below --color-text-muted in the de-emphasis order. */
+  --color-text-light: oklch(63% 0.013 65);
   --color-border: oklch(33% 0.013 65);
 
   /* ---- Brand accent (terracotta, brightened for dark) ---- */
