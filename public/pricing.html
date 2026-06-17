@@ -70,7 +70,7 @@
             position: fixed;
             top: 0; left: 0; right: 0;
             z-index: 100;
-            background: oklch(98.8% 0.005 62 / 0.92);
+            background: oklch(20% 0.005 62 / 0.92);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--color-border);
@@ -134,14 +134,14 @@
             display: none;
             margin-top: 72px;
             padding: 16px 24px;
-            background: oklch(92% 0.08 80);
+            background: oklch(31% 0.1 80);
             border-bottom: 2px solid oklch(75% 0.12 70);
             text-align: center;
         }
         .subscription-banner p {
             font-size: 15px;
             font-weight: 600;
-            color: oklch(35% 0.08 60);
+            color: oklch(82% 0.08 60);
         }
 
         /* ===== HERO ===== */
@@ -175,12 +175,12 @@
             gap: 8px;
             margin-top: 20px;
             padding: 8px 18px;
-            background: oklch(95% 0.04 142);
+            background: oklch(31% 0.06 142);
             border: 1px solid oklch(85% 0.08 142);
             border-radius: 6px;
             font-size: 14px;
             font-weight: 600;
-            color: oklch(35% 0.1 142);
+            color: oklch(82% 0.1 142);
         }
 
         /* ===== TOGGLE ===== */
@@ -191,7 +191,7 @@
         }
         .toggle-pill {
             display: inline-flex;
-            background: oklch(95% 0.005 60);
+            background: oklch(26% 0.005 60);
             border-radius: 10px;
             padding: 4px;
             border: 1px solid var(--color-border);
@@ -214,8 +214,8 @@
             box-shadow: 0 1px 4px oklch(0% 0 0 / 0.06);
         }
         .save-badge {
-            background: oklch(92% 0.06 142);
-            color: oklch(40% 0.12 142);
+            background: oklch(31% 0.08 142);
+            color: oklch(82% 0.12 142);
             padding: 3px 10px;
             border-radius: 4px;
             font-size: 11px;
@@ -556,6 +556,19 @@
         .reveal.visible {
             opacity: 1;
             transform: translateY(0);
+        }
+
+        /* Dark theme: the featured card uses an inverted (text-dark) bg in
+           light mode; that token flips light in dark mode, so give it a
+           coherent lifted warm surface with an accent ring + light heading. */
+        html[data-theme="dark"] .plan-card.featured {
+            background: oklch(29% 0.045 55);
+            color: oklch(90% 0.01 60);
+            box-shadow: 0 0 0 1px var(--color-accent), var(--shadow-lg);
+        }
+        html[data-theme="dark"] .plan-card.featured h3,
+        html[data-theme="dark"] .plan-card.featured .plan-price {
+            color: var(--color-text-dark);
         }
     </style>
 </head>

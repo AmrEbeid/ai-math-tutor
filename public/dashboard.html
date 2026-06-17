@@ -435,12 +435,12 @@
     }
 
     .credit-badge.low {
-      background: oklch(88% 0.12 80);
+      background: oklch(31% 0.1 80);
       color: var(--color-warning);
     }
 
     .credit-badge.empty {
-      background: oklch(85% 0.15 25);
+      background: oklch(31% 0.1 25);
       color: var(--color-error);
     }
 
@@ -752,7 +752,7 @@
             + '<div style="font-size:48px;margin-bottom:20px;">&#128336;</div>'
             + '<h2 style="font-family:var(--font-display,serif);font-size:24px;font-weight:700;color:var(--color-text-dark,#1a1a1a);margin-bottom:12px;">Your trial is almost ready</h2>'
             + '<p style="font-size:16px;color:var(--color-text-muted,#666);line-height:1.6;margin-bottom:24px;">We\u2019re still waiting for checkout confirmation from Lemon Squeezy. This can take a little longer sometimes. Please refresh in a moment.</p>'
-            + '<button onclick="window.location.reload()" style="padding:13px 32px;background:var(--color-text-dark,#1a1a1a);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:12px;">Refresh status</button>'
+            + '<button onclick="window.location.reload()" style="padding:13px 32px;background:var(--color-accent);color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;margin-bottom:12px;">Refresh status</button>'
             + '<br><a href="/pricing.html" style="font-size:13px;color:var(--color-text-muted,#666);">Back to pricing</a>'
             + '</div>';
           document.body.appendChild(pendingDiv);
@@ -964,7 +964,7 @@
           const timeStr = time.toLocaleDateString('en-GB', { day:'numeric', month:'short' }) + ' ' + time.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
           const isSafety = n.type === 'child_distress' || n.type === 'personal_info_shared';
 
-          return '<div style="padding:12px 14px; background:' + (isSafety ? 'oklch(95% 0.04 25)' : 'var(--color-warm-bg)') + '; border-radius:8px; margin-bottom:8px; border-left:3px solid ' + cfg.color + ';">'
+          return '<div style="padding:12px 14px; background:' + (isSafety ? 'oklch(31% 0.06 25)' : 'var(--color-warm-bg)') + '; border-radius:8px; margin-bottom:8px; border-left:3px solid ' + cfg.color + ';">'
             + '<div style="display:flex; justify-content:space-between; align-items:start;">'
             + '<div>'
             + '<span style="font-size:14px;">' + cfg.icon + ' <strong>' + cfg.label + '</strong></span>'
@@ -1284,7 +1284,7 @@
               <span style="font-size:12px; color:var(--color-text-muted);">${s.messages.length} messages</span>
             </div>
             <div style="font-size:12px; color:var(--color-text-muted); margin-top:4px;">
-              <span style="display:inline-block; background:${s.subject === 'science' ? 'oklch(90% 0.08 142)' : s.subject === 'english' ? 'oklch(90% 0.08 260)' : 'var(--color-accent-light)'}; color:${s.subject === 'science' ? 'oklch(40% 0.12 142)' : s.subject === 'english' ? 'oklch(40% 0.12 260)' : 'var(--color-accent-dark)'}; font-size:11px; font-weight:600; padding:2px 8px; border-radius:10px; margin-right:6px;">${(s.subject || 'math').charAt(0).toUpperCase() + (s.subject || 'math').slice(1)}</span>
+              <span style="display:inline-block; background:${s.subject === 'science' ? 'oklch(31% 0.1 142)' : s.subject === 'english' ? 'oklch(31% 0.1 260)' : 'var(--color-accent-light)'}; color:${s.subject === 'science' ? 'oklch(85% 0.12 142)' : s.subject === 'english' ? 'oklch(85% 0.12 260)' : 'var(--color-accent-dark)'}; font-size:11px; font-weight:600; padding:2px 8px; border-radius:10px; margin-right:6px;">${(s.subject || 'math').charAt(0).toUpperCase() + (s.subject || 'math').slice(1)}</span>
               ${s.credits_used || 0} credits &middot; Grade ${s.grade} &middot;
               <span style="color:${s.status === 'completed' ? 'var(--color-success)' : s.status === 'stuck_loop' ? 'var(--color-warning)' : 'var(--color-text-muted)'};">${s.status}</span>
             </div>
