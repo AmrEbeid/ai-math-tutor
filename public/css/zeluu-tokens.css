@@ -21,6 +21,8 @@
   --color-cream: oklch(97.5% 0.004 60);
   --color-warm-bg: oklch(98.8% 0.005 62);
   --color-surface: oklch(99% 0.003 60);
+  /* Frosted/translucent surface for sticky navs & glass overlays */
+  --color-surface-glass: oklch(99% 0.003 60 / 0.85);
   --color-text-dark: oklch(15% 0.02 60);
   --color-text-muted: oklch(50% 0.015 65);
   --color-text-light: oklch(75% 0.01 65);
@@ -87,6 +89,73 @@
   --z-nav: 100;
   --z-modal: 200;
   --z-toast: 300;
+}
+
+/* ============================================================
+   Dark theme (warm dark)
+   ============================================================
+   Opt-in: set <html data-theme="dark">. The selector
+   html[data-theme="dark"] has specificity (0,1,1), which beats
+   the bare :root (0,1,0) blocks several pages still inline — so
+   these dark values win centrally without editing those pages.
+
+   Only COLOR tokens are redefined (surfaces, text, border, the
+   gray scale, accent, status, child variants, shadows). Spacing,
+   radius, typography, motion and z-index are theme-independent
+   and intentionally inherited from :root above.
+
+   Palette intent: keep the warm-editorial identity in the dark —
+   warm near-black backgrounds (hue ~60), warm off-white text, and
+   a brightened terracotta accent for AA contrast on dark surfaces.
+   The legacy --primary/--danger/--success/--warning aliases are
+   var() references to these tokens, so they re-resolve to the dark
+   values automatically and are not repeated here.
+   ============================================================ */
+
+html[data-theme="dark"] {
+  /* Tell the UA to render native controls, scrollbars and form
+     widgets in their dark variant too. */
+  color-scheme: dark;
+
+  /* ---- Surfaces & text ---- */
+  --color-cream: oklch(20% 0.012 60);
+  --color-warm-bg: oklch(17% 0.012 62);
+  --color-surface: oklch(24% 0.014 60);
+  --color-surface-glass: oklch(20% 0.014 60 / 0.82);
+  --color-text-dark: oklch(95% 0.008 75);
+  --color-text-muted: oklch(73% 0.015 70);
+  /* 63% (not 56%) so tertiary text clears WCAG AA 4.5:1 on dark surfaces
+     while staying clearly below --color-text-muted in the de-emphasis order. */
+  --color-text-light: oklch(63% 0.013 65);
+  --color-border: oklch(33% 0.013 65);
+
+  /* ---- Brand accent (terracotta, brightened for dark) ---- */
+  --color-accent: oklch(70% 0.15 55);
+  --color-accent-dark: oklch(62% 0.16 52);
+  --color-accent-light: oklch(40% 0.09 55);
+
+  /* ---- Status (brightened for dark backgrounds) ---- */
+  --color-success: oklch(72% 0.16 142);
+  --color-error: oklch(68% 0.19 25);
+  --color-warning: oklch(78% 0.14 80);
+
+  /* ---- Child-facing variants ---- */
+  --color-child-accent: oklch(78% 0.13 75);
+  --color-child-bg: oklch(26% 0.04 80);
+
+  /* ---- Gray scale: inverted so light grays read as dark ---- */
+  --gray-50: oklch(24% 0.008 60);
+  --gray-100: oklch(28% 0.009 60);
+  --gray-200: oklch(33% 0.011 65);
+  --gray-500: oklch(60% 0.013 65);
+  --gray-600: oklch(68% 0.013 65);
+  --gray-700: oklch(80% 0.012 60);
+  --gray-900: oklch(95% 0.008 75);
+
+  /* ---- Shadows: deepen to read against dark surfaces ---- */
+  --shadow-sm: 0 1px 3px oklch(0% 0 0 / 0.40), 0 1px 2px oklch(0% 0 0 / 0.30);
+  --shadow-md: 0 4px 12px oklch(0% 0 0 / 0.45), 0 2px 4px oklch(0% 0 0 / 0.30);
+  --shadow-lg: 0 12px 32px oklch(0% 0 0 / 0.55), 0 4px 8px oklch(0% 0 0 / 0.35);
 }
 
 /* ============================================================
