@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zeluu - AI Learning That Actually Teaches Your Child</title>
     <!-- PWA Meta Tags -->
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#d97706">
+    <meta name="theme-color" content="#1b1714">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Zeluu">
@@ -121,7 +121,7 @@
             left: 0;
             right: 0;
             z-index: 100;
-            background: rgba(255, 255, 255, 0.95);
+            background: var(--color-surface-glass);
             border-bottom: 1px solid var(--color-border);
             padding: 16px 0;
         }
@@ -285,7 +285,7 @@
         }
 
         .chat-container {
-            background: white;
+            background: var(--color-surface);
             border-radius: 16px;
             box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
             overflow: hidden;
@@ -417,7 +417,7 @@
         /* ===== PARENT MESSAGE ===== */
         .parent-message {
             padding: 60px 0;
-            background: white;
+            background: var(--color-surface);
             border-top: 1px solid var(--color-border);
         }
 
@@ -495,7 +495,7 @@
         /* ===== HOW IT WORKS ===== */
         .how-works {
             padding: 80px 0;
-            background: white;
+            background: var(--color-surface);
         }
 
         .steps-grid {
@@ -596,7 +596,7 @@
         }
 
         .pricing-preview {
-            background: white;
+            background: var(--color-surface);
             border: 1px solid var(--color-border);
             border-radius: 12px;
             padding: 48px;
@@ -850,7 +850,7 @@
         }
 
         .install-modal {
-            background: white;
+            background: var(--color-surface);
             border-radius: 16px;
             padding: 32px 28px;
             max-width: 340px;
