@@ -147,8 +147,11 @@ Ordered, each step a **separate gated slice** (none performed here):
    derived cost matches expectations against live request shapes. *(Medium risk; no payment change.)*
    → **DONE (config half):** `lib/credits.js` (+`tests/credits.test.mjs`) ships the `ACTION_CREDIT_COSTS`
    table + `creditCostForAction()` / `creditCostForTurn()`, **pure and unwired** (no importer in `api/`,
-   so deduction is unchanged). Remaining for this step: the `plans` catalog + the shadow-mode *logging*
-   wire-in to `api/chat.js` (that wire-in touches the chat path → its own small reviewed slice).
+   so deduction is unchanged). The **`plans` catalog** is also done: `lib/plans.js`
+   (+`tests/plans.test.mjs`) ships the per-plan credits/caps/children/voice numbers (§3) +
+   `getPlan`/`listActivePlans`/`resolvePlanKey`, **pure and unwired**. Remaining for this step: the
+   shadow-mode *logging* wire-in to `api/chat.js` (that wire-in touches the chat path → its own small
+   reviewed slice).
 2. **RPC amount support (hard gate):** add `deduct_credit(..., p_amount)` (or `deduct_credits_amount`) via a
    reviewed Supabase migration; keep the old signature working. *(Hard gate — migration + credit logic.)*
 3. **Cut over deduction (hard gate):** `finalizeTurn()` deducts `creditCostForTurn()` instead of the modulo;
