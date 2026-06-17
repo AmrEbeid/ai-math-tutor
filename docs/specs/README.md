@@ -256,6 +256,17 @@ ID (e.g. `A0.5`, `A0.6`, `STAGE1`).
 * **Next action:** Legal sign-off on no-PII-pre-consent + landing copy; then a gated phase-1 (static landing
   UI with the teaser endpoint disabled).
 
+### `SPEC-SLICE-step-reveal.md`
+* **Purpose:** Design (T-09) for one-step-at-a-time guided explanations with a comprehension check,
+  including on image/photo problems (anti-QANDA). Splits into **Slice A** (frontend progressive-reveal
+  stepper — medium risk, no backend) and **Slice B** (a chat-backend no-dump-on-image prompt guard, sibling
+  of the worked-example guard — high risk). Reuses the live `step_by_step` mode + L1–L4 scaffolding + Math
+  Answer Release Policy; rendering stays XSS-safe via `renderMarkdown`.
+* **Status:** Drafted 2026-06-17 (design-only). **No code.**
+* **Risk level:** Low to write; Slice A medium / Slice B high to implement (no migration/auth/payment/React).
+* **Next action:** Owner review; ship Slice A (frontend stepper) first; Slice B (image guard) via a reviewed
+  chat-backend slice.
+
 > **Research & tasks:** competitive/product research is saved under `docs/research/`
 > (`RESEARCH-competitive-product-strategy-2026-06-15.md`, `RESEARCH-coppa-vpc-options.md`);
 > the MVP build plan is `docs/plans/PLAN-MVP-foundation.md`; the executable, gate-aware backlog
