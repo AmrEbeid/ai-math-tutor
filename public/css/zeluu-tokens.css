@@ -33,6 +33,19 @@
   --color-accent-dark: oklch(45% 0.18 48);
   --color-accent-light: oklch(82% 0.1 55);
 
+  /* ---- Brand foundation (premium trust-forward) — ADDITIVE ----
+     Deep-teal trust anchor + warm-amber accent. New pages/sections opt in via
+     these --brand-* tokens; existing pages keep --color-accent until redesigned
+     (staged Brand → Home → Login rollout). Hex refs: teal #1E6E78 / #13525A,
+     amber #E08A3C, safe-green #3B9B6E. */
+  --brand-primary: oklch(48% 0.062 210);
+  --brand-primary-strong: oklch(38% 0.058 210);
+  --brand-primary-tint: oklch(95% 0.018 210);
+  --brand-accent: oklch(70% 0.12 60);
+  --brand-accent-strong: oklch(60% 0.13 55);
+  --brand-safe: oklch(60% 0.11 160);
+  --brand-on-primary: oklch(99% 0.003 60);
+
   /* ---- Color: status ---- */
   --color-success: oklch(65% 0.16 142);
   --color-error: oklch(55% 0.2 25);
@@ -133,6 +146,16 @@ html[data-theme="dark"] {
   --color-accent: oklch(70% 0.15 55);
   --color-accent-dark: oklch(62% 0.16 52);
   --color-accent-light: oklch(40% 0.09 55);
+
+  /* ---- Brand foundation (premium trust-forward) — dark overrides ----
+     Teal lightened for dark surfaces (#4FB3C0 / #6FC7D2), amber #F0A35C. */
+  --brand-primary: oklch(72% 0.082 205);
+  --brand-primary-strong: oklch(80% 0.078 200);
+  --brand-primary-tint: oklch(30% 0.04 210);
+  --brand-accent: oklch(78% 0.11 62);
+  --brand-accent-strong: oklch(72% 0.12 58);
+  --brand-safe: oklch(74% 0.13 160);
+  --brand-on-primary: oklch(13% 0.012 220);
 
   /* ---- Status (brightened for dark backgrounds) ---- */
   --color-success: oklch(72% 0.16 142);
