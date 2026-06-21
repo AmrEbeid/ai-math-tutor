@@ -30,7 +30,9 @@ import { TopicTag } from '../dist/TopicTag.js';
 import { ChatBubble } from '../dist/ChatBubble.js';
 import { Container } from '../dist/Container.js';
 import { Toggle } from '../dist/Toggle.js';
-const DS = { Button, NavBar, LiveBadge, Card, Feature, Step, Stat, StatCard, PlanCard, FormField, Modal, Spinner, CreditBadge, InfoCell, SubjectTab, TopicTag, ChatBubble, Container, Toggle };
+import { ProgressBar } from '../dist/ProgressBar.js';
+import { Badge } from '../dist/Badge.js';
+const DS = { Button, NavBar, LiveBadge, Card, Feature, Step, Stat, StatCard, PlanCard, FormField, Modal, Spinner, CreditBadge, InfoCell, SubjectTab, TopicTag, ChatBubble, Container, Toggle, ProgressBar, Badge };
 
 const html = (el) => renderToStaticMarkup(el);
 const has = (markup, ...cls) => cls.every((c) => new RegExp(`class="[^"]*\\b${c}\\b`).test(markup));
@@ -140,7 +142,22 @@ test('Toggle: segmented control, active + badge', () => {
   assert.ok(has(m, 'save-badge'));
 });
 
-test('all 19 components are exported', () => {
-  const expected = ['Button','NavBar','LiveBadge','Card','Feature','Step','Stat','StatCard','PlanCard','FormField','Modal','Spinner','CreditBadge','InfoCell','SubjectTab','TopicTag','ChatBubble','Container','Toggle'];
+test('ProgressBar: track + clamped fill', () => {
+  const m = html(h(DS.ProgressBar, { value: 25 }));
+  assert.ok(has(m, 'progress-bar'));
+  assert.match(m, /class="progress-fill"[^>]*width:\s*25%/);
+  // clamps out-of-range
+  assert.match(html(h(DS.ProgressBar, { value: 150 })), /width:\s*100%/);
+  assert.match(html(h(DS.ProgressBar, { value: -5 })), /width:\s*0%/);
+});
+
+test('Badge: now / soon status', () => {
+  assert.ok(has(html(h(DS.Badge, { status: 'now' }, 'Available now')), 'badge-now'));
+  assert.ok(has(html(h(DS.Badge, { status: 'soon' }, 'Coming soon')), 'badge-soon'));
+  assert.ok(has(html(h(DS.Badge, null, 'x')), 'badge-now')); // defaults to now
+});
+
+test('all 21 components are exported', () => {
+  const expected = ['Button','NavBar','LiveBadge','Card','Feature','Step','Stat','StatCard','PlanCard','FormField','Modal','Spinner','CreditBadge','InfoCell','SubjectTab','TopicTag','ChatBubble','Container','Toggle','ProgressBar','Badge'];
   for (const name of expected) assert.equal(typeof DS[name], 'function', `${name} exported`);
 });
