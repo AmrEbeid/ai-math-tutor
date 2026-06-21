@@ -36,3 +36,7 @@ export { Container } from './Container';
 export type { ContainerProps } from './Container';
 export { Toggle } from './Toggle';
 export type { ToggleProps, ToggleOption } from './Toggle';
+export { ProgressBar } from './ProgressBar';
+export type { ProgressBarProps } from './ProgressBar';
+export { Badge } from './Badge';
+export type { BadgeProps, BadgeStatus } from './Badge';

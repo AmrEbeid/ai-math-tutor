@@ -32,6 +32,8 @@ Zeluu serves **parents** (account, billing, dashboard, marketing pages) and
 | Read-only account field | `InfoCell` | Label + value tiles in a 2–3 col grid |
 | Form input | `FormField` | Pass `error` to surface validation inline |
 | Remaining credits | `CreditBadge` | `level` shifts color: normal → low → empty |
+| Feature availability | `Badge` | `status="now"` (accent) vs `status="soon"` (muted) status pill |
+| Progress / usage meter | `ProgressBar` | `value` 0–100; thin accent fill on a track |
 | Binary/segmented choice (billing, etc.) | `Toggle` | Pill segmented control; 2–3 options, one active, optional per-option `badge` |
 | Subject switcher (child app) | `SubjectTab` | Group in `.subject-tabs`; exactly one `active` |
 | Topic / skill chips | `TopicTag` | Inline cloud; keep labels short |
