@@ -29,7 +29,8 @@ import { SubjectTab } from '../dist/SubjectTab.js';
 import { TopicTag } from '../dist/TopicTag.js';
 import { ChatBubble } from '../dist/ChatBubble.js';
 import { Container } from '../dist/Container.js';
-const DS = { Button, NavBar, LiveBadge, Card, Feature, Step, Stat, StatCard, PlanCard, FormField, Modal, Spinner, CreditBadge, InfoCell, SubjectTab, TopicTag, ChatBubble, Container };
+import { Toggle } from '../dist/Toggle.js';
+const DS = { Button, NavBar, LiveBadge, Card, Feature, Step, Stat, StatCard, PlanCard, FormField, Modal, Spinner, CreditBadge, InfoCell, SubjectTab, TopicTag, ChatBubble, Container, Toggle };
 
 const html = (el) => renderToStaticMarkup(el);
 const has = (markup, ...cls) => cls.every((c) => new RegExp(`class="[^"]*\\b${c}\\b`).test(markup));
@@ -130,7 +131,16 @@ test('Container', () => {
   assert.ok(has(html(h(DS.Container, null, 'x')), 'container'));
 });
 
-test('all 18 components are exported', () => {
-  const expected = ['Button','NavBar','LiveBadge','Card','Feature','Step','Stat','StatCard','PlanCard','FormField','Modal','Spinner','CreditBadge','InfoCell','SubjectTab','TopicTag','ChatBubble','Container'];
+test('Toggle: segmented control, active + badge', () => {
+  const opts = [{ value: 'm', label: 'Monthly' }, { value: 'a', label: 'Annual', badge: 'Save 20%' }];
+  const m = html(h(DS.Toggle, { value: 'a', options: opts }));
+  assert.ok(has(m, 'toggle-pill'));
+  assert.equal((m.match(/<button/g) || []).length, 2, 'one button per option');
+  assert.match(m, /class="active"[^>]*aria-pressed="true"[^>]*>Annual/);
+  assert.ok(has(m, 'save-badge'));
+});
+
+test('all 19 components are exported', () => {
+  const expected = ['Button','NavBar','LiveBadge','Card','Feature','Step','Stat','StatCard','PlanCard','FormField','Modal','Spinner','CreditBadge','InfoCell','SubjectTab','TopicTag','ChatBubble','Container','Toggle'];
   for (const name of expected) assert.equal(typeof DS[name], 'function', `${name} exported`);
 });
