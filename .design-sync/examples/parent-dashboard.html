@@ -1,0 +1,193 @@
+<!--
+  Zeluu parent dashboard — a worked screen composed entirely from the synced
+  design-system components (window.ZeluuDS) + the bundle CSS, teal Spark brand.
+  To render: copy this file into the built ds-bundle/ (the asset paths below are
+  relative to the bundle root: ./styles.css, ./_vendor/*, ./_ds_bundle.js), then
+  serve ds-bundle/ and open /parent-dashboard.html. Rebuild the bundle with the
+  design-sync build (see .design-sync/NOTES.md) if ds-bundle/ is absent.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zeluu — Parent Dashboard</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./_ds_bundle.css" />
+  <script src="./_vendor/react.js"></script>
+  <script src="./_vendor/react-dom.js"></script>
+  <script src="./_ds_bundle.js"></script>
+  <style>
+    body { background: var(--color-warm-bg); margin: 0; }
+    .page { padding-bottom: var(--spacing-2xl); }
+    .greeting { padding: var(--spacing-lg) 0 var(--spacing-md); }
+    .greeting h1 { font-family: var(--font-display); font-size: 32px; font-weight: 800; color: var(--color-text-dark); margin: 0 0 6px; }
+    .greeting p { color: var(--color-text-muted); margin: 0; font-size: 16px; }
+    .section-title { font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--color-text-dark); margin: var(--spacing-lg) 0 var(--spacing-sm); display: flex; align-items: baseline; justify-content: space-between; }
+    .section-title a { font-family: var(--font-body); font-size: 14px; font-weight: 600; color: var(--color-accent); text-decoration: none; }
+    .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--spacing-sm); }
+    .children-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-sm); }
+    .bottom-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: var(--spacing-sm); }
+    .child-head { display: flex; align-items: center; gap: 12px; }
+    .avatar { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+    .muted { color: var(--color-text-muted); font-size: 13px; }
+    .meter-row { display: flex; justify-content: space-between; font-size: 13px; color: var(--color-text-muted); margin-bottom: 6px; }
+    .tags { display: flex; flex-wrap: wrap; gap: 4px; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--spacing-xs); }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .activity-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--color-border); }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-icon { width: 36px; height: 36px; border-radius: 9px; background: var(--color-warm-bg); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .activity-main { flex: 1; min-width: 0; }
+    .activity-main .t { font-size: 14px; font-weight: 600; color: var(--color-text-dark); }
+    .activity-main .s { font-size: 12px; color: var(--color-text-muted); }
+    .empty-state { text-align: center; padding: var(--spacing-md) var(--spacing-sm); min-height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .greeting .wk { display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-accent-dark); background: var(--color-accent-light); padding: 3px 10px; border-radius: 999px; margin-bottom: 12px; }
+    .empty-state .e-icon { font-size: 34px; }
+    .empty-state p { color: var(--color-text-muted); font-size: 14px; margin: 8px 0 16px; }
+    .errbox { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 10px; background: oklch(96% 0.03 80); border: 1px solid var(--color-warning); font-size: 13px; color: var(--color-text-dark); }
+    .rec { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--color-border); }
+    .rec:last-child { border-bottom: none; }
+    .rec .r-icon { font-size: 20px; }
+    .rec .r-body { flex: 1; }
+    .rec .r-body .rt { font-size: 14px; font-weight: 600; color: var(--color-text-dark); margin-bottom: 2px; }
+    .rec .r-body .rs { font-size: 13px; color: var(--color-text-muted); }
+    @media (max-width: 900px) { .stat-grid { grid-template-columns: 1fr 1fr; } .children-grid, .bottom-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script>
+    const h = React.createElement;
+    const DS = window.ZeluuDS;
+    const { NavBar, Container, Button, Card, StatCard, CreditBadge, ProgressBar, TopicTag, InfoCell, Badge } = DS;
+
+    function StatRow() {
+      return h('div', { className: 'stat-grid' },
+        h(StatCard, { value: '1,240', label: 'Credits left' }),
+        h(StatCard, { value: '18', label: 'Lessons this week' }),
+        h(StatCard, { value: '6', label: 'Day streak' }),
+        h(StatCard, { value: '88%', label: 'Avg. quiz score' }),
+      );
+    }
+
+    function ChildCard(p) {
+      const header = h('div', { className: 'child-head' },
+        h('div', { className: 'avatar', style: { background: p.avBg, color: p.avFg } }, p.emoji),
+        h('div', null,
+          h('div', { style: { fontWeight: 700, color: 'var(--color-text-dark)' } }, p.name),
+          h('div', { className: 'muted' }, 'Grade ' + p.grade + ' · ' + p.lang),
+        ),
+        h('div', { style: { marginLeft: 'auto' } }, h(CreditBadge, { level: p.creditLevel }, p.credits)),
+      );
+      if (p.empty) {
+        return h(Card, { header },
+          h('div', { className: 'empty-state' },
+            h('div', { className: 'e-icon' }, '🌱'),
+            h('p', null, "No lessons yet this week. A gentle nudge helps " + p.name.split(' ')[0] + " get started."),
+            h(Button, { size: 'sm' }, 'Send a reminder'),
+          ),
+        );
+      }
+      return h(Card, { header },
+        h('div', { style: { margin: 'var(--spacing-sm) 0' } },
+          h('div', { className: 'meter-row' },
+            h('span', null, 'Weekly goal · ' + p.done + ' of ' + p.goal + ' lessons'),
+            h('span', { style: { fontWeight: 600, color: 'var(--color-accent)' } }, Math.round(p.done / p.goal * 100) + '%'),
+          ),
+          h(ProgressBar, { value: p.done / p.goal * 100 }),
+        ),
+        h('div', { className: 'tags', style: { margin: '4px 0 var(--spacing-sm)' } },
+          p.topics.map((t, i) => h(TopicTag, { key: i }, t)),
+        ),
+        h('div', { className: 'info-grid' },
+          h(InfoCell, { label: 'Last active', value: p.lastActive }),
+          h(InfoCell, { label: 'Top subject', value: p.topSubject }),
+          h(InfoCell, { label: 'This week', value: p.minutes + ' min' }),
+        ),
+        h('div', { className: 'actions', style: { marginTop: 'var(--spacing-md)' } },
+          h(Button, { size: 'sm' }, 'Open ' + p.name.split(' ')[0] + "'s app"),
+          h(Button, { variant: 'secondary', size: 'sm' }, 'View full report'),
+        ),
+      );
+    }
+
+    function Activity() {
+      const item = (icon, t, s, badge) => h('div', { className: 'activity-item' },
+        h('div', { className: 'activity-icon' }, icon),
+        h('div', { className: 'activity-main' },
+          h('div', { className: 't' }, t),
+          h('div', { className: 's' }, s),
+        ),
+        badge,
+      );
+      return h(Card, { header: h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' } },
+          h('strong', null, 'Recent tutor activity'),
+          h('a', { href: '#', style: { fontSize: 13, color: 'var(--color-accent)', textDecoration: 'none' } }, 'View all')) },
+        item('🧮', 'Layla — Fractions practice', 'Today, 4:10 PM · 12 min · 9/10 correct', h(Badge, { status: 'now' }, 'Completed')),
+        item('🔬', 'Layla — Photosynthesis Q&A', 'Today, 3:30 PM · 8 min', h(Badge, { status: 'now' }, 'Completed')),
+        item('📖', 'Omar — Reading comprehension', 'Yesterday · started, not finished', h(Badge, { status: 'soon' }, 'In progress')),
+        h('div', { className: 'errbox', style: { marginTop: 12 } },
+          h('span', null, '⚠️'),
+          h('span', null, "We couldn't load activity from before Monday. ",
+            h('a', { href: '#', style: { color: 'var(--color-accent-dark)', fontWeight: 600 } }, 'Retry')),
+        ),
+      );
+    }
+
+    function NextActions() {
+      const rec = (icon, t, s, btn) => h('div', { className: 'rec' },
+        h('div', { className: 'r-icon' }, icon),
+        h('div', { className: 'r-body' }, h('div', { className: 'rt' }, t), h('div', { className: 'rs' }, s)),
+        btn,
+      );
+      return h(Card, { header: h('strong', null, 'Recommended next') },
+        rec('💳', 'Top up credits soon', "Layla is down to 45 credits today. Add a pack so lessons don't pause.",
+          h(Button, { size: 'sm' }, 'Add credits')),
+        rec('📅', 'Set Omar a weekly goal', 'Kids with a goal finish 2× more lessons. Takes 30 seconds.',
+          h(Button, { variant: 'secondary', size: 'sm' }, 'Set goal')),
+        rec('🛡️', 'Review this week’s chats', 'You have full visibility — skim Layla’s 14 tutor messages.',
+          h(Button, { variant: 'secondary', size: 'sm' }, 'Review')),
+      );
+    }
+
+    function Dashboard() {
+      return h(React.Fragment, null,
+        h(NavBar, { brand: 'Zeluu', logo: h('span', { style: { color: 'var(--color-accent)', fontSize: 22 } }, '✦'),
+          actions: h('div', { style: { display: 'flex', alignItems: 'center', gap: 14 } },
+            h(CreditBadge, { level: 'normal' }, '1,240 credits'),
+            h(Button, { variant: 'secondary', size: 'sm' }, 'Account'),
+          ) }),
+        h('div', { className: 'page' },
+          h(Container, null,
+            h('div', { className: 'greeting' },
+              h('span', { className: 'wk' }, 'Week of Jun 16–22'),
+              h('h1', null, 'Good afternoon, Sara 👋'),
+              h('p', null, "Here's how Layla and Omar are learning this week."),
+            ),
+            h(StatRow),
+            h('div', { className: 'section-title' }, h('span', null, 'Your children'),
+              h('a', { href: '#' }, 'Manage profiles')),
+            h('div', { className: 'children-grid' },
+              h(ChildCard, { name: 'Layla Hassan', grade: 5, lang: 'English + Arabic', emoji: '👧',
+                avBg: 'var(--color-accent-light)', avFg: 'var(--color-accent-dark)',
+                credits: '45 left today', creditLevel: 'low',
+                done: 4, goal: 5, topics: ['Fractions', 'Photosynthesis', 'Past tense'],
+                lastActive: 'Today', topSubject: 'Mathematics', minutes: 96 }),
+              h(ChildCard, { name: 'Omar Hassan', grade: 3, lang: 'English', emoji: '👦',
+                avBg: 'var(--color-warm-bg)', avFg: 'var(--color-text-dark)',
+                credits: 'No usage', creditLevel: 'empty', empty: true }),
+            ),
+            h('div', { className: 'bottom-grid', style: { marginTop: 'var(--spacing-lg)' } },
+              h(Activity),
+              h(NextActions),
+            ),
+          ),
+        ),
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(h(Dashboard));
+  </script>
+</body>
+</html>
