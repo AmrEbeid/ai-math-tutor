@@ -14,7 +14,8 @@
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json"
+    "build": "tsc -p tsconfig.json",
+    "test": "tsc -p tsconfig.json && node --test tests/*.test.mjs"
   },
   "peerDependencies": {
     "react": ">=18",
