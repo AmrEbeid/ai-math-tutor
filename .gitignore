@@ -27,3 +27,14 @@ scripts/knowledge-pipeline/cookies.txt
 # docs/specs/SPEC-PROJECT-BRIEF-drift-reconciliation). Kept on disk only;
 # ignored so `git add -A` can't accidentally commit it.
 /PROJECT_BRIEF.md
+
+# design-sync generated/build artifacts (Claude Design component-library sync)
+# Durable inputs that ARE committed: .design-sync/{config.json,NOTES.md,conventions.md,previews/} and ds-src source.
+/ds-bundle/
+/.ds-sync/
+/.design-sync/.cache/
+/.design-sync/learnings/
+/.design-sync/node_modules
+/ds-src/dist/
+/ds-src/styles/ds-bundle.css
+/ds-src/package-lock.json
