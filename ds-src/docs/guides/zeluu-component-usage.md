@@ -68,3 +68,81 @@ Zeluu serves **parents** (account, billing, dashboard, marketing pages) and
 Light is default; set `<html data-theme="dark">` for the warm-dark theme. Never
 hardcode dark values — only color tokens redefine; spacing/radius/type are shared.
 For the child app's Arabic mode, set `dir="rtl"` on the document.
+
+## Worked examples (screen-level composition)
+
+Full screens assembled from the library + token glue. Components come from
+`window.ZeluuDS`; layout uses `var(--*)` tokens. These show how the parts fit
+together — adapt the content, keep the structure.
+
+### Pricing section
+
+```jsx
+const { Container, NavBar, Button, Toggle, PlanCard } = window.ZeluuDS;
+
+<>
+  <NavBar brand="Zeluu" logo="✦" actions={<Button href="/login" variant="secondary" size="sm">Sign in</Button>} />
+  <Container>
+    <div style={{ textAlign: 'center', padding: 'var(--spacing-xl) 0 var(--spacing-md)' }}>
+      <h2 style={{ fontFamily: 'var(--font-display)' }}>Simple, child-first pricing</h2>
+      <p style={{ color: 'var(--color-text-muted)' }}>Cancel anytime. 7-day free trial.</p>
+    </div>
+    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 'var(--spacing-lg)' }}>
+      <Toggle value="annual" options={[{ value: 'monthly', label: 'Monthly' }, { value: 'annual', label: 'Annual', badge: 'Save 20%' }]} />
+    </div>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--spacing-md)' }}>
+      <PlanCard name="Solo" credits="500 credits / mo" price="$9" priceSuffix="/mo" features={['1 child', 'All subjects', 'Homework help']} ctaLabel="Start trial" />
+      <PlanCard featured popLabel="Most popular" name="Family" credits="2,000 credits / mo" price="$29" priceSuffix="/mo" features={['Up to 4 children', 'All subjects', 'Progress reports', 'Priority support']} ctaLabel="Start trial" />
+      <PlanCard name="School" credits="Unlimited" price="Custom" features={['Classrooms', 'Admin dashboard', 'SSO']} ctaLabel="Contact us" />
+    </div>
+  </Container>
+</>
+```
+
+### Parent dashboard panel
+
+```jsx
+const { Container, Card, StatCard, InfoCell, ProgressBar, CreditBadge, Button } = window.ZeluuDS;
+
+<Container>
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--spacing-sm)', marginBottom: 'var(--spacing-md)' }}>
+    <StatCard value="1,240" label="Credits left" />
+    <StatCard value="18" label="Lessons this week" />
+    <StatCard value="6" label="Day streak" />
+  </div>
+  <Card header={<><strong>Layla — Grade 5</strong><CreditBadge level="low">45 left today</CreditBadge></>}>
+    <div style={{ margin: 'var(--spacing-sm) 0' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'var(--color-text-muted)', marginBottom: 6 }}>
+        <span>Monthly credits</span><span>820 / 2,000</span>
+      </div>
+      <ProgressBar value={41} />
+    </div>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--spacing-xs)' }}>
+      <InfoCell label="Plan" value="Family" />
+      <InfoCell label="Renews" value="Jul 14" />
+      <InfoCell label="Top subject" value="Mathematics" />
+    </div>
+    <div style={{ marginTop: 'var(--spacing-md)' }}><Button>Open child app</Button></div>
+  </Card>
+</Container>
+```
+
+### Tutor chat view
+
+```jsx
+const { SubjectTab, ChatBubble } = window.ZeluuDS;
+
+<div style={{ maxWidth: 560, margin: '0 auto' }}>
+  <div className="subject-tabs">
+    <SubjectTab label="Math" icon="🧮" active />
+    <SubjectTab label="Science" icon="🔬" />
+    <SubjectTab label="English" icon="📖" />
+  </div>
+  <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: 'var(--spacing-md) 0' }}>
+    <ChatBubble role="user">How do I add 1/2 and 1/3?</ChatBubble>
+    <ChatBubble role="assistant">Great question! First we need a common denominator. What number do both 2 and 3 divide into?</ChatBubble>
+    <ChatBubble role="user">6?</ChatBubble>
+    <ChatBubble role="assistant">Exactly 👏 So 1/2 becomes 3/6 and 1/3 becomes 2/6. Now add the tops…</ChatBubble>
+  </div>
+</div>
+```
