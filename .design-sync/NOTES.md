@@ -115,3 +115,10 @@ ChatBubble, Container.
 - **Gitignore** (generated/installed): `ds-bundle/`, `.ds-sync/`,
   `.design-sync/.cache/`, `.design-sync/learnings/`, `.design-sync/node_modules`,
   `ds-src/node_modules/`, `ds-src/dist/`, `ds-src/styles/ds-bundle.css` (generated).
+
+## Verifying the worked screens
+
+Run `node .design-sync/verify-screens.mjs` (after building ds-bundle/) to re-check
+every `.design-sync/examples/*.html` renders without errors in **light + dark** and
+has **no horizontal overflow at 390px**. Pass a screen name to scope it. Exits
+non-zero on any failure — handy after a brand/CSS change or a re-sync.
