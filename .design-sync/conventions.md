@@ -1,7 +1,7 @@
 # Zeluu Design System
 
 Zeluu is a parent-controlled AI tutor for Math, Science & English, grades 1–9.
-Its identity is **warm-editorial**: a soft OKLCH cream/terracotta palette, the
+Its identity is **warm-editorial**: a soft OKLCH cream/teal palette, the
 **Fraunces** display serif for headings paired with **Plus Jakarta Sans** for
 body text. This project ships **18 real, importable components** plus the full
 token layer. Build UI by composing these components and styling your own layout
@@ -33,10 +33,10 @@ Import from the bundle global `ZeluuDS`. Each has a typed `<Name>Props` contract
 | App / dashboard | `StatCard` (`value`/`label`), `InfoCell` (`label`/`value`), `SubjectTab` (`label`/`icon`/`active`), `TopicTag`, `ChatBubble` (`role` user/assistant), `FormField` (`label`/`type`/`error`) |
 
 Composition notes that matter:
-- `Stat` inherits its container's color — place it on a terracotta/accent band
+- `Stat` inherits its container's color — place it on a teal/accent band
   (`background: var(--color-accent)`), as in the marketing stats row.
 - `SubjectTab`s belong in a `.subject-tabs` row; one carries `active`.
-- `ChatBubble role="user"` is terracotta and right-aligned; `role="assistant"`
+- `ChatBubble role="user"` is teal and right-aligned; `role="assistant"`
   is cream, bordered, left-aligned — stack them in a column for a conversation.
 - `PlanCard featured` is the inverted dark "recommended" column.
 
@@ -51,7 +51,7 @@ colors — use the tokens so light/dark and brand stay consistent.
 | Surfaces | `--color-cream`, `--color-warm-bg`, `--color-surface`, `--color-surface-glass` |
 | Text | `--color-text-dark`, `--color-text-muted`, `--color-text-light` |
 | Border | `--color-border` |
-| Brand accent (terracotta) | `--color-accent`, `--color-accent-dark`, `--color-accent-light` |
+| Brand accent (teal) | `--color-accent`, `--color-accent-dark`, `--color-accent-light` |
 | Status | `--color-success`, `--color-error`, `--color-warning` |
 | Type | `--font-display` (Fraunces, headings), `--font-body` (Plus Jakarta Sans) |
 | Spacing | `--spacing-xs` 8 · `--spacing-sm` 16 · `--spacing-md` 24 · `--spacing-lg` 40 · `--spacing-xl` 64 · `--spacing-2xl` 100 |
