@@ -1,0 +1,15 @@
+{
+  "projectId": "bdb471bb-97d4-4fd4-9513-ab00e2e04e8f",
+  "pkg": "@zeluu/design-system",
+  "globalName": "ZeluuDS",
+  "shape": "package",
+  "buildCmd": "cd ds-src && npx tsc -p tsconfig.json && node styles/build-css.mjs",
+  "cssEntry": "styles/ds-bundle.css",
+  "readmeHeader": ".design-sync/conventions.md",
+  "overrides": {
+    "Modal": { "cardMode": "single", "viewport": "640x520" },
+    "Button": { "cardMode": "column" },
+    "InfoCell": { "cardMode": "column" },
+    "SubjectTab": { "cardMode": "column" }
+  }
+}
