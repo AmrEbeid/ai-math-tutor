@@ -34,3 +34,5 @@ export { ChatBubble } from './ChatBubble';
 export type { ChatBubbleProps, ChatRole } from './ChatBubble';
 export { Container } from './Container';
 export type { ContainerProps } from './Container';
+export { Toggle } from './Toggle';
+export type { ToggleProps, ToggleOption } from './Toggle';

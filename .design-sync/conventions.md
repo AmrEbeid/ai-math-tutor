@@ -3,7 +3,7 @@
 Zeluu is a parent-controlled AI tutor for Math, Science & English, grades 1–9.
 Its identity is **warm-editorial**: a soft OKLCH cream/teal palette, the
 **Fraunces** display serif for headings paired with **Plus Jakarta Sans** for
-body text. This project ships **18 real, importable components** plus the full
+body text. This project ships **19 real, importable components** plus the full
 token layer. Build UI by composing these components and styling your own layout
 glue with the tokens below.
 
@@ -27,7 +27,7 @@ Import from the bundle global `ZeluuDS`. Each has a typed `<Name>Props` contract
 
 | Group | Components |
 |---|---|
-| Actions & status | `Button` (variant primary/secondary/white, size sm/md/large, `href` → link), `Spinner`, `LiveBadge`, `CreditBadge` (level normal/low/empty) |
+| Actions & status | `Button` (variant primary/secondary/white, size sm/md/large, `href` → link), `Toggle` (segmented control), `Spinner`, `LiveBadge`, `CreditBadge` (level normal/low/empty) |
 | Surfaces & layout | `Container`, `Card` (optional `header`), `Modal` (`title`, `closable`), `NavBar` (`brand`/`logo`/`actions`) |
 | Marketing | `Feature` (`icon`/`title`), `Step` (`number`/`title`), `Stat` (`value`/`label`, designed for the accent band), `PlanCard` (`featured`, `features[]`, `price`…) |
 | App / dashboard | `StatCard` (`value`/`label`), `InfoCell` (`label`/`value`), `SubjectTab` (`label`/`icon`/`active`), `TopicTag`, `ChatBubble` (`role` user/assistant), `FormField` (`label`/`type`/`error`) |
