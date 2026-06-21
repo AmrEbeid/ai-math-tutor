@@ -588,6 +588,19 @@ html[data-theme="dark"] .plan-card.featured .plan-price {
   font-size: 14px;
   font-family: 'Courier New', monospace;
 }
+/* RTL (Arabic): the child app sets dir="rtl". The user bubble's margin-left:auto
+   and the tail-corner radii are physical, so they must flip — matches the
+   product's overrides in public/app.html. */
+[dir="rtl"] .chat-bubble.user {
+  margin-left: 0;
+  margin-right: auto;
+  border-bottom-right-radius: 8px;
+  border-bottom-left-radius: 2px;
+}
+[dir="rtl"] .chat-bubble.assistant {
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 2px;
+}
 
 /* ===== Toggle / segmented control (pricing billing switch) ===== */
 .toggle-wrap {
