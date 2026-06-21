@@ -1,0 +1,103 @@
+<!--
+  Zeluu first-run onboarding (add-a-child step), composed from the synced
+  design-system components (window.ZeluuDS) + bundle CSS, teal Spark brand.
+  Stepper, grade + subject multi-select, daily-limit Toggle. Interactive useState.
+  To render: copy into the built ds-bundle/, serve, open /onboarding.html.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zeluu — Set up</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./_ds_bundle.css" />
+  <script src="./_vendor/react.js"></script>
+  <script src="./_vendor/react-dom.js"></script>
+  <script src="./_ds_bundle.js"></script>
+  <style>
+    body { background: var(--color-warm-bg); margin: 0; }
+    .wrap { max-width: 560px; margin: 0 auto; padding: var(--spacing-lg) var(--spacing-sm) var(--spacing-2xl); }
+    .brand { text-align: center; font-family: var(--font-display); font-weight: 800; font-size: 22px; color: var(--color-text-dark); margin-bottom: var(--spacing-md); }
+    .brand .spark { color: var(--color-accent); }
+    .stepper { display: flex; align-items: center; gap: 6px; justify-content: center; margin-bottom: var(--spacing-lg); }
+    .st { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
+    .st .dot { width: 26px; height: 26px; border-radius: 999px; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+    .st.done .dot { background: var(--color-accent); color: #fff; }
+    .st.done { color: var(--color-text-muted); }
+    .st.cur .dot { background: var(--color-accent); color: #fff; box-shadow: 0 0 0 4px var(--color-accent-light); }
+    .st.cur { color: var(--color-text-dark); }
+    .st.next .dot { background: var(--color-warm-bg); color: var(--color-text-light); border: 1px solid var(--color-border); }
+    .st.next { color: var(--color-text-light); }
+    .line { width: 28px; height: 2px; background: var(--color-border); }
+    .head { text-align: center; margin-bottom: var(--spacing-md); }
+    .head h1 { font-family: var(--font-display); font-size: 26px; font-weight: 800; color: var(--color-text-dark); margin: 0 0 6px; }
+    .head p { color: var(--color-text-muted); margin: 0; font-size: 15px; }
+    .lbl { font-size: 13px; font-weight: 600; color: var(--color-text-dark); text-transform: uppercase; letter-spacing: 0.5px; margin: var(--spacing-sm) 0 8px; }
+    .grades { display: flex; flex-wrap: wrap; gap: 8px; }
+    .grade { padding: 9px 16px; border-radius: var(--radius-full); border: 1.5px solid var(--color-border); background: var(--color-surface); font-family: var(--font-body); font-size: 14px; font-weight: 600; color: var(--color-text-muted); cursor: pointer; }
+    .grade.sel { border-color: var(--color-accent); background: var(--color-accent-light); color: var(--color-accent-dark); }
+    .subjects { display: flex; flex-wrap: wrap; gap: 8px; }
+    .subj { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: var(--radius-md); border: 1.5px solid var(--color-border); background: var(--color-surface); cursor: pointer; font-size: 14px; font-weight: 600; color: var(--color-text-dark); }
+    .subj.sel { border-color: var(--color-accent); background: var(--color-accent-light); }
+    .subj .chk { color: var(--color-accent); }
+    .nav { display: flex; justify-content: space-between; margin-top: var(--spacing-lg); }
+    .note { display: flex; gap: 8px; align-items: center; justify-content: center; font-size: 13px; color: var(--color-text-muted); margin-top: var(--spacing-md); }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script>
+    const h = React.createElement;
+    const { Card, FormField, Button, Toggle } = window.ZeluuDS;
+
+    function App() {
+      const [grade, setGrade] = React.useState('4-6');
+      const [subs, setSubs] = React.useState({ Math: true, Science: true, English: false });
+      const [limit, setLimit] = React.useState('on');
+      const toggle = (s) => setSubs({ ...subs, [s]: !subs[s] });
+      const step = (cls, n, label) => h('div', { className: 'st ' + cls }, h('div', { className: 'dot' }, cls === 'done' ? '✓' : n), label);
+      return h('div', { className: 'wrap' },
+        h('div', { className: 'brand' }, h('span', { className: 'spark' }, '✦ '), 'Zeluu'),
+        h('div', { className: 'stepper' },
+          step('done', '1', 'Account'), h('div', { className: 'line' }),
+          step('cur', '2', 'Add a child'), h('div', { className: 'line' }),
+          step('next', '3', 'Controls'),
+        ),
+        h('div', { className: 'head' },
+          h('h1', null, 'Add your first child'),
+          h('p', null, "We'll tailor the tutor to their grade and the subjects they need."),
+        ),
+        h(Card, null,
+          h(FormField, { label: "Child's first name", placeholder: 'e.g. Layla', name: 'name' }),
+          h('div', { className: 'lbl' }, 'Grade'),
+          h('div', { className: 'grades' },
+            ['Grades 1–3', 'Grades 4–6', 'Grades 7–9'].map((g, i) => {
+              const key = ['1-3', '4-6', '7-9'][i];
+              return h('button', { key, type: 'button', className: 'grade' + (grade === key ? ' sel' : ''), onClick: () => setGrade(key) }, g);
+            }),
+          ),
+          h('div', { className: 'lbl' }, 'Subjects'),
+          h('div', { className: 'subjects' },
+            [['Math', '🧮'], ['Science', '🔬'], ['English', '📖']].map(([s, ic]) =>
+              h('button', { key: s, type: 'button', className: 'subj' + (subs[s] ? ' sel' : ''), onClick: () => toggle(s) },
+                h('span', null, ic), s, subs[s] ? h('span', { className: 'chk' }, '✓') : null)),
+          ),
+          h('div', { className: 'lbl' }, 'Daily limit'),
+          h('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 } },
+            h('div', { style: { fontSize: 13, color: 'var(--color-text-muted)', maxWidth: 320 } },
+              'Cap lessons per day so learning stays a healthy habit. You can change this anytime.'),
+            h(Toggle, { value: limit, onChange: setLimit, options: [{ value: 'on', label: '5 / day' }, { value: 'off', label: 'No limit' }] }),
+          ),
+        ),
+        h('div', { className: 'nav' },
+          h(Button, { variant: 'secondary', size: 'sm' }, 'Back'),
+          h(Button, { size: 'sm' }, 'Continue to controls →'),
+        ),
+        h('div', { className: 'note' }, h('span', null, '🛡️'), 'You set the rules — every chat stays visible to you.'),
+      );
+    }
+    ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+  </script>
+</body>
+</html>
