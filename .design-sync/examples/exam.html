@@ -1,0 +1,96 @@
+<!--
+  Zeluu exam-prep question screen, composed from the synced design-system
+  components (window.ZeluuDS) + bundle CSS, teal Spark brand. Timed multiple-
+  choice with a selected-option pattern (token-styled), progress, and a Socratic
+  hint nudge. To render: copy into the built ds-bundle/, serve, open /exam.html.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zeluu — Exam prep</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./_ds_bundle.css" />
+  <script src="./_vendor/react.js"></script>
+  <script src="./_vendor/react-dom.js"></script>
+  <script src="./_ds_bundle.js"></script>
+  <style>
+    body { background: var(--color-warm-bg); margin: 0; }
+    .wrap { max-width: 680px; margin: 0 auto; padding: var(--spacing-lg) var(--spacing-sm) var(--spacing-2xl); }
+    .examhead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .examhead .left { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 800; color: var(--color-text-dark); }
+    .examhead .left .spark { color: var(--color-accent); }
+    .examhead .left .sub { font-family: var(--font-body); font-weight: 600; font-size: 13px; color: var(--color-text-muted); }
+    .examhead .right { display: flex; align-items: center; gap: 12px; }
+    .timer { font-weight: 700; font-size: 15px; color: var(--color-accent); background: var(--color-warm-bg); padding: 6px 12px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); }
+    .timer.warn { color: var(--color-error); border-color: var(--color-error); }
+    .exit { background: none; border: none; color: var(--color-text-muted); font-size: 13px; cursor: pointer; }
+    .progress-meta { display: flex; justify-content: space-between; font-size: 13px; color: var(--color-text-muted); margin-bottom: 6px; }
+    .qtags { display: flex; gap: 6px; margin: var(--spacing-sm) 0; }
+    .qnum { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-accent); }
+    .qtext { font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--color-text-dark); margin: 8px 0 var(--spacing-md); line-height: 1.3; }
+    .opts { display: grid; gap: 10px; }
+    .opt { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; padding: 16px 18px; border: 1.5px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); cursor: pointer; font-family: var(--font-body); font-size: 16px; color: var(--color-text-dark); transition: all .15s ease; }
+    .opt:hover { border-color: var(--color-accent); }
+    .opt.sel { border-color: var(--color-accent); background: var(--color-accent-light); }
+    .opt .key { width: 28px; height: 28px; flex-shrink: 0; border-radius: 8px; background: var(--color-warm-bg); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; color: var(--color-text-muted); }
+    .opt.sel .key { background: var(--color-accent); color: white; }
+    .footrow { display: flex; align-items: center; justify-content: space-between; margin-top: var(--spacing-md); }
+    .flag { background: none; border: none; color: var(--color-text-muted); font-size: 13px; cursor: pointer; }
+    .hint { display: flex; gap: 8px; align-items: center; margin-top: var(--spacing-md); font-size: 13px; color: var(--color-text-dark); background: var(--color-accent-light); padding: 10px 14px; border-radius: var(--radius-sm); }
+    .hint b { color: var(--color-accent-dark); }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script>
+    const h = React.createElement;
+    const { Container, ProgressBar, Card, TopicTag, Button, Badge } = window.ZeluuDS;
+
+    function Exam() {
+      const [sel, setSel] = React.useState('a');
+      const opts = [['a', '5/6'], ['b', '2/5'], ['c', '1/6'], ['d', '2/6']];
+      return h('div', { className: 'wrap' },
+        h('div', { className: 'examhead' },
+          h('div', { className: 'left' }, h('span', { className: 'spark' }, '✦'), 'Zeluu',
+            h('span', { className: 'sub' }, '· Grade 5 Math mock exam')),
+          h('div', { className: 'right' },
+            h('span', { className: 'timer' }, '⏱ 04:12'),
+            h('button', { className: 'exit' }, 'Save & exit'),
+          ),
+        ),
+        h('div', { className: 'progress-meta' },
+          h('span', null, 'Question 3 of 12'),
+          h('span', { style: { fontWeight: 600, color: 'var(--color-accent)' } }, '25%'),
+        ),
+        h(ProgressBar, { value: 25 }),
+        h('div', { style: { marginTop: 'var(--spacing-md)' } },
+          h(Card, null,
+            h('div', { className: 'qtags' },
+              h(TopicTag, null, 'Fractions'),
+              h(TopicTag, null, 'Medium'),
+            ),
+            h('div', { className: 'qnum' }, 'Question 3'),
+            h('div', { className: 'qtext' }, 'What is 1/2 + 1/3?'),
+            h('div', { className: 'opts' },
+              opts.map(([k, v]) => h('button', { key: k, className: 'opt' + (sel === k ? ' sel' : ''), onClick: () => setSel(k) },
+                h('span', { className: 'key' }, k.toUpperCase()), v)),
+            ),
+            h('div', { className: 'hint' }, h('span', null, '💡'),
+              h('span', null, h('b', null, 'Stuck? '), "Ask your tutor for a hint — it won't give the answer, just a nudge.")),
+            h('div', { className: 'footrow' },
+              h('button', { className: 'flag' }, '🚩 Flag for review'),
+              h('div', { style: { display: 'flex', gap: 10 } },
+                h(Button, { variant: 'secondary', size: 'sm' }, 'Previous'),
+                h(Button, { size: 'sm' }, 'Next question'),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    ReactDOM.createRoot(document.getElementById('root')).render(h(Exam));
+  </script>
+</body>
+</html>
