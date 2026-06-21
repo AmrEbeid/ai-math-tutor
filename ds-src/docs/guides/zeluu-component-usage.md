@@ -146,3 +146,58 @@ const { SubjectTab, ChatBubble } = window.ZeluuDS;
   </div>
 </div>
 ```
+
+### Login / sign-up screen
+
+```jsx
+const { Container, Card, FormField, Button } = window.ZeluuDS;
+
+<Container>
+  <div style={{ maxWidth: 420, margin: '0 auto', padding: 'var(--spacing-xl) 0' }}>
+    <div style={{ textAlign: 'center', marginBottom: 'var(--spacing-lg)' }}>
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 800, color: 'var(--color-accent)' }}>✦ Zeluu</div>
+      <p style={{ color: 'var(--color-text-muted)' }}>Parent sign-in</p>
+    </div>
+    <Card>
+      <FormField label="Parent email" type="email" placeholder="you@example.com" name="email" />
+      <FormField label="Password" type="password" placeholder="••••••••" name="password" />
+      <div style={{ marginTop: 'var(--spacing-md)' }}>
+        <Button>Sign in</Button>
+      </div>
+      <p style={{ marginTop: 'var(--spacing-sm)', fontSize: 13, color: 'var(--color-text-muted)', textAlign: 'center' }}>
+        New here? <a href="/signup" style={{ color: 'var(--color-accent)' }}>Create an account</a>
+      </p>
+    </Card>
+  </div>
+</Container>
+```
+
+### Exam-prep question view
+
+```jsx
+const { Container, ProgressBar, Card, TopicTag, Button } = window.ZeluuDS;
+
+<Container>
+  <div style={{ maxWidth: 640, margin: '0 auto' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, fontSize: 14, color: 'var(--color-text-muted)' }}>
+      <span>Question 3 of 12</span>
+      <span style={{ fontWeight: 600, color: 'var(--color-accent)' }}>⏱ 04:12</span>
+    </div>
+    <ProgressBar value={25} />
+    <Card>
+      <div style={{ display: 'flex', gap: 8, margin: 'var(--spacing-sm) 0' }}>
+        <TopicTag>Fractions</TopicTag>
+        <TopicTag>Medium</TopicTag>
+      </div>
+      <p style={{ fontSize: 18, color: 'var(--color-text-dark)', marginBottom: 'var(--spacing-md)' }}>
+        What is 1/2 + 1/3?
+      </p>
+      <div style={{ display: 'grid', gap: 'var(--spacing-xs)' }}>
+        {['5/6', '2/5', '1/6', '2/6'].map((opt) => (
+          <Button key={opt} variant="secondary">{opt}</Button>
+        ))}
+      </div>
+    </Card>
+  </div>
+</Container>
+```
