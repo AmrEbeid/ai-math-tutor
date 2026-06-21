@@ -385,6 +385,20 @@ h1.zds, h2.zds, h3.zds {
   text-align: center;
 }
 
+/* Dark theme: the featured card is `background: var(--color-text-dark)` (an
+   inverted-dark card in light mode); in dark mode that token flips light, so it
+   must be re-pinned to a lifted warm surface + accent ring (matches the product's
+   UI-DARK fix in public/pricing.html). Without this it renders light-on-dark. */
+html[data-theme="dark"] .plan-card.featured {
+  background: oklch(29% 0.045 55);
+  color: oklch(90% 0.01 60);
+  box-shadow: 0 0 0 1px var(--color-accent), var(--shadow-lg);
+}
+html[data-theme="dark"] .plan-card.featured h3,
+html[data-theme="dark"] .plan-card.featured .plan-price {
+  color: var(--color-text-dark);
+}
+
 /* ===== Form group ===== */
 .form-group {
   margin-bottom: var(--spacing-sm);
