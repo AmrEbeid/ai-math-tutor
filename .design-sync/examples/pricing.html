@@ -1,0 +1,97 @@
+<!--
+  Zeluu pricing screen, composed from the synced design-system components
+  (window.ZeluuDS) + bundle CSS, teal Spark brand. The Annual/Monthly Toggle
+  drives the prices (interactive useState). To render: copy into the built
+  ds-bundle/, serve, open /pricing.html. See .design-sync/NOTES.md.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zeluu — Pricing</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./_ds_bundle.css" />
+  <script src="./_vendor/react.js"></script>
+  <script src="./_vendor/react-dom.js"></script>
+  <script src="./_ds_bundle.js"></script>
+  <style>
+    body { background: var(--color-warm-bg); margin: 0; }
+    .hero { text-align: center; padding: var(--spacing-xl) 0 var(--spacing-md); }
+    .hero .eyebrow { display: inline-block; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-accent-dark); background: var(--color-accent-light); padding: 4px 12px; border-radius: 999px; margin-bottom: 14px; }
+    .hero h1 { font-family: var(--font-display); font-size: 40px; font-weight: 800; color: var(--color-text-dark); margin: 0 0 10px; }
+    .hero p { color: var(--color-text-muted); font-size: 17px; max-width: 520px; margin: 0 auto; }
+    .toggle-row { display: flex; justify-content: center; margin: var(--spacing-lg) 0; }
+    .plans { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--spacing-sm); align-items: stretch; }
+    .assurance { display: flex; align-items: center; justify-content: center; gap: 24px; flex-wrap: wrap; margin: var(--spacing-xl) 0 var(--spacing-lg); }
+    .assurance .a { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--color-text-muted); }
+    .assurance .a b { color: var(--color-text-dark); font-weight: 600; }
+    .faq { max-width: 640px; margin: 0 auto var(--spacing-2xl); }
+    .faq h2 { font-family: var(--font-display); font-size: 24px; text-align: center; color: var(--color-text-dark); margin-bottom: var(--spacing-md); }
+    .qa { padding: 16px 0; border-bottom: 1px solid var(--color-border); }
+    .qa .q { font-weight: 600; color: var(--color-text-dark); margin-bottom: 4px; }
+    .qa .a { font-size: 14px; color: var(--color-text-muted); }
+    @media (max-width: 1000px) { .plans { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 560px) { .plans { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script>
+    const h = React.createElement;
+    const { NavBar, Container, Button, Toggle, PlanCard } = window.ZeluuDS;
+
+    function Plans({ annual }) {
+      const m = (mo) => annual ? '$' + Math.round(mo * 0.8) : '$' + mo;
+      const per = annual ? '/mo, billed yearly' : '/mo';
+      return h('div', { className: 'plans' },
+        h(PlanCard, { name: 'Free trial', credits: '50 credits', price: '$0', period: '7 days, no card',
+          features: ['1 child profile', 'All subjects', 'Parent dashboard'], ctaLabel: 'Start free', note: 'No credit card needed' }),
+        h(PlanCard, { name: 'Solo', popLabel: 'For one child', credits: '500 credits / mo', price: m(9), priceSuffix: per,
+          features: ['1 child profile', 'Math, Science & English', 'Homework & exam prep', 'Full chat visibility'], ctaLabel: 'Choose Solo' }),
+        h(PlanCard, { featured: true, popLabel: 'Most popular', name: 'Family', credits: '2,000 credits / mo', price: m(29), priceSuffix: per,
+          features: ['Up to 4 children', 'All subjects, grades 1–9', 'Progress reports & insights', 'Priority support'], ctaLabel: 'Choose Family', note: '7-day free trial' }),
+        h(PlanCard, { name: 'School', credits: 'Unlimited', price: 'Custom',
+          features: ['Classrooms & rosters', 'Admin dashboard', 'SSO + data controls'], ctaLabel: 'Contact us' }),
+      );
+    }
+
+    function Pricing() {
+      const [billing, setBilling] = React.useState('annual');
+      return h(React.Fragment, null,
+        h(NavBar, { brand: 'Zeluu', logo: h('span', { style: { color: 'var(--color-accent)', fontSize: 22 } }, '✦'),
+          actions: h(Button, { variant: 'secondary', size: 'sm', href: '/login' }, 'Sign in') }),
+        h(Container, null,
+          h('div', { className: 'hero' },
+            h('span', { className: 'eyebrow' }, 'Cancel anytime'),
+            h('h1', null, 'Simple, child-first pricing'),
+            h('p', null, 'Pay for tutoring credits, not seats. Every plan includes full parent visibility and the same child-safe tutor.'),
+          ),
+          h('div', { className: 'toggle-row' },
+            h(Toggle, { value: billing, onChange: setBilling, options: [
+              { value: 'monthly', label: 'Monthly' },
+              { value: 'annual', label: 'Annual', badge: 'Save 20%' },
+            ] }),
+          ),
+          h(Plans, { annual: billing === 'annual' }),
+          h('div', { className: 'assurance' },
+            h('div', { className: 'a' }, '🛡️ ', h('b', null, 'COPPA-aligned'), ' privacy'),
+            h('div', { className: 'a' }, '👁️ ', h('b', null, 'Every chat'), ' visible to parents'),
+            h('div', { className: 'a' }, '↩️ ', h('b', null, '30-day'), ' money-back guarantee'),
+          ),
+          h('div', { className: 'faq' },
+            h('h2', null, 'Questions parents ask'),
+            h('div', { className: 'qa' }, h('div', { className: 'q' }, 'What is a credit?'),
+              h('div', { className: 'a' }, 'One credit ≈ one tutor question or short exchange. Unused credits roll over for 30 days.')),
+            h('div', { className: 'qa' }, h('div', { className: 'q' }, 'Can I add more children later?'),
+              h('div', { className: 'a' }, 'Yes — the Family plan covers up to 4 profiles, each with their own progress and history.')),
+            h('div', { className: 'qa' }, h('div', { className: 'q' }, 'Is my child’s data safe?'),
+              h('div', { className: 'a' }, 'We don’t sell data, every chat is parent-visible, and we follow COPPA-aligned practices. Cancel and export anytime.')),
+          ),
+        ),
+      );
+    }
+    ReactDOM.createRoot(document.getElementById('root')).render(h(Pricing));
+  </script>
+</body>
+</html>
