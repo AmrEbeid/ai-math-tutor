@@ -71,6 +71,18 @@ ChatBubble, Container.
    ds-src/node_modules --entry ./ds-src/dist/index.js --out ./ds-bundle --remote
    .design-sync/.cache/remote-sync.json`.
 
+## Brand (teal rollout)
+- The product is mid-rebrand **terracotta → teal**. `build-css.mjs` applies the
+  product's brand rollout (route `--color-accent`/`-dark`/`-light` →
+  `--brand-primary`/`-strong`/`-tint`, light+dark), so the synced library renders
+  **teal** to match the app. The teal VALUES live in `zeluu-tokens.css` (auto-pulled);
+  only the mapping is hardcoded.
+- **Rollout is incomplete**: 12/13 product pages route to teal, but **`index.html`
+  (landing) is still terracotta** (no rollout block). When index is migrated and the
+  brand is consistent, nothing here needs changing (the mapping already points at
+  `--brand-primary`). If the brand DIRECTION reverses, revert the `ROLLOUT` block in
+  `build-css.mjs` and re-sync.
+
 ## Re-sync risks (what can silently go stale)
 - **Source of truth is the product CSS/tokens.** If `public/css/zeluu-tokens.css`
   or the page `<style>` blocks change, `ds-src/styles/components.css` is a
