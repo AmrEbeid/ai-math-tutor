@@ -1,0 +1,90 @@
+<!--
+  Zeluu sign-in / sign-up screen, composed from the synced design-system
+  components (window.ZeluuDS) + bundle CSS, teal Spark brand. Toggle switches
+  Sign in / Create account (interactive useState). To render: copy into the built
+  ds-bundle/, serve, open /auth.html. See .design-sync/NOTES.md.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zeluu — Sign in</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./_ds_bundle.css" />
+  <script src="./_vendor/react.js"></script>
+  <script src="./_vendor/react-dom.js"></script>
+  <script src="./_ds_bundle.js"></script>
+  <style>
+    body { background: var(--color-warm-bg); margin: 0; }
+    .auth { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--spacing-lg) var(--spacing-sm); }
+    .auth-inner { width: 100%; max-width: 400px; }
+    .brand { text-align: center; margin-bottom: var(--spacing-lg); }
+    .brand .mark { font-family: var(--font-display); font-size: 30px; font-weight: 800; color: var(--color-text-dark); }
+    .brand .mark .spark { color: var(--color-accent); }
+    .brand .tag { color: var(--color-text-muted); font-size: 14px; margin-top: 4px; }
+    .toggle-row { display: flex; justify-content: center; margin-bottom: var(--spacing-md); }
+    .forgot { text-align: right; margin-top: -8px; margin-bottom: var(--spacing-sm); }
+    .forgot a { font-size: 13px; color: var(--color-accent); text-decoration: none; }
+    .submit { margin-top: var(--spacing-xs); }
+    .submit > * { width: 100%; }
+    .divider { display: flex; align-items: center; gap: 12px; margin: var(--spacing-md) 0; color: var(--color-text-light); font-size: 12px; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--color-border); }
+    .ghost { width: 100%; padding: 12px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface); font-family: var(--font-body); font-size: 14px; font-weight: 600; color: var(--color-text-dark); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .trust { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: var(--spacing-md); }
+    .trust .item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--color-text-muted); }
+    .foot { text-align: center; font-size: 13px; color: var(--color-text-muted); margin-top: var(--spacing-md); }
+    .foot a { color: var(--color-accent); text-decoration: none; font-weight: 600; }
+    .err { display: flex; gap: 8px; align-items: flex-start; padding: 10px 12px; border-radius: var(--radius-sm); background: oklch(95% 0.04 25); border: 1px solid var(--color-error); font-size: 13px; color: var(--color-text-dark); margin-bottom: var(--spacing-sm); }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script>
+    const h = React.createElement;
+    const { Card, FormField, Button, Toggle, Badge } = window.ZeluuDS;
+
+    function Auth() {
+      const [mode, setMode] = React.useState('signin');
+      const signup = mode === 'signup';
+      return h('div', { className: 'auth' },
+        h('div', { className: 'auth-inner' },
+          h('div', { className: 'brand' },
+            h('div', { className: 'mark' }, h('span', { className: 'spark' }, '✦ '), 'Zeluu'),
+            h('div', { className: 'tag' }, 'The parent-controlled AI tutor · Grades 1–9'),
+          ),
+          h(Card, null,
+            h('div', { className: 'toggle-row' },
+              h(Toggle, { value: mode, onChange: setMode, options: [
+                { value: 'signin', label: 'Sign in' },
+                { value: 'signup', label: 'Create account' },
+              ] }),
+            ),
+            signup && h('div', { className: 'err', style: { background: 'var(--color-accent-light)', border: '1px solid var(--color-accent)' } },
+              h('span', null, '👋'), h('span', null, "Parents create the account — you'll add your children next.")),
+            signup && h(FormField, { label: 'Your name', placeholder: 'Sara Hassan', name: 'name' }),
+            h(FormField, { label: 'Parent email', type: 'email', placeholder: 'you@example.com', name: 'email' }),
+            h(FormField, { label: 'Password', type: 'password', placeholder: signup ? 'Create a password' : '••••••••', name: 'password',
+              error: !signup ? undefined : undefined }),
+            !signup && h('div', { className: 'forgot' }, h('a', { href: '#' }, 'Forgot password?')),
+            h('div', { className: 'submit' }, h(Button, null, signup ? 'Create account' : 'Sign in')),
+            h('div', { className: 'divider' }, 'or'),
+            h('button', { className: 'ghost', type: 'button' }, h('span', null, 'G'), 'Continue with Google'),
+            h('div', { className: 'trust' },
+              h('span', { className: 'item' }, '🔒 ', 'Encrypted'),
+              h('span', { className: 'item' }, '🛡️ ', 'COPPA-aligned'),
+              h('span', { className: 'item' }, '👁️ ', 'Full chat visibility'),
+            ),
+          ),
+          h('div', { className: 'foot' },
+            signup ? 'Already have an account? ' : 'New to Zeluu? ',
+            h('a', { href: '#', onClick: (e) => { e.preventDefault(); setMode(signup ? 'signin' : 'signup'); } },
+              signup ? 'Sign in' : 'Create a free account'),
+          ),
+        ),
+      );
+    }
+    ReactDOM.createRoot(document.getElementById('root')).render(h(Auth));
+  </script>
+</body>
+</html>
