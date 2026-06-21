@@ -1,0 +1,152 @@
+<!--
+  Zeluu account & parent-controls screen — the parent control center (the
+  product differentiator), composed from the synced design-system components
+  (window.ZeluuDS) + bundle CSS, teal Spark brand. Plan/credits, children
+  management, safety/privacy On-Off Toggles, account fields. Interactive useState.
+  To render: copy into the built ds-bundle/, serve, open /account.html.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zeluu — Account & controls</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./_ds_bundle.css" />
+  <script src="./_vendor/react.js"></script>
+  <script src="./_vendor/react-dom.js"></script>
+  <script src="./_ds_bundle.js"></script>
+  <style>
+    body { background: var(--color-warm-bg); margin: 0; }
+    .page { padding-bottom: var(--spacing-2xl); }
+    .head { padding: var(--spacing-lg) 0 var(--spacing-md); }
+    .head h1 { font-family: var(--font-display); font-size: 30px; font-weight: 800; color: var(--color-text-dark); margin: 0 0 4px; }
+    .head p { color: var(--color-text-muted); margin: 0; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-sm); align-items: start; }
+    .full { grid-column: 1 / -1; }
+    .ch { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--color-border); }
+    .ch:last-child { border-bottom: none; }
+    .av { width: 40px; height: 40px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .ch .nm { font-weight: 600; color: var(--color-text-dark); }
+    .ch .gr { font-size: 12px; color: var(--color-text-muted); }
+    .ctrl { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--color-border); }
+    .ctrl:last-child { border-bottom: none; }
+    .ctrl .lbl { font-weight: 600; color: var(--color-text-dark); font-size: 14px; display: flex; align-items: center; gap: 8px; }
+    .ctrl .dsc { font-size: 13px; color: var(--color-text-muted); margin-top: 2px; max-width: 360px; }
+    .ctrl .t { flex-shrink: 0; }
+    .meter { margin: 4px 0 14px; }
+    .meter .row { display: flex; justify-content: space-between; font-size: 13px; color: var(--color-text-muted); margin-bottom: 6px; }
+    .info3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--spacing-xs); margin-bottom: var(--spacing-md); }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script>
+    const h = React.createElement;
+    const { NavBar, Container, Button, Card, InfoCell, ProgressBar, CreditBadge, Toggle, Badge, FormField } = window.ZeluuDS;
+
+    function cardHeader(title, right) {
+      return h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' } },
+        h('strong', null, title), right || null);
+    }
+
+    function Control({ label, icon, desc, value, onChange, recommended }) {
+      return h('div', { className: 'ctrl' },
+        h('div', null,
+          h('div', { className: 'lbl' }, icon ? h('span', null, icon) : null, label,
+            recommended ? h(Badge, { status: 'now' }, 'Recommended') : null),
+          h('div', { className: 'dsc' }, desc),
+        ),
+        h('div', { className: 't' }, h(Toggle, { value, onChange, options: [{ value: 'on', label: 'On' }, { value: 'off', label: 'Off' }] })),
+      );
+    }
+
+    function App() {
+      const [review, setReview] = React.useState('on');
+      const [limit, setLimit] = React.useState('on');
+      const [digest, setDigest] = React.useState('on');
+      const [block, setBlock] = React.useState('on');
+      return h(React.Fragment, null,
+        h(NavBar, { brand: 'Zeluu', logo: h('span', { style: { color: 'var(--color-accent)', fontSize: 22 } }, '✦'),
+          actions: h('div', { style: { display: 'flex', gap: 12, alignItems: 'center' } },
+            h(CreditBadge, { level: 'normal' }, '1,240 credits'),
+            h(Button, { variant: 'secondary', size: 'sm' }, 'Dashboard')) }),
+        h('div', { className: 'page' },
+          h(Container, null,
+            h('div', { className: 'head' },
+              h('h1', null, 'Account & controls'),
+              h('p', null, "You're in charge. Manage your plan, your children, and exactly how the tutor behaves."),
+            ),
+            h('div', { className: 'grid' },
+              // Plan & credits
+              h(Card, { header: cardHeader('Plan & credits', h(Badge, { status: 'now' }, 'Family')) },
+                h('div', { className: 'meter' },
+                  h('div', { className: 'row' }, h('span', null, 'Monthly credits'), h('span', null, '820 / 2,000 used')),
+                  h(ProgressBar, { value: 41 }),
+                ),
+                h('div', { className: 'info3' },
+                  h(InfoCell, { label: 'Price', value: '$29 / mo' }),
+                  h(InfoCell, { label: 'Renews', value: 'Jul 14' }),
+                  h(InfoCell, { label: 'Children', value: '2 of 4' }),
+                ),
+                h('div', { className: 'actions' },
+                  h(Button, { size: 'sm' }, 'Add credits'),
+                  h(Button, { variant: 'secondary', size: 'sm' }, 'Manage billing'),
+                ),
+              ),
+              // Children
+              h(Card, { header: cardHeader('Children', h(Button, { size: 'sm' }, '+ Add child')) },
+                h('div', { className: 'ch' },
+                  h('div', { className: 'av', style: { background: 'var(--color-accent-light)' } }, '👧'),
+                  h('div', { style: { flex: 1 } }, h('div', { className: 'nm' }, 'Layla'), h('div', { className: 'gr' }, 'Grade 5 · Math, Science, English')),
+                  h(CreditBadge, { level: 'low' }, '45 left today'),
+                  h(Button, { variant: 'secondary', size: 'sm' }, 'Edit'),
+                ),
+                h('div', { className: 'ch' },
+                  h('div', { className: 'av', style: { background: 'var(--color-warm-bg)' } }, '👦'),
+                  h('div', { style: { flex: 1 } }, h('div', { className: 'nm' }, 'Omar'), h('div', { className: 'gr' }, 'Grade 3 · Math, English')),
+                  h(CreditBadge, { level: 'empty' }, 'No usage'),
+                  h(Button, { variant: 'secondary', size: 'sm' }, 'Edit'),
+                ),
+              ),
+              // Safety & privacy — the differentiator (full width)
+              h('div', { className: 'full' },
+                h(Card, { header: cardHeader('Safety & privacy controls', h('span', { style: { fontSize: 12, color: 'var(--color-text-muted)' } }, '🛡️ Applies to all children')) },
+                  h(Control, { label: 'Parent reviews all chats', icon: '👁️', recommended: true,
+                    desc: 'Every tutor conversation is saved and visible to you. Turning this off is not available on child-safe plans.',
+                    value: review, onChange: setReview }),
+                  h(Control, { label: 'Block sensitive topics', icon: '🚫',
+                    desc: 'The tutor refuses self-harm, violence, and adult content and alerts you instead.',
+                    value: block, onChange: setBlock }),
+                  h(Control, { label: 'Daily time & credit limits', icon: '⏱️',
+                    desc: 'Cap lessons per day so learning stays a healthy habit. Currently 5 lessons/day.',
+                    value: limit, onChange: setLimit }),
+                  h(Control, { label: 'Weekly progress email', icon: '📧',
+                    desc: 'Get a Sunday summary of what each child learned and where they struggled.',
+                    value: digest, onChange: setDigest }),
+                ),
+              ),
+              // Account
+              h('div', { className: 'full' },
+                h(Card, { header: cardHeader('Account') },
+                  h('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-sm)' } },
+                    h(FormField, { label: 'Parent email', type: 'email', value: 'sara@example.com', name: 'email' }),
+                    h(FormField, { label: 'Password', type: 'password', placeholder: '••••••••', name: 'pw' }),
+                  ),
+                  h('div', { className: 'actions', style: { marginTop: 'var(--spacing-sm)' } },
+                    h(Button, { size: 'sm' }, 'Save changes'),
+                    h(Button, { variant: 'secondary', size: 'sm' }, 'Sign out'),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+  </script>
+</body>
+</html>
