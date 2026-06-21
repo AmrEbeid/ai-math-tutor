@@ -71,6 +71,19 @@ ChatBubble, Container.
    ds-src/node_modules --entry ./ds-src/dist/index.js --out ./ds-bundle --remote
    .design-sync/.cache/remote-sync.json`.
 
+### Gotchas (cost real debugging — read before a re-sync)
+- **The driver does NOT run `build-css.mjs`.** `resync.mjs` rebuilds the JS bundle
+  but uses the pre-built `ds-src/styles/ds-bundle.css` (cssEntry). If you change
+  `components.css` or `build-css.mjs` (e.g. add a component's CSS, change the
+  brand), run `cd ds-src && node styles/build-css.mjs` FIRST, then the driver —
+  otherwise the new/changed CSS never reaches the bundle and renders unstyled.
+- **Duplicate group dir (`general 2`).** Repeated incremental rebuilds into
+  `ds-bundle/` can leave a duplicate group directory that splits the components
+  (e.g. 12 in `general`, 7 in `general 2`) even though every `@dsCard` says
+  `group="general"`. Fix with a CLEAN rebuild: `rm -rf ds-bundle` then
+  `package-build.mjs` (not the incremental driver) → single `general` group.
+  Always `list_files` the project after upload to confirm one group, no orphans.
+
 ## Brand (teal rollout)
 - The product is mid-rebrand **terracotta → teal**. `build-css.mjs` applies the
   product's brand rollout (route `--color-accent`/`-dark`/`-light` →
