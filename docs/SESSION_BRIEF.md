@@ -94,6 +94,15 @@ market-size numbers.
 
 ## 5. Recently Completed
 
+* **AT-REST frontend/XSS/auth re-hunt (2026-11-26 UTC, read-only)** — hunter
+  `bc-8f74d0d0` on product HEAD `9e63dba` (`origin/main` tip `d07ab73` docs-only;
+  `git diff 9e63dba..HEAD -- public/ vercel.json .github/` empty). Scope: all
+  `public/*.html`, `public/js/*`, `public/sw.js`, `vercel.json` CSP, `.github/`
+  workflows. Independently re-traced every `innerHTML` sink, notification writers,
+  session-list/transcript, exam-prep/render.js, URL params, checkout `data.url`,
+  SW cache, CSP, CI knowledge-pipeline. **Result: NONE** — no new MEDIUM+ complete
+  child→parent / DOM-auth-theft chains beyond stored finding #4. No app code
+  changed; no deploy; flagged-vulnerability memory not rewritten.
 * **AT-REST full-repo security re-hunt (2026-11-24 PST, read-only)** — parent
   hunter `bc-74580521` on product HEAD `9e63dba` (`origin/main` tip `c0fcaad`
   docs-only). Same-run sub-hunts: API/`lib` `bc-7904f1fc`, SQL/RLS `bc-66e37cba`,
@@ -392,6 +401,7 @@ recommend archiving as legacy per its reconciliation spec).
 
 | Date       | Action                                                                 | Evidence                                              | Next                                                |
 | ---------- | ---------------------------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------- |
+| 2026-11-26 | AT-REST-FE-1 — read-only frontend/XSS/auth re-hunt (hunter `bc-8f74d0d0`) on unchanged product SHA `9e63dba` (`main` tip `d07ab73` docs-only). Full sink re-trace of `public/*`, `sw.js`, CSP, CI workflow vs finding #4 + reject list. **NONE** — no new MEDIUM+ complete chains. Docs-only brief note; no app code; no deploy; no PR. | `git diff 9e63dba..HEAD -- public/ vercel.json .github/` empty; finding #4 sinks still live at `dashboard.html` n.title/n.body; session subject CHECK-blocked. | Owner still owns remediations for stored finding #4 + the other 12; next product work unchanged. |
 | 2026-11-24 | AT-REST-1 — parent full-repo at-rest security re-hunt (hunter `bc-74580521`) on unchanged product SHA `9e63dba` (`main` tip `c0fcaad` docs-only). Sub-hunts API/`lib` `bc-7904f1fc`, SQL/RLS `bc-66e37cba`, frontend `bc-eb1f275f`. Live unauth API + anon RPC/RLS probes. **NONE** — no new MEDIUM+ complete chains beyond stored 1–13. Docs-only brief note; no app code; no deploy; no PR. | Live: `/api/chat`+`/api/exams` 401; webhook no-sig 400; balance/checkout 401; anon `verify_child_login`/`set_child_password`/`get_valid_credit_balance` 42501; anon INSERT children/sessions RLS denied. | Owner still owns remediations for the stored 13; next product work unchanged. |
 | 2026-11-24 | AT-REST-API-2 — read-only API/`lib`/`vercel.json` security re-hunt (hunter `bc-7904f1fc`) on unchanged product SHA `9e63dba` (`main` tip `f70780b` docs-only). Full file read + auth/IDOR/payment-chain triage vs stored 1–13 + prior reject list. **NONE** — no new MEDIUM+ complete chains. Docs-only brief note; no app code; no deploy; no PR. | `git diff 9e63dba..HEAD -- api/ lib/ vercel.json` empty; known issues 1–13 still present in code as previously stored. | Owner still owns remediations for the stored 13; next product work unchanged. |
 | 2026-11-23 | AT-REST-API-1 — read-only API/`lib`/`vercel.json` security re-hunt on `9e63dba` (hunter `bc-e18b884f`). Full file read + auth-chain trace + live unauth API/RPC probes. **NONE** — no new MEDIUM+ complete chains beyond stored findings 1–13. Docs-only brief note; no app code; no deploy; no PR. | Live: `/api/chat`+`/api/exams` 401; webhook no-sig 400; balance/checkout 401; anon `set_child_password`/`verify_child_login`/`get_valid_credit_balance` 42501. | Owner still owns remediations for the stored 13; next product work unchanged. |
