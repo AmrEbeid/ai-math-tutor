@@ -94,6 +94,16 @@ market-size numbers.
 
 ## 5. Recently Completed
 
+* **AT-REST frontend/XSS/CSP/SW/CI re-hunt (2026-11-27 PST, read-only)** — hunter
+  `bc-68c484e4` on product HEAD `9e63dba` (`origin/main` tip `4f1a78a` docs-only;
+  `git diff 9e63dba..HEAD -- public/ vercel.json .github/` empty). Scope: all
+  `public/*.html`, `public/js/*`, `public/sw.js`, `vercel.json` CSP,
+  `.github/workflows/knowledge-pipeline.yml`. Independently re-traced every
+  `innerHTML` sink, notification writers, children-list/modals/transcript,
+  exam-prep/render.js, URL params, checkout `data.url`, SW cache, CSP, CI
+  triggers. **Result: NONE** — no new MEDIUM+ complete child→parent /
+  DOM-auth-theft / CI-injection chains beyond stored finding #4. No app code
+  changed; no deploy; flagged-vulnerability memory not rewritten.
 * **AT-REST API/`lib` security re-hunt (2026-11-26 UTC, read-only)** — hunter
   `bc-748e5a48` on product HEAD `9e63dba` (`origin/main` tip `d07ab73` docs-only;
   `git diff 9e63dba..HEAD -- api/ lib/ vercel.json` empty). Full read of all 10
