@@ -94,6 +94,17 @@ market-size numbers.
 
 ## 5. Recently Completed
 
+* **AT-REST API/`lib`/vercel.json re-hunt (2026-11-27 PST, read-only)** — hunter
+  `bc-85094d30` on product HEAD `9e63dba` (`origin/main` tip was `4f1a78a`
+  docs-only; `git diff 9e63dba..HEAD -- api/ lib/ vercel.json` empty). Full read
+  of all 10 `api/**/*.js` + 6 `lib/**/*.js` + `vercel.json`; re-traced
+  `getChildOrUser`/`resolveChildId`/HMAC webhook/checkout/children/profile/
+  balance/sessions/exams/chat. Live unauth API + anon RPC probes on
+  `gstjvjynkdvqncjyybwm`. **Result: 1 NEW MEDIUM** — exam submit scores only the
+  client `answers` array (`api/exams.js`), so a partial answers payload inflates
+  percentage / parent `exam_completed` notification. Stored as finding #15 in
+  automation flagged-vulnerability memory. No app code fix in this hunt; no
+  deploy.
 * **AT-REST SQL/RLS/RPC re-hunt (2026-11-27 PST, read-only)** — hunter
   `bc-5be51cce` on product HEAD `9e63dba` (`origin/main` tip `00aaf19` docs-only;
   `git diff 9e63dba..HEAD -- supabase/` empty). Read all 22 `live/*.sql` + root
@@ -427,6 +438,7 @@ recommend archiving as legacy per its reconciliation spec).
 
 | Date       | Action                                                                 | Evidence                                              | Next                                                |
 | ---------- | ---------------------------------------------------------------------- | ----------------------------------------------------- | --------------------------------------------------- |
+| 2026-11-28 | AT-REST-API-4 — read-only API/`lib`/`vercel.json` security re-hunt (hunter `bc-85094d30`) on unchanged product SHA `9e63dba` (`main` tip `4f1a78a` docs-only). Full read of 10 `api/**/*.js` + 6 `lib/**/*.js` + `vercel.json`; live unauth API + anon RPC probes. **1 NEW MEDIUM** — exam submit scores only client `answers` (`api/exams.js`), inflating percentage / parent notification. Stored as finding #15 in automation flagged-vulnerability memory. Docs-only brief note; no app code fix; no deploy; no PR. | `git diff 9e63dba..HEAD -- api/ lib/ vercel.json` empty; live chat/exams/children/checkout/create 401; webhook no-sig 400; CORS exact `https://zeluu.com`; anon `verify_child_login`/`set_child_password`/`get_valid_credit_balance` 42501. | Owner owns remediation for new #15 + stored 1–14; next product work unchanged. |
 | 2026-11-28 | AT-REST-SQL-1 — read-only SQL/RLS/RPC security re-hunt (hunter `bc-5be51cce`) on unchanged product SHA `9e63dba` (`main` tip `00aaf19` docs-only). Full read of 22 `live/*.sql` + root `00N_*` + docs/specs missing CREATE bodies; live anon+auth probes. **NONE** — no new MEDIUM+ complete chains beyond stored SQL set (1–14). Docs-only brief note; no app code; no deploy; no PR. Did not rewrite flagged-vulnerability memory. | `git diff 9e63dba..HEAD -- supabase/` empty; live: dangerous DEFINER EXECUTE 42501; foreign consent `P0001`; second-child 400; soft-delete frees slot (#6 ext); sessions cross-tenant `credits_used` 201 (#8); ledger/notif/sub INSERT RLS deny; `enforce_subscription_expiry` 204; knowledge corpus anon-readable. | Owner still owns remediations for stored 1–14; next product work unchanged. |
 | 2026-11-26 | AT-REST-1 — parent full-repo at-rest security re-hunt (hunter `bc-e6c57259`) on unchanged product SHA `9e63dba` (`main` tip `7242a08` docs-only). Same-run sub-hunts: API/`lib` `bc-748e5a48`, SQL/RLS `bc-296f1561`, frontend `bc-8f74d0d0`. Parent independently re-read child-auth HMAC, children/profile/checkout, webhook HMAC + custom_data, sessions create/history, exams generate/submit/history, chat ownership/credits, dashboard notification sinks, CI knowledge-pipeline workflow, and live unauth `zeluu.com/api/*` + anon RPC/RLS on `gstjvjynkdvqncjyybwm`. **NONE** — no new MEDIUM+ complete chains beyond stored 1–13. Docs-only brief note; no app code; no deploy; no PR. Did not rewrite flagged-vulnerability memory. | `git diff 9e63dba..HEAD -- api/ lib/ public/ supabase/ vercel.json` empty; live chat/exams/children/checkout/create 401; webhook no-sig 400; CORS exact `https://zeluu.com`; anon `verify_child_login`/`set_child_password`/`get_valid_credit_balance`/`delete_parent_account` 42501; anon INSERT children/sessions RLS denied; `knowledge_chunks` anon SELECT still teaching corpus. | Owner still owns remediations for the stored 13; next product work unchanged. |
 | 2026-11-26 | AT-REST-API-3 — read-only API/`lib`/`vercel.json` security re-hunt (hunter `bc-748e5a48`) on unchanged product SHA `9e63dba` (`main` tip `d07ab73` docs-only). Full file read + auth/IDOR/payment-chain triage vs stored 1–13 + prior reject list; live unauth API probes. **NONE** — no new MEDIUM+ complete chains. Docs-only brief note; no app code; no deploy; no PR. | `git diff 9e63dba..HEAD -- api/ lib/ vercel.json` empty; live chat/exams/children/checkout/create 401; balance/history/profile GET 401; webhook no-sig 400; child-login missing fields 400. | Owner still owns remediations for the stored 13; next product work unchanged. |
